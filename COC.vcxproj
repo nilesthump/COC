@@ -832,6 +832,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test.cpp" />
     <ClInclude Include="G:\COC\COC\Classes\AppDelegate.h" />
     <ClInclude Include="G:\COC\COC\Classes\HelloWorldScene.h" />
     <ClInclude Include="G:\COC\COC\proj.win32\main.h" />
