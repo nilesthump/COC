@@ -13,9 +13,6 @@
     <ClCompile Include="G:\COC\COC\cocos2d\cocos\precheader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test.cpp">
-      <Filter>Source Files\proj.win32</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="G:\COC\COC\Classes\AppDelegate.h">
