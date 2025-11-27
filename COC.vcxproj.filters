@@ -74,4 +74,9 @@
       <UniqueIdentifier>{366C4191-AB1F-3EC9-99EE-84335E778197}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Resources\mimi.png">
+      <Filter>Resources\res</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
