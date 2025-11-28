@@ -362,4 +362,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-build/ 
+build/
+
+proj.ios_mac/
+
+proj.linux/
+
+cocos2d/
