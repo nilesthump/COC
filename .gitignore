@@ -369,3 +369,9 @@ proj.ios_mac/
 proj.linux/
 
 cocos2d/
+
+proj.android/
+
+proj.win32/
+
+.cocos-project.json
