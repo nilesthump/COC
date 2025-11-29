@@ -375,3 +375,5 @@ proj.android/
 proj.win32/
 
 .cocos-project.json
+
+CMakeLists.txt
