@@ -61,7 +61,7 @@ bool HelloWorld::init()
     // add a label shows "Hello World"
     // create and initialize a label
 
-    auto label = Label::createWithTTF("Hello Mimi--From Cyrene", "fonts/Marker Felt.ttf", 24);
+    auto label = Label::createWithTTF("Hello Mimi--From Cyrene", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
     {
         problemLoading("'fonts/Marker Felt.ttf'");
@@ -100,7 +100,7 @@ bool HelloWorld::init()
     }
     else
     {
-        head_pic_left->setPosition(Vec2(origin.x+150, origin.y + visibleSize.height - label->getContentSize().height-150));
+        head_pic_left->setPosition(Vec2(origin.x + 150, origin.y + visibleSize.height - label->getContentSize().height - 150));
 
         head_pic_left->setRotation(-45.0);
 
@@ -109,6 +109,14 @@ bool HelloWorld::init()
         head_pic_left->setScale(0.25);
 
         this->addChild(head_pic_left, -1);
+
+        auto moveby = MoveBy::create(10, Vec2(50, 50));
+        auto fadein = FadeIn::create(10.0);
+        auto rotation = RotateBy::create(10, 45.0);
+        auto spawn = Spawn::create(moveby, fadein, rotation, nullptr);
+        auto seq = Sequence::create(spawn, spawn->reverse(), nullptr);
+        head_pic_left->runAction(seq);
+
     }
 
     auto head_pic_right = Sprite::create("headpic.png");
