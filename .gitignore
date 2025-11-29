@@ -364,16 +364,16 @@ FodyWeavers.xsd
 
 build/
 
-proj.ios_mac/
+#proj.ios_mac/
 
-proj.linux/
+#proj.linux/
 
-cocos2d/
+#cocos2d/
 
-proj.android/
+#proj.android/
 
-proj.win32/
+#proj.win32/
 
-.cocos-project.json
+#.cocos-project.json
 
-CMakeLists.txt
+#CMakeLists.txt
