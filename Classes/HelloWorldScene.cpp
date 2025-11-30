@@ -61,7 +61,7 @@ bool HelloWorld::init()
     // add a label shows "Hello World"
     // create and initialize a label
 
-    auto label = Label::createWithTTF("Hello Mimi--From Cyrene", "fonts/Marker Felt.ttf", 36);
+    auto label = Label::createWithTTF("Hello Mimi--From Cyrene093", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
     {
         problemLoading("'fonts/Marker Felt.ttf'");
