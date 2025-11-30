@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CMakePredefinedTargets", "CMakePredefinedTargets", "{AB3EF0A6-9370-3464-AE53-EC88AFC45C83}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{730E9031-6BF7-33E4-A038-FF05504D7A74}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{DD5E49E8-A7EC-3FCD-9EAE-FB971247D355}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB} = {AF5600DF-33DE-3F2F-82E8-569D24128BAB}
+		{B2AC849C-5304-3E23-A603-7C86F3927D18} = {B2AC849C-5304-3E23-A603-7C86F3927D18}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "..\..\..\\ZERO_CHECK.vcxproj", "{AF5600DF-33DE-3F2F-82E8-569D24128BAB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ext_unzip", "ext_unzip.vcxproj", "{B2AC849C-5304-3E23-A603-7C86F3927D18}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB} = {AF5600DF-33DE-3F2F-82E8-569D24128BAB}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|win32 = Debug|win32
+		Release|win32 = Release|win32
+		MinSizeRel|win32 = MinSizeRel|win32
+		RelWithDebInfo|win32 = RelWithDebInfo|win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD5E49E8-A7EC-3FCD-9EAE-FB971247D355}.Debug|win32.ActiveCfg = Debug|win32
+		{DD5E49E8-A7EC-3FCD-9EAE-FB971247D355}.Release|win32.ActiveCfg = Release|win32
+		{DD5E49E8-A7EC-3FCD-9EAE-FB971247D355}.MinSizeRel|win32.ActiveCfg = MinSizeRel|win32
+		{DD5E49E8-A7EC-3FCD-9EAE-FB971247D355}.RelWithDebInfo|win32.ActiveCfg = RelWithDebInfo|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.Debug|win32.ActiveCfg = Debug|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.Debug|win32.Build.0 = Debug|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.Release|win32.ActiveCfg = Release|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.Release|win32.Build.0 = Release|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.MinSizeRel|win32.ActiveCfg = MinSizeRel|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.MinSizeRel|win32.Build.0 = MinSizeRel|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.RelWithDebInfo|win32.ActiveCfg = RelWithDebInfo|win32
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB}.RelWithDebInfo|win32.Build.0 = RelWithDebInfo|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.Debug|win32.ActiveCfg = Debug|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.Debug|win32.Build.0 = Debug|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.Release|win32.ActiveCfg = Release|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.Release|win32.Build.0 = Release|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.MinSizeRel|win32.ActiveCfg = MinSizeRel|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.MinSizeRel|win32.Build.0 = MinSizeRel|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.RelWithDebInfo|win32.ActiveCfg = RelWithDebInfo|win32
+		{B2AC849C-5304-3E23-A603-7C86F3927D18}.RelWithDebInfo|win32.Build.0 = RelWithDebInfo|win32
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DD5E49E8-A7EC-3FCD-9EAE-FB971247D355} = {AB3EF0A6-9370-3464-AE53-EC88AFC45C83}
+		{AF5600DF-33DE-3F2F-82E8-569D24128BAB} = {AB3EF0A6-9370-3464-AE53-EC88AFC45C83}
+		{B2AC849C-5304-3E23-A603-7C86F3927D18} = {730E9031-6BF7-33E4-A038-FF05504D7A74}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9930A92A-6487-307D-9EB8-770B8F5FEA31}
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
