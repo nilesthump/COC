@@ -50,8 +50,35 @@ bool HelloWorld::init()
         closeItem->setPosition(Vec2(x,y));
     }
 
+    // ========== 添加第二个按钮：跳转到 SecondScene ==========
+    auto secondSceneItem = MenuItemImage::create(
+        "btn_normal.png",      // 正常状态图片
+        "btn_pressed.png",     // 按下状态图片
+        CC_CALLBACK_1(HelloWorld::menuSecondSceneCallback, this));
+
+    if (secondSceneItem == nullptr ||
+        secondSceneItem->getContentSize().width <= 0 ||
+        secondSceneItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        // 设置位置（屏幕中央偏上）
+        float x = origin.x + visibleSize.width / 2;
+        float y = origin.y + visibleSize.height / 2 + 50;
+        secondSceneItem->setPosition(Vec2(x, y));
+
+        // 可选：在按钮上添加文字
+        auto secondLabel = Label::createWithSystemFont("Second Scene", "Arial", 20);
+        secondLabel->setColor(Color3B::WHITE);
+        secondLabel->setPosition(Vec2(secondSceneItem->getContentSize().width / 2,
+            secondSceneItem->getContentSize().height / 2));
+        secondSceneItem->addChild(secondLabel);
+    }
+
     // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
+    auto menu = Menu::create(closeItem, secondSceneItem, NULL);  // 添加第二个按钮到菜单
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
