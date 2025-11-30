@@ -370,7 +370,7 @@ FodyWeavers.xsd
 
 #proj.linux/
 
-#cocos2d/
+!cocos2d/
 
 #proj.android/
 
