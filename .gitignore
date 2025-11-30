@@ -364,6 +364,7 @@ FodyWeavers.xsd
 
 build/
 
+!win32/
 #proj.ios_mac/
 
 #proj.linux/
