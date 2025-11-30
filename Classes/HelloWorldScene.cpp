@@ -77,7 +77,7 @@ bool HelloWorld::init()
     }
 
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("shenhe.jpg");
+    auto sprite = Sprite::create("mimi.png");
     if (sprite == nullptr)
     {
         problemLoading("'mimi.png'");
