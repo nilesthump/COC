@@ -1,6 +1,5 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-#include "Login.h"
 #include <conio.h>
 // #define USE_AUDIO_ENGINE 1
 

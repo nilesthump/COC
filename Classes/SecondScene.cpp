@@ -1,11 +1,11 @@
 #if 1
-#include "Login.h"
+#include "SecondScene.h"
 
 USING_NS_CC;
 
-Scene* Login::createScene()
+Scene* SecondScene::createScene()
 {
-	return Login::create();
+	return SecondScene::create();
 }
 
 static void problemLoading(const char* filename)
@@ -14,7 +14,7 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-bool Login::init()
+bool SecondScene::init()
 {
     //////////////////////////////
     // 1. super init first
@@ -31,26 +31,26 @@ bool Login::init()
     //    you may modify it.
 
     // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-        "CloseNormal.png",
-        "CloseSelected.png",
-        CC_CALLBACK_1(Login::menuCloseCallback, this));
+    auto backItem = MenuItemImage::create(
+        "btn_noramal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
 
-    if (closeItem == nullptr ||
-        closeItem->getContentSize().width <= 0 ||
-        closeItem->getContentSize().height <= 0)
+    if (backItem == nullptr ||
+        backItem->getContentSize().width <= 0 ||
+        backItem->getContentSize().height <= 0)
     {
         problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
     }
     else
     {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
-        float y = origin.y + closeItem->getContentSize().height / 2;
-        closeItem->setPosition(Vec2(x, y));
+        float x = origin.x + visibleSize.width / 2;
+        float y = origin.y + visibleSize.height / 2;
+        backItem->setPosition(Vec2(x, y));
     }
 
     // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
+    auto menu = Menu::create(backItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -60,7 +60,7 @@ bool Login::init()
     // add a label shows "Hello World"
     // create and initialize a label
 
-    auto label = Label::createWithTTF("Hello Mimi--From Cyrene", "fonts/Marker Felt.ttf", 36);
+    auto label = Label::createWithTTF("Hello!!!!!!!!!", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
     {
         problemLoading("'fonts/Marker Felt.ttf'");
@@ -76,10 +76,10 @@ bool Login::init()
     }
 
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
+    auto sprite = Sprite::create("mainscene.png");
     if (sprite == nullptr)
     {
-        problemLoading("'HelloWorld.png'");
+        problemLoading("'mainscene.png'");
     }
     else
     {
@@ -95,7 +95,7 @@ bool Login::init()
     return true;
 }
 
-void Login::menuCloseCallback(Ref* pSender)
+void SecondScene::menuFirstCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application
     Director::getInstance()->end();

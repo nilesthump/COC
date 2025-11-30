@@ -3,16 +3,16 @@
 
 #include "cocos2d.h"
 
-class Login :public cocos2d::Scene 
+class SecondScene :public cocos2d::Scene 
 {
 public:
 	static cocos2d::Scene* createScene();
 
 	bool virtual init();
 
-	void menuCloseCallback(cocos2d::Ref* pSender);
+	void menuFirstCallback(cocos2d::Ref* pSender);
 
-	CREATE_FUNC(Login);
+	CREATE_FUNC(SecondScene);
 };
 
 #endif
