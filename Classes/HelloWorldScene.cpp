@@ -87,7 +87,7 @@ bool HelloWorld::init()
         // position the sprite on the center of the screen
         sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
 
-        sprite->setScale(0.5);
+        sprite->setScale(0.25);
 
         // add the sprite as a child to this layer
         this->addChild(sprite, 0);
