@@ -365,7 +365,7 @@ FodyWeavers.xsd
 #build/
 #!external/
 #!lib/
-#!win32/
+!win32/
 #proj.ios_mac/
 
 #proj.linux/
