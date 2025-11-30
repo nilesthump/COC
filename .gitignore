@@ -363,7 +363,8 @@ MigrationBackup/
 FodyWeavers.xsd
 
 build/
-
+!engine/
+!lib/
 !win32/
 #proj.ios_mac/
 
