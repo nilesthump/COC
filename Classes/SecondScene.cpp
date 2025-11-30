@@ -1,5 +1,6 @@
 #if 1
 #include "SecondScene.h"
+#include "HelloWorldScene.h"
 
 USING_NS_CC;
 
@@ -31,28 +32,22 @@ bool SecondScene::init()
     //    you may modify it.
 
     // add a "close" icon to exit the progress. it's an autorelease object
-    auto backItem = MenuItemImage::create(
-        "btn_noramal.png",
-        "btn_pressed.png",
+    // 添加返回按钮
+    auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
-
-    if (backItem == nullptr ||
-        backItem->getContentSize().width <= 0 ||
-        backItem->getContentSize().height <= 0)
+    if (backItem)
     {
-        problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
-    }
-    else
-    {
-        float x = origin.x + visibleSize.width / 2;
-        float y = origin.y + visibleSize.height / 2;
-        backItem->setPosition(Vec2(x, y));
-    }
+        backItem->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 
-    // create menu, it's an autorelease object
-    auto menu = Menu::create(backItem, NULL);
-    menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
+        auto backLabel = Label::createWithSystemFont("return", "Arial", 20);
+        backLabel->setColor(Color3B::WHITE);
+        backLabel->setPosition(Vec2(backItem->getContentSize().width / 2, backItem->getContentSize().height / 2));
+        backItem->addChild(backLabel);
+
+        auto menu = Menu::create(backItem, nullptr);
+        menu->setPosition(Vec2::ZERO);
+        this->addChild(menu, 1);
+    }
 
     /////////////////////////////
     // 3. add your codes below...
@@ -97,15 +92,8 @@ bool SecondScene::init()
 
 void SecondScene::menuFirstCallback(Ref* pSender)
 {
-    //Close the cocos2d-x game scene and quit the application
-    Director::getInstance()->end();
-
-    /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
-
-    //EventCustom customEndEvent("game_scene_close_event");
-    //_eventDispatcher->dispatchEvent(&customEndEvent);
-
-
+    // 返回主场景
+    Director::getInstance()->replaceScene(HelloWorld::createScene());
 }
 
 #endif

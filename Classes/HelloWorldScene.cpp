@@ -1,4 +1,5 @@
 #include "HelloWorldScene.h"
+#include "SecondScene.h"
 
 USING_NS_CC;
 
@@ -168,6 +169,11 @@ bool HelloWorld::init()
     return true;
 }
 
+void HelloWorld::menuSecondSceneCallback(Ref* pSender)
+{
+    // Ìø×ªµ½ SecondScene
+    Director::getInstance()->replaceScene(SecondScene::createScene());
+}
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
