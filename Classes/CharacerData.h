@@ -53,7 +53,7 @@ enum class ResourceType
 	GOLD            //金币
 };
 
-class CharacterData
+struct CharacterData
 {
 	//标识
 	std::string id_;				//内部标识	
