@@ -43,13 +43,22 @@ enum class TargetPriority
 	TROOPS         // 部队优先（以后再实现）
 };
 
+//资源使用枚举
+enum class ResourceType
+{
+	ELIXIR,         //圣水
+	DARK_ELIXIR,    //暗黑重油
+	GOLD            //金币
+};
+
 class CharacterData
 {
 	//标识
-	std::string id_;		   //内部标识	
-	std::string name_;		   //显示名称
-	CombatType combat_type_;   //近战远程
-	UnitType unit_type_;	   //单位类型
+	std::string id_;				//内部标识	
+	std::string name_;				//显示名称
+	CombatType combat_type_;		//近战远程
+	UnitType unit_type_;			//单位类型
+	ResourceType resource_type_;	//资源使用类型
 
 	//战斗
 	int health_;                 // 生命值
