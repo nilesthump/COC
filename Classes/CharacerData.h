@@ -74,9 +74,7 @@ struct CharacterData
 	TargetPriority preferred_target_;  // 优先目标
 
 	//训练
-	int training_cost_;         //训练花费
-	int training_time_;         //训练时间（秒）
-	int house_space_;			//占用兵营人口数
+	int housing_space_;			//占用兵营人口数
 
 	// 构造函数
 	CharacterData()
