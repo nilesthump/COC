@@ -9,6 +9,8 @@
 #define CHARACTERDATA_H
 #include<string>
 //? NOTE ：一些和UI相关，视觉音效等还没实现
+//? NOTE ：角色不同等级对应的属性都不同
+//? NOTE ：实验室等级和大本营等级的约束是不是可以不在这里体现，而是在主scene体现
 
 //近战远程枚举
 enum class CombatType
