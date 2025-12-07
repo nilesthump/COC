@@ -9,7 +9,7 @@
 #define CHARACTERDATA_H
 #include<string>
 //? NOTE ：一些和UI相关，视觉音效等还没实现
-//? NOTE ：角色不同等级对应的属性都不同
+//? NOTE ：角色不同等级对应的属性都不同(先用基础方式）
 //? NOTE ：实验室等级和大本营等级的约束是不是可以不在这里体现，而是在主scene体现
 
 //近战远程枚举
@@ -56,39 +56,44 @@ enum class ResourceType
 struct CharacterData
 {
 	//标识
-	std::string id_;				//内部标识	
-	std::string name_;				//显示名称
-	CombatType combat_type_;		//近战远程
-	UnitType unit_type_;			//单位类型
-	ResourceType resource_type_;	//资源使用类型
+	std::string id;				//内部标识	
+	std::string name;			//显示名称
+	int level;					//等级展示
+	CombatType combat_type;		//近战远程
+	UnitType unit_type;			//单位类型
+	ResourceType resource_type;	//资源使用类型
 
 	//战斗
-	int health_;                 // 生命值
-	int damage_;                 // 攻击力
-	double attack_speed_;        // 攻击速度（攻击间隔秒数）
-	double attack_range_;        // 攻击范围
-	double move_speed_;          // 移动速度
-	AttackType attack_type_;     // 攻击类型
+	int health;                 // 生命值
+	int damage;                 // 攻击力（每次伤害）
+	double attack_interval;     // 攻击间隔秒数
+	double attack_distance;        // 攻击距离
+	double move_speed;          // 移动速度
+	AttackType attack_type;     // 攻击类型
 
 	//目标选择
-	TargetPriority preferred_target_;  // 优先目标
+	TargetPriority preferred_target;  // 优先目标
 
 	//训练
-	int housing_space_;			//占用兵营人口数
+	int housing_space;			//占用兵营人口数
 
-	// 构造函数
+	//构造函数
 	CharacterData()
-		: health_(0), damage_(0), attack_speed_(1.0),
-		attack_range_(0.0), move_speed_(0.0),
-		training_cost_(0), training_time_(0)
+		: health(0), damage(0), attack_interval(1.0),
+		attack_distance(0.0), move_speed(0.0)
 	{}
 
-	static CharacterData CreateBarbarianData();	//野蛮人
-	static CharacterData CreateArcherData();	//弓箭手
-	static CharacterData CreateGiantData();		//巨人
-	static CharacterData CreateGoblinData();	//哥布林
-	static CharacterData CreateBomberData();	//炸弹人
+	static CharacterData CreateBarbarianData(int level = 1);//野蛮人
+	static CharacterData CreateArcherData(int level = 1);	//弓箭手
+	static CharacterData CreateGiantData(int level = 1);	//巨人
+	static CharacterData CreateGoblinData(int level = 1);	//哥布林
+	static CharacterData CreateBomberData(int level = 1);	//炸弹人
 
+	//获取展示名称
+	std::string GetDisplayName()const
+	{
+		return name + "Lv." + std::to_string(level);
+	}
 };
 
 #endif// CHARACTERDATA_H
