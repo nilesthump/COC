@@ -36,9 +36,17 @@ list(APPEND GAME_SOURCE
      Classes/CharacterData.cpp
      Classes/HelloWorldScene.cpp
      Classes/SecondScene.cpp
-     Classes/AttackStrategy.cpp
      Classes/CharacterUnitCard.cpp
      Classes/BarracksPopup.cpp
+     Classes/UnitProcess.cpp
+     Classes/BaseRule.cpp
+     Classes/BomberRule.cpp
+     Classes/GoblinRule.cpp
+     Classes/ArcherWay.cpp
+     Classes/BarbarianWay.cpp
+     Classes/BomberWay.cpp
+     Classes/GiantWay.cpp
+     Classes/GoblinWay.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -46,9 +54,9 @@ list(APPEND GAME_HEADER
      Classes/CharacterData.h
      Classes/HelloWorldScene.h
      Classes/SecondScene.h
-     Classes/AttackStrategy.h
      Classes/CharacterUnitCard.h
      Classes/BarracksPopup.h
+     Classses/BomberBehaviorData.h
      )
 
 if(ANDROID)

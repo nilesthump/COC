@@ -1,5 +1,7 @@
 #include "CharacerData.h"
+#include "BomberBehaviorData.h"
 #include<vector>
+#include<tuple>
 
 //! 其他细节请看社区
 //! 还没有规定好格子和距离的关系
@@ -192,28 +194,34 @@ CharacterData CharacterData::CreateBomberData(int level = 1)
 	//! 主动伤害爆炸半径 0.8格
 	//! 死亡伤害爆炸半径 1.5格
 	//! 下面表格是错的，没有区分主动和被动伤害以及这些逻辑应该写到哪里，明天见
-	static const std::vector<std::pair<int, int>> klevel_stats = {
-		{11, 20},
-		{14, 24},
-		{19, 29},
-		{24, 35},
-		{32, 53},
-		{42, 72},
-		{52, 82},
-		{62, 92},
-		{72, 112},
-		{156, 130},
-		{172, 140},
-		{188, 150},
-		{204, 160}		// 等级13
+	static const std::vector<std::tuple<int, int,int>> klevel_stats = {
+		{10, 6, 20},
+		{20, 9, 24},
+		{25, 13, 29},
+		{30, 16, 35},
+		{43, 23, 53},
+		{55, 30, 72},
+		{66, 36, 82},
+		{75, 42, 92},
+		{86, 48, 112},
+		{94, 54, 130},
+		{102, 60, 140},
+		{110, 66, 150},
+		{118, 72, 160}		// 等级13(主动伤害、死亡伤害、生命值）
 	};
-	int idx = level - 1;
+	data.bomber_data = std::make_unique<BomberBehaviorData>();
+	data.bomber_data->fuse_time = 1.0;
+	data.bomber_data->active_radius = 0.8;
+	data.bomber_data->death_radius = 1.5;
+	data.bomber_data->wall_damage_multiplier = 40;
 	
+	int idx = level - 1;
+
 	if (idx >= 0 && idx < klevel_stats.size())
 	{
-		data.damage = klevel_stats[idx].first;
-		data.health = klevel_stats[idx].second;
+		data.bomber_data->active_damage = data.damage = std::get<0>(klevel_stats[idx]);
+		data.bomber_data->death_damage = std::get<1>(klevel_stats[idx]);
+		data.health = std::get<2>(klevel_stats[idx]);
 	}
-
 	return data;
 }

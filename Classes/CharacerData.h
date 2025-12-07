@@ -8,6 +8,8 @@
 #ifndef CHARACTERDATA_H
 #define CHARACTERDATA_H
 #include<string>
+#include<memory>
+#include"BomberBehaviorData.h"
 //? NOTE ：一些和UI相关，视觉音效等还没实现
 //? NOTE ：角色不同等级对应的属性都不同(先用基础方式）
 //? NOTE ：实验室等级和大本营等级的约束是不是可以不在这里体现，而是在主scene体现
@@ -76,6 +78,9 @@ struct CharacterData
 
 	//训练
 	int housing_space;			//占用兵营人口数
+
+	//Bomber特殊数据
+	std::unique_ptr<BomberBehaviorData> bomber_data;
 
 	//构造函数
 	CharacterData()
