@@ -32,23 +32,23 @@ endif()
 # add cross-platforms source files and header files 
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
-     Classes/Battle/BattleCharacter.cpp
-     Classes/Data/CharacterData.cpp
-     Classes/Scenes/HelloWorldScene.cpp
-     Classes/Scenes/SecondScene.cpp
-     Classes/Strategy/AttackStrategy.cpp
-     Classes/UI/cards/CharacterUnitCard.cpp
-     Classes/UI/popups/BarracksPopup.cpp
+     Classes/BattleCharacter.cpp
+     Classes/CharacterData.cpp
+     Classes/HelloWorldScene.cpp
+     Classes/SecondScene.cpp
+     Classes/AttackStrategy.cpp
+     Classes/CharacterUnitCard.cpp
+     Classes/BarracksPopup.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
-     Classes/Battle/BattleCharacter.h
-     Classes/Data/CharacterData.h
-     Classes/Scenes/HelloWorldScene.h
-     Classes/Scenes/SecondScene.h
-     Classes/Strategy/AttackStrategy.h
-     Classes/UI/cards/CharacterUnitCard.h
-     Classes/UI/popups/BarracksPopup.h
+     Classes/BattleCharacter.h
+     Classes/CharacterData.h
+     Classes/HelloWorldScene.h
+     Classes/SecondScene.h
+     Classes/AttackStrategy.h
+     Classes/CharacterUnitCard.h
+     Classes/BarracksPopup.h
      )
 
 if(ANDROID)
