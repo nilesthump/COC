@@ -190,10 +190,7 @@ CharacterData CharacterData::CreateBomberData(int level = 1)
 	data.attack_interval = 0.0;     //! 爆炸一次会杀死自己不需要间隔
 	data.attack_distance = 0.5;		// 0.5格
 	data.move_speed = 3.0;			// 3格/s
-	//! 到达目标停顿1s
-	//! 主动伤害爆炸半径 0.8格
-	//! 死亡伤害爆炸半径 1.5格
-	//! 下面表格是错的，没有区分主动和被动伤害以及这些逻辑应该写到哪里，明天见
+	
 	static const std::vector<std::tuple<int, int,int>> klevel_stats = {
 		{10, 6, 20},
 		{20, 9, 24},
