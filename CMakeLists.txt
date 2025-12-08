@@ -32,13 +32,13 @@ endif()
 # add cross-platforms source files and header files 
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
-     Classes/BattleCharacter.cpp
+     Classes/BattleAgent.cpp
      Classes/CharacterData.cpp
      Classes/HelloWorldScene.cpp
      Classes/SecondScene.cpp
      Classes/CharacterUnitCard.cpp
      Classes/BarracksPopup.cpp
-     Classes/UnitProcess.cpp
+     Classes/UnitState.cpp
      Classes/BaseRule.cpp
      Classes/BomberRule.cpp
      Classes/GoblinRule.cpp
@@ -50,7 +50,7 @@ list(APPEND GAME_SOURCE
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
-     Classes/BattleCharacter.h
+     Classes/BattleAgent.h
      Classes/CharacterData.h
      Classes/HelloWorldScene.h
      Classes/SecondScene.h
