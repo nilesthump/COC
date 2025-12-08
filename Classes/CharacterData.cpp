@@ -1,4 +1,4 @@
-#include "CharacerData.h"
+#include "CharacterData.h"
 #include "BomberBehaviorData.h"
 #include<vector>
 #include<tuple>

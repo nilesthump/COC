@@ -32,31 +32,43 @@ endif()
 # add cross-platforms source files and header files 
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
-     Classes/BattleAgent.cpp
+     Classes/BattleManager.cpp
      Classes/CharacterData.cpp
      Classes/HelloWorldScene.cpp
      Classes/SecondScene.cpp
      Classes/CharacterUnitCard.cpp
      Classes/BarracksPopup.cpp
-     Classes/UnitState.cpp
-     Classes/BaseRule.cpp
-     Classes/BomberRule.cpp
-     Classes/GoblinRule.cpp
-     Classes/ArcherWay.cpp
-     Classes/BarbarianWay.cpp
-     Classes/BomberWay.cpp
-     Classes/GiantWay.cpp
-     Classes/GoblinWay.cpp
+     Classes/NormalBehavior.cpp
+     Classes/BomberBehavior.cpp
+     Classes/GoblinBehavior.cpp
+     Classes/ArcherNavigation.cpp
+     Classes/BarbarianNavigation.cpp
+     Classes/BomberNavigation.cpp
+     Classes/GiantNavigation.cpp
+     Classes/GoblinNavigation.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
-     Classes/BattleAgent.h
+     Classes/BattleManager.h
      Classes/CharacterData.h
+     Classses/BomberBehaviorData.h
      Classes/HelloWorldScene.h
      Classes/SecondScene.h
      Classes/CharacterUnitCard.h
      Classes/BarracksPopup.h
-     Classses/BomberBehaviorData.h
+     Classses/UnitState.h
+     Classses/BattleUnit.h
+     Classes/UnitFactory.h
+     Classes/UnitNavigation.h
+     Classes/UnitBehavior.h
+     Classes/NormalBehavior.h
+     Classes/BomberBehavior.h
+     Classes/GoblinBehavior.h
+     Classes/ArcherNavigation.h
+     Classes/BarbarianNavigation.h
+     Classes/BomberNavigation.h
+     Classes/GiantNavigation.h
+     Classes/GoblinNavigation.h
      )
 
 if(ANDROID)

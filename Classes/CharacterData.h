@@ -88,6 +88,58 @@ struct CharacterData
 		attack_distance(0.0), move_speed(0.0)
 	{}
 
+	//拷贝构造
+	CharacterData(const CharacterData& other)
+		: id(other.id), name(other.name), level(other.level),
+		combat_type(other.combat_type),
+		unit_type(other.unit_type),
+		resource_type(other.resource_type),
+		health(other.health), damage(other.damage),
+		attack_interval(other.attack_interval),
+		attack_distance(other.attack_distance),
+		move_speed(other.move_speed),
+		attack_type(other.attack_type),
+		preferred_target(other.preferred_target),
+		housing_space(other.housing_space)
+	{
+		if (other.bomber_data)
+		{
+			bomber_data = std::make_unique<BomberBehaviorData>(*other.bomber_data);
+		}
+	}
+
+	//赋值构造
+	CharacterData& operator=(const CharacterData& data)
+	{
+		if (this != &data)
+		{
+			id = data.id;
+			name = data.name;
+			level = data.level;
+			combat_type = data.combat_type;
+			unit_type = data.unit_type;
+			resource_type = data.resource_type;
+			health = data.health;
+			damage = data.damage;
+			attack_interval = data.attack_interval;
+			attack_distance = data.attack_distance;
+			move_speed = data.move_speed;
+			attack_type = data.attack_type;
+			preferred_target = data.preferred_target;
+			housing_space = data.housing_space;
+
+			if (data.bomber_data)
+			{
+				bomber_data = std::make_unique<BomberBehaviorData>(*data.bomber_data);
+			}
+			else
+			{
+				bomber_data.reset();
+			}
+		}
+		return *this;
+	}
+
 	static CharacterData CreateBarbarianData(int level = 1);//野蛮人
 	static CharacterData CreateArcherData(int level = 1);	//弓箭手
 	static CharacterData CreateGiantData(int level = 1);	//巨人
