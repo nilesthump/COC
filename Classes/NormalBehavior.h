@@ -1,4 +1,4 @@
-//! 今天我先把normal作为通用行为而不是基类
+//12.10 我先把normal作为通用行为而不是基类
 #ifndef NORMALBEHAVIOR_H
 #define NORMALBEHAVIOR_H
 #include "UnitBehavior.h"

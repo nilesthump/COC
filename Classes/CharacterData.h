@@ -3,7 +3,7 @@
 // 1.有地面、空中、近战、远程几种基础类别
 // 2.每个单位有生命值，攻击伤害，伤害范围（单体、连锁、范围）
 // 3.考虑攻击偏好
-// 4.哪些属性是战斗相关哪些是资源相关
+// 4.哪些属性是战斗相关哪些是资源相关d
 // Classes/Data/CharacterData.h
 #ifndef CHARACTERDATA_H
 #define CHARACTERDATA_H
