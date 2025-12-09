@@ -8,7 +8,7 @@ Scene* HelloWorld::createScene()
     return HelloWorld::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
+//报错提示
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
@@ -18,25 +18,21 @@ static void problemLoading(const char* filename)
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
-    //////////////////////////////
-    // 1. super init first
-    if ( !Scene::init() )
+    //报错
+    if (!Scene::init())
     {
         return false;
     }
 
+    //可视区域大小和原点，用来确定UI元素绝对位置
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
-
-    // add a "close" icon to exit the progress. it's an autorelease object
+    //退出游戏按钮设置
     auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
-                                           CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+        "CloseNormal.png",
+        "CloseSelected.png",
+        CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
 
     if (closeItem == nullptr ||
         closeItem->getContentSize().width <= 0 ||
@@ -46,9 +42,9 @@ bool HelloWorld::init()
     }
     else
     {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width/2;
-        float y = origin.y + closeItem->getContentSize().height/2;
-        closeItem->setPosition(Vec2(x,y));
+        float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
+        float y = origin.y + closeItem->getContentSize().height / 2;
+        closeItem->setPosition(Vec2(x, y));//设置图标位置
     }
 
     // ========== 添加第二个按钮：跳转到 SecondScene ==========
@@ -65,20 +61,20 @@ bool HelloWorld::init()
     }
     else
     {
-        // 设置位置（屏幕中央偏上）
-        float x = origin.x + visibleSize.width / 2;
-        float y = origin.y + visibleSize.height / 2 + 50;
+        // 设置位置（屏幕右上）
+        float x = origin.x + visibleSize.width - secondSceneItem->getContentSize().width / 2;
+        float y = origin.y + visibleSize.height - secondSceneItem->getContentSize().height / 2;
         secondSceneItem->setPosition(Vec2(x, y));
 
         // 可选：在按钮上添加文字
-        auto secondLabel = Label::createWithSystemFont("Second Scene", "Arial", 20);
+        auto secondLabel = Label::createWithSystemFont("START GAME", "fonts/Marker Felt.ttf", 24);
         secondLabel->setColor(Color3B::WHITE);
         secondLabel->setPosition(Vec2(secondSceneItem->getContentSize().width / 2,
-            secondSceneItem->getContentSize().height / 2));
+            secondSceneItem->getContentSize().height / 2));//相对于框的位置
         secondSceneItem->addChild(secondLabel);
     }
 
-    // create menu, it's an autorelease object
+    //菜单
     auto menu = Menu::create(closeItem, secondSceneItem, NULL);  // 添加第二个按钮到菜单
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
@@ -97,8 +93,8 @@ bool HelloWorld::init()
     else
     {
         // position the label on the center of the screen
-        label->setPosition(Vec2(origin.x + visibleSize.width/2,
-                                origin.y + visibleSize.height - label->getContentSize().height));
+        label->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height - label->getContentSize().height));
 
         // add the label as a child to this layer
         this->addChild(label, 1);
@@ -113,9 +109,9 @@ bool HelloWorld::init()
     else
     {
         // position the sprite on the center of the screen
-        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+        sprite->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-        sprite->setScale(0.25);
+        sprite->setScale(0.5);
 
         // add the sprite as a child to this layer
         this->addChild(sprite, 0);
