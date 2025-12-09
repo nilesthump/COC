@@ -1,4 +1,4 @@
-//BattleAgent的作用是战斗管理，组织各种battleunit
+//BattleManager的作用是战斗管理，组织各种battleunit
 #ifndef BATTLEMANAGER_H
 #define BATTLEMANAGER_H
 #include "BattleUnit.h"
