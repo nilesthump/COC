@@ -6,7 +6,7 @@
 //! 其他细节请看社区
 //! 还没有规定好格子和距离的关系
 //野蛮人Barbarian
-CharacterData CharacterData::CreateBarbarianData(int level)
+CharacterData CharacterData::CreateBarbarianData(int level = 1)
 {
 	CharacterData data;
 
@@ -47,7 +47,7 @@ CharacterData CharacterData::CreateBarbarianData(int level)
 }
 
 //弓箭手Archer
-CharacterData CharacterData::CreateArcherData(int level)
+CharacterData CharacterData::CreateArcherData(int level = 1)
 {
 	CharacterData data;
 
@@ -89,7 +89,7 @@ CharacterData CharacterData::CreateArcherData(int level)
 }
 
 //巨人Giant
-CharacterData CharacterData::CreateGiantData(int level)
+CharacterData CharacterData::CreateGiantData(int level = 1)
 {
 	CharacterData data;
 
@@ -131,7 +131,7 @@ CharacterData CharacterData::CreateGiantData(int level)
 }
 
 //哥布林Goblin
-CharacterData CharacterData::CreateGoblinData(int level)
+CharacterData CharacterData::CreateGoblinData(int level = 1)
 {
 	CharacterData data;
 
@@ -174,7 +174,7 @@ CharacterData CharacterData::CreateGoblinData(int level)
 //炸弹人Bomber
 //! 炸弹人有特殊的寻路机制和爆炸伤害机制，参考社区
 //! 架构还没有想清楚
-CharacterData CharacterData::CreateBomberData(int level)
+CharacterData CharacterData::CreateBomberData(int level = 1)
 {
 	CharacterData data;
 
