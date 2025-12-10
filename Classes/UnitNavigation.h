@@ -48,7 +48,7 @@
 	12.9
 	Yzl:unitNavigation作为导航类通用接口，炸弹人和空军除外的话，其他可以直接给target在这里实现通用，到时候单独的
 	navigation.cpp（除了炸弹人和空军）可以删除了；
-	我先测试完整流程，上面Trw部分暂时注释掉
+	我先测试完整流程，上面Trw部分暂时注释
 */
 
 #ifndef _UNIT_NAVIGATION_H_
