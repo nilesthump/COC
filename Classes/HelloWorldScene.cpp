@@ -3,6 +3,11 @@
 
 USING_NS_CC;
 
+//于12.10muMukefu渡劫成功
+//太不容易了（哭）
+//老天爷下次别这样对这个可怜的娃了
+//最后试一次
+//再来一次
 Scene* HelloWorld::createScene()
 {
     return HelloWorld::create();
