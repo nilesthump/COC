@@ -1,7 +1,7 @@
 #if 1
 #include "SecondScene.h"
 #include "HelloWorldScene.h"
-
+//添加精灵的坐标依附于父母的左下角，待添加的精灵的坐标是其中心坐标
 USING_NS_CC;
 
 Scene* SecondScene::createScene()
