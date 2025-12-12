@@ -44,7 +44,7 @@ std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(CharacterData 
 		此处添加搜索范围内城墙并为graph_2d对应位置加上破墙所需时间
 	*/
 
-	std::map<VecWithValue, VecWithValue> road;//用于记录某个坐标的前置坐标，构建逆序通路
+	std::unordered_map<VecWithValue, VecWithValue> road;//用于记录某个坐标的前置坐标，构建逆序通路
 
 	//define n 目标建筑类中心单元格横坐标-当前单元格横坐标
 	//define m 目标建筑类中心单元格纵坐标-当前单元格纵坐标
