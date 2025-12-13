@@ -155,19 +155,55 @@ bool SecondScene::init()
         this->addChild(label, 1);
     }
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("mainscene.png");
-    if (sprite == nullptr)
+    background_sprite = Sprite::create("normal(winter).jpg");
+    if (background_sprite == nullptr)
     {
-        problemLoading("'mainscene.png'");
+        problemLoading("'normal(winter).jpg'");
     }
     else
     {
         // position the sprite on the center of the screen
-        sprite->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-        sprite->setScale(visibleSize.width / sprite->getContentSize().width);
+        background_sprite->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+        float scale = visibleSize.width / background_sprite->getContentSize().width * 1.5f;
+        background_sprite->setScale(scale);
         // add the sprite as a child to this layer
-        this->addChild(sprite, 0);//第二个参数代表图层，越大越靠上
+        this->addChild(background_sprite, 0);//第二个参数代表图层，越大越靠上
     }
+
+    //初始化拖拽相关变量
+    is_dragging = false;
+    drag_start_position = Vec2::ZERO;
+    background_start_position = Vec2::ZERO;
+
+    //初始化缩放相关变量
+    is_scaling = false;
+    previous_distance = 0.0f;
+    scale_center = Vec2::ZERO;
+    min_scale = 0.5f;//最小缩放比例为0.5倍
+    max_scale = 2.0f;//最大缩放比例为2.0倍
+
+    //添加触摸事件监听器
+    auto touch_listener = EventListenerTouchOneByOne::create();
+    touch_listener->setSwallowTouches(true);
+    touch_listener->onTouchBegan = CC_CALLBACK_2(SecondScene::onTouchBegan, this);
+    touch_listener->onTouchMoved = CC_CALLBACK_2(SecondScene::onTouchMoved, this);
+    touch_listener->onTouchEnded = CC_CALLBACK_2(SecondScene::onTouchEnded, this);
+    touch_listener->onTouchCancelled = CC_CALLBACK_2(SecondScene::onTouchCancelled, this);
+
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
+
+    //添加鼠标滚轮事件监听器(用于电脑端缩放)
+    auto mouse_listener = EventListenerMouse::create();
+    mouse_listener->onMouseScroll = CC_CALLBACK_1(SecondScene::onMouseScroll, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse_listener, this);
+
+    //添加多点触摸事件监听器(用于手机端双指缩放)
+    auto multi_touch_listener = EventListenerTouchAllAtOnce::create();
+    multi_touch_listener->onTouchesBegan = CC_CALLBACK_2(SecondScene::onTouchesBegan, this);
+    multi_touch_listener->onTouchesMoved = CC_CALLBACK_2(SecondScene::onTouchesMoved, this);
+    multi_touch_listener->onTouchesEnded = CC_CALLBACK_2(SecondScene::onTouchesEnded, this);
+    multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(SecondScene::onTouchesCancelled, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
 
     return true;
 }
@@ -181,5 +217,207 @@ void SecondScene::menuFirstCallback(Ref* pSender)
 void SecondScene::menuBuildCallback(Ref* pSender)
 {
     buildPanel->setVisible(true);
+}
+
+bool SecondScene::onTouchBegan(Touch* touch, Event* event)
+{
+    //记录触摸开始的位置和背景图当前位置
+    drag_start_position = touch->getLocation();
+    background_start_position = background_sprite->getPosition();
+    is_dragging = true;
+    return true;
+}
+
+void SecondScene::onTouchMoved(Touch* touch, Event* event)
+{
+    if (!is_dragging)
+        return;
+    //计算触摸移动的偏移量
+    auto current_touch_position = touch->getLocation();
+    auto offset = current_touch_position - drag_start_position;
+
+    //计算新位置
+    auto new_position = background_start_position + offset;
+
+    //获取屏幕大小和背景图信息
+    auto visible_size = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    float background_width = background_sprite->getContentSize().width * background_sprite->getScale();
+    float background_height = background_sprite->getContentSize().height * background_sprite->getScale();
+
+    //计算边界限制
+    float minX = origin.x + visible_size.width / 2;
+    float maxX = origin.x + visible_size.width / 2;
+    float minY = origin.y + visible_size.height / 2;
+    float maxY = origin.y + visible_size.height / 2;
+
+    //如果背景图比屏幕大，则设置边界
+    if (background_width > visible_size.width)
+    {
+        minX -= (background_width - visible_size.width) / 2;
+        maxX += (background_width - visible_size.width) / 2;
+    }
+
+    if (background_height > visible_size.width)
+    {
+        minY -= (background_height - visible_size.height) / 2;
+        maxY += (background_height - visible_size.height) / 2;
+    }
+
+    //应用边界限制
+    new_position.x = clampf(new_position.x, minX, maxX);
+    new_position.y = clampf(new_position.y, minY, maxY);
+
+    //更新背景图位置
+    background_sprite->setPosition(new_position);
+}
+
+void SecondScene::onTouchEnded(Touch* touch, Event* event)
+{
+    //结束拖拽
+    is_dragging = false;
+}
+
+void SecondScene::onTouchCancelled(Touch* touch, Event* event)
+{
+    //取消拖拽
+    is_dragging = false;
+}
+
+//鼠标滚轮缩放功能实现
+void SecondScene::onMouseScroll(EventMouse* event)
+{
+    //获取滚动方向
+    float scrollY = event->getScrollY();
+
+    //计算缩放比例
+    float scale_factor = scrollY > 0 ? 1.1f : 0.9f;
+
+    //获取当前缩放比例
+    float current_scale = background_sprite->getScale();
+
+    //计算新的缩放比例
+    float new_scale = current_scale * scale_factor;
+
+    //应用缩放边界限制
+    new_scale = clampf(new_scale, min_scale, max_scale);
+
+    //设置新的缩放比例
+    background_sprite->setScale(new_scale);
+
+    //重新计算边界并限制背景图位置
+    updateBackgroundBounds();
+}
+
+//多点触摸开始事件
+void SecondScene::onTouchesBegan(const std::vector<Touch*>& touches, Event* event)
+{
+    if (touches.size() == 2)
+    {
+        //开始双指缩放
+        is_scaling = true;
+
+        //计算初始两指距离
+        Vec2 touch1 = touches[0]->getLocation();
+        Vec2 touch2 = touches[1]->getLocation();
+        previous_distance = touch1.distance(touch2);
+
+        //计算缩放中心
+        scale_center = (touch1 + touch2) / 2;
+    }
+}
+
+//多点触摸移动事件（双指缩放）
+void SecondScene::onTouchesMoved(const std::vector<Touch*>& touches, Event* event)
+{
+    if (!is_scaling || touches.size() != 2)
+        return;
+
+    //计算当前两指距离
+    Vec2 touch1 = touches[0]->getLocation();
+    Vec2 touch2 = touches[1]->getLocation();
+    float current_distance = touch1.distance(touch2);
+
+    //计算缩放比例
+    float scale_factor = current_distance / previous_distance;
+
+    //获取当前缩放比例
+    float current_scale = background_sprite->getScale();
+
+    //计算新的缩放比例
+    float new_scale = current_scale * scale_factor;
+
+    //应用缩放边界限制
+    new_scale = clampf(new_scale, min_scale, max_scale);
+
+    //设置新的缩放比例
+    background_sprite->setScale(new_scale);
+
+    //更新上一次的距离
+    previous_distance = current_distance;
+
+    //重新计算边界并限制背景图位置
+    updateBackgroundBounds();
+}
+
+//多点触摸结束事件
+void SecondScene::onTouchesEnded(const std::vector<Touch*>& touches, Event* event)
+{
+    //结束缩放
+    is_scaling = false;
+}
+
+//多点触摸取消事件
+void SecondScene::onTouchesCancelled(const std::vector<Touch*>& touches, Event* event)
+{
+    //取消缩放
+    is_scaling = false;
+}
+
+//更新背景图边界
+void SecondScene::updateBackgroundBounds()
+{
+    //获取当前缩放比例
+    float scale = background_sprite->getScale();
+
+    //获取可见区域
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    Size visible_size = Director::getInstance()->getVisibleSize();
+
+    //获取背景图原始大小
+    Size background_size = background_sprite->getContentSize();
+
+    //计算缩放后的背景图大小
+    float scaled_width = background_size.width * scale;
+    float scaled_height = background_size.height * scale;
+
+    //计算边界
+    Vec2 current_position = background_sprite->getPosition();
+
+    float minX = origin.x + visible_size.width / 2;
+    float maxX = origin.x + visible_size.width / 2;
+    float minY = origin.y + visible_size.height / 2;
+    float maxY = origin.y + visible_size.height / 2;
+
+    //如果背景图比屏幕大，则设置边界
+    if (scaled_width > visible_size.width)
+    {
+        minX -= (scaled_width - visible_size.width) / 2;
+        maxX += (scaled_width - visible_size.width) / 2;
+    }
+
+    if (scaled_height > visible_size.height)
+    {
+        minY -= (scaled_height - visible_size.height) / 2;
+        maxY += (scaled_height - visible_size.height) / 2;
+    }
+
+    //应用边界限制
+    Vec2 new_position;
+    new_position.x = clampf(current_position.x, minX, maxX);
+    new_position.y = clampf(current_position.y, minY, maxY);
+
+    //更新背景图位置
+    background_sprite->setPosition(new_position);
 }
 #endif
