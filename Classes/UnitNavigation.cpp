@@ -12,9 +12,9 @@
 #include <map>
 
 //曼哈顿距离，用于加权
-int ManhattanDistance(/*单元格1*/,/*单元格2*/)
+int ManhattanDistance(const VecWithValue& current_cell, const VecWithValue& target_cell)
 {
-	return abs(/*单元格1横坐标-单元格2横坐标*/) + abs(/*单元格1纵坐标-单元格2纵坐标*/);
+	return abs(current_cell.x_ - target_cell.x_) + abs(current_cell.y_ - target_cell.y_);
 }
 
 
@@ -27,31 +27,32 @@ public:
 	}
 };
 
-std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(CharacterData offensive_unit,/*目标建筑类*/,/*当前单元格*/)
+std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(CharacterData offensive_unit,
+	const VecWithValue& target_cell, const VecWithValue& current_cell)
 {
 	//方向搜索数组
 	int tx[] = { -1,-1,-1,0,0,1,1,1 }, ty[] = { -1,0,1,-1,1,-1,0,1 };
 
 	std::vector<std::vector<double>> graph_2d(2 * offensive_unit.visible_range_ - 1,
-		std::vector<double>(2 * offensive_unit.visible_range_ - 1, /*当前军队通过一格的时间*/));
+		std::vector<double>(2 * offensive_unit.visible_range_ - 1, 1.0 / offensive_unit.move_speed));
 	graph_2d[offensive_unit.visible_range_ - 1][offensive_unit.visible_range_ - 1] = 0;
 
 	//标记坐标是否被访问
 	std::vector<std::vector<bool>> visit_2d(2 * offensive_unit.visible_range_ - 1,
-		std::vector<double>(2 * offensive_unit.visible_range_ - 1, false);
+		std::vector<bool>(2 * offensive_unit.visible_range_ - 1, false);
 
 	/*
 		此处添加搜索范围内城墙并为graph_2d对应位置加上破墙所需时间
 	*/
 
-	std::unordered_map<VecWithValue, VecWithValue> road;//用于记录某个坐标的前置坐标，构建逆序通路
+	std::map<VecWithValue, VecWithValue> road;//用于记录某个坐标的前置坐标，构建逆序通路
 
-	//define n 目标建筑类中心单元格横坐标-当前单元格横坐标
-	//define m 目标建筑类中心单元格纵坐标-当前单元格纵坐标
+	int nx = target_cell.x_ - current_cell.x_;
+	int ny = target_cell.y_ - current_cell.y_;
 	std::pair<VecWithValue, VecWithValue> start = { offensive_unit.visible_range_ - 1, offensive_unit.visible_range_ - 1, 0 ,
 	offensive_unit.visible_range_ - 1, offensive_unit.visible_range_ - 1, 0 };
 
-	VecWithValue target(start.x + n, start.y + m);//目标单元格坐标记录
+	VecWithValue target(start.x + nx, start.y + ny);//目标单元格坐标记录
 
 	std::priority_queue<std::pair<VecWithValue, VecWithValue>,
 		std::vector<std::pair<VecWithValue, VecWithValue>>, Compare> search_2d;
@@ -69,7 +70,9 @@ std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(CharacterData 
 	{
 		std::pair<VecWithValue, VecWithValue> current = search_2d.top();
 		search_2d.pop();
-		if (visit[current.second.x_][current.second.y_])
+		if (current.second.x_ < 0 || current.second.x_ >= 2 * offensive_unit.visible_range_ - 1 ||
+			current.second.y_ < 0 || current.second.y_ >= 2 * offensive_unit.visible_range_ - 1 ||
+			visit[current.second.x_][current.second.y_])
 			continue;
 		visit[current.second.x_][current.second.y_] = true;
 		road[current.second] = current.first;
@@ -91,7 +94,7 @@ std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(CharacterData 
 	std::stack<VecWithValue> target_road;
 	target_road.push(target);
 
-	while (road[target] != target)
+	while (target != start.first)
 	{
 		target = road[target];
 		target_road.push(target);
