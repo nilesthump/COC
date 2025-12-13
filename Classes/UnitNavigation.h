@@ -9,7 +9,7 @@
 #if 0
 
 #ifndef _UNIT_NAVIGATION_H_
-#define _UNIN_NAVIGATION_H_
+#define _UNIT_NAVIGATION_H_
 
 #include <string>
 #include "CharacterData.h"
@@ -27,17 +27,18 @@ struct  VecWithValue {
 	VecWithValue(int x, int y, double min_distance) :
 		x_(x), y_(y), min_distance_(min_distance) {
 	}
-	bool operator!=(VecWithValue& v1, VecWithValue& v2)
+	bool operator!=(VecWithValue& other)
 	{
-		return v1.x_ != v2.x_ || v1.y_ != v2.y_;
+		return x_ != other.x_ || y_ != other.y_;
 	}
 };
  
 class UnitNavigationLogic
 {
 public:
-      //返回一条坐标通路
-		static std::stack<VecWithValue> NavigationWithAStar(CharacterData offensive_unit,/*目标建筑类*/,/*当前单元格*/);
+      //返回一条坐标通路，相对位置（单位为单元格）
+		static std::stack<VecWithValue> NavigationWithAStar(CharacterData offensive_unit,
+			const VecWithValue& target_cell, const VecWithValue& current_cell);
 };
 
 #endif  _UNIT_NAVIGATION_H_
