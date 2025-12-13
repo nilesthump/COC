@@ -33,14 +33,6 @@ enum class ResourceType
 	DARK_ELIXIR,    //暗黑重油
 	GOLD            //金币
 };
-
-struct BaseUnitData
-{
-	std::string id;				//内部标识	
-	std::string name;			//显示名称
-	int level;					//等级展示
-};
-
 struct BaseUnitData
 {
     //标识信息
