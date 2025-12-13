@@ -1,5 +1,5 @@
 # 程序设计范式期末项目
-## 部落冲突(Clash of Clans)
+## 部落冲突(Clash of Clans,COC)
 |组员姓名|GitHub昵称|
 |:-:|:-:|
 |唐荣炜(组长)|[@nilesthump](https://github.com/nilesthump)|
