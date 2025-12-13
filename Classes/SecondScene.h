@@ -23,6 +23,14 @@ public:
 private:
 	// 建造面板的根节点（背景+内部按钮都挂在这个节点下）
 	Node* buildPanel;
+
+	//场景底部图精灵
+	cocos2d::Sprite* background_sprite;
+
+	//初始化拖拽相关变量
+	bool is_dragging;
+	cocos2d::Vec2 drag_start_position;
+	cocos2d::Vec2 background_start_position;
 };
 
 #endif
