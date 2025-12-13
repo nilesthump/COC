@@ -11,40 +11,40 @@
  * 4. 集中管理组件依赖关系
  *
  * 创建流程：
- * 1. 获取静态数据（CharacterData/DefenseData）
+ * 1. 获取静态数据（AttackerData/DefenderData）
  * 2. 创建BattleUnit空壳
  * 3. 根据角色类型注入对应组件
  * 4. 返回配置完成的战斗单位
  */
 #ifndef UNITFACTORY_H
 #define UNITFACTORY_H
-#include"BattleUnit.h"
-#include "NormalBehavior.h"
-#include "DefenseBehavior.h"
+#include "BattleUnit.h"
+#include "AttackerNormalBehavior.h"
+#include "DefenderNormalBehavior.h"
 #include "BarbarianNavigation.h"
-#include "CharacterData.h"
-#include "DefenseData.h"
+#include "AttackerData.h"
+#include "DefenderData.h"
 
 class UnitFactory
 {
 public:
-    // 创建进攻单位
+    //创建进攻单位
     static BattleUnit* CreateBarbarian(int level = 1)
     {
-        CharacterData data = CharacterData::CreateBarbarianData(level);
+        AttackerData data = AttackerData::CreateBarbarianData(level);
         BattleUnit* unit = new BattleUnit();
         unit->Init(data);
-        unit->SetBehavior(new NormalBehavior()); // 先用通用行为
+        unit->SetBehavior(new AttackerNormalBehavior()); //先用通用行为
         unit->SetNavigation(new BarbarianNavigation());
         return unit;
     }
 
     static BattleUnit* CreateArcher(int level = 1)
     {
-        CharacterData data = CharacterData::CreateArcherData(level);
+        AttackerData data = AttackerData::CreateArcherData(level);
         BattleUnit* unit = new BattleUnit();
         unit->Init(data);
-        unit->SetBehavior(new NormalBehavior());
+        unit->SetBehavior(new AttackerNormalBehavior());
         unit->SetNavigation(new BarbarianNavigation()); // 先用野蛮人导航
         return unit;
     }
@@ -52,10 +52,10 @@ public:
     // 创建防御建筑
     static BattleUnit* CreateArcherTower(int level = 1)
     {
-        DefenseData data = DefenseData::CreateArcherTowerData(level);
+        DefenderData data = DefenderData::CreateArcherTowerData(level);
         BattleUnit* unit = new BattleUnit();
         unit->Init(data);
-        unit->SetBehavior(new DefenseBehavior());
+        unit->SetBehavior(new DefenderNormalBehavior());
         unit->SetNavigation(nullptr); // 防御建筑无导航
         return unit;
     }

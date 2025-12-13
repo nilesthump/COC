@@ -33,7 +33,7 @@ endif()
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/BattleManager.cpp
-     Classes/CharacterData.cpp
+     Classes/AttackerData.cpp
      Classes/HelloWorldScene.cpp
      Classes/SecondScene.cpp
      Classes/CharacterUnitCard.cpp
@@ -50,7 +50,7 @@ list(APPEND GAME_SOURCE
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/BattleManager.h
-     Classes/CharacterData.h
+     Classes/AttackerData.h
      Classses/BomberBehaviorData.h
      Classes/HelloWorldScene.h
      Classes/SecondScene.h

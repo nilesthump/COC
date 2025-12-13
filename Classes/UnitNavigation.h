@@ -12,7 +12,7 @@
 #define _UNIT_NAVIGATION_H_
 
 #include <string>
-#include "CharacterData.h"
+#include "AttackerData.h"
 #include "cocos2d.h"
 #include <stack>
 
@@ -37,7 +37,7 @@ class UnitNavigationLogic
 {
 public:
       //返回一条坐标通路，相对位置（单位为单元格）
-		static std::stack<VecWithValue> NavigationWithAStar(CharacterData offensive_unit,
+		static std::stack<VecWithValue> NavigationWithAStar(AttackerData offensive_unit,
 			const VecWithValue& target_cell, const VecWithValue& current_cell);
 };
 
@@ -71,7 +71,7 @@ public:
     //计算移动
     virtual void CalculateMove(BattleUnit* self,
         BattleUnit* target,
-        float deltaTime) = 0;
+        double deltaTime) = 0;
 
     //是否在攻击范围内
     virtual bool IsInAttackRange(BattleUnit* self, BattleUnit* target) = 0;

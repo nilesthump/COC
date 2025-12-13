@@ -1,6 +1,7 @@
 #if 1
-#include "SecondScene.h"
 #include "HelloWorldScene.h"
+#include "SecondScene.h"
+
 //添加精灵的坐标依附于父母的左下角，待添加的精灵的坐标是其中心坐标
 USING_NS_CC;
 
@@ -38,8 +39,8 @@ bool SecondScene::init()
     else
     {
         //坐标左上角
-        float x = origin.x + backItem->getContentSize().width / 2;
-        float y = origin.y + visibleSize.height - backItem->getContentSize().height / 2;
+        double x = origin.x + backItem->getContentSize().width / 2;
+        double y = origin.y + visibleSize.height - backItem->getContentSize().height / 2;
         backItem->setPosition(Vec2(x, y));//setPosition设置的坐标是相对于父节点的坐标
 
         auto backLabel = Label::createWithSystemFont("BACK", "fonts/Marker Felt.ttf", 24);
@@ -61,8 +62,8 @@ bool SecondScene::init()
     else
     {
         //坐标左上角,暂紧邻返回键
-        float x = origin.x + buildItem->getContentSize().width / 2; // 和返回按钮同X
-        float y = origin.y + backItem->getPositionY() - buildItem->getContentSize().height; // 紧挨着返回按钮下方
+        double x = origin.x + buildItem->getContentSize().width / 2; // 和返回按钮同X
+        double y = origin.y + backItem->getPositionY() - buildItem->getContentSize().height; // 紧挨着返回按钮下方
         buildItem->setPosition(Vec2(x, y));
 
         auto buildLabel = Label::createWithSystemFont("BUILD", "fonts/Marker Felt.ttf", 24);
@@ -78,8 +79,8 @@ bool SecondScene::init()
     //下为建造面板的具体实现
     buildPanel = Node::create();
     //坐标
-    float buildPanelX = buildItem->getContentSize().width;
-    float buildPanelY = 0;
+    double buildPanelX = buildItem->getContentSize().width;
+    double buildPanelY = 0;
     buildPanel->setPosition(Vec2(buildPanelX, buildPanelY));
     buildPanel->setVisible(false); // 默认隐藏
     buildItem->addChild(buildPanel, 1); // 层级1：高于底层背景（0），低于按钮（2）
@@ -90,8 +91,8 @@ bool SecondScene::init()
         problemLoading("'btn_long.png'");
     }
     else {
-        float panelBgX = panelBg->getContentSize().width/2 ;
-        float panelBgY = buildItem->getContentSize().height -panelBg->getContentSize().height / 2;
+        double panelBgX = panelBg->getContentSize().width/2 ;
+        double panelBgY = buildItem->getContentSize().height -panelBg->getContentSize().height / 2;
         panelBg->setPosition(Vec2(panelBgX,panelBgY)); // 相对于根节点
         buildPanel->addChild(panelBg);
     }

@@ -1,31 +1,30 @@
 /*
  * UnitState.h - 单位状态数据类
- *
  * 核心职责：战斗单位的实时状态数据容器（纯数据类）
  * 设计模式：数据容器模式 + 值对象模式
  *
- * 架构位置：
- * BattleUnit（实体） → 包含 → UnitState（状态数据）
- *                           ↓
- *                    CharacterData（静态配置）
- *
  * 设计原则：
- * 1. 纯数据类：只包含数据，不包含逻辑
+ * 1. 纯数据类：只包含数据，不包含行为
  * 2. 值语义：可以被复制，没有多态性
- * 3. 与CharacterData区分：静态配置 vs 动态状态
  *
  * 数据流：
  * 静态配置 → 动态状态 → 实时显示
  *   (Data)    (State)     (UI)
+ * 
+ * 关注：
+ * 1.UnitState提供了部分接口来获取静态数据，原因是在实际战斗中，Unit个体的寻路、
+ *	 战斗表现需要关注静态数据的移动速度等，故提供部分接口。但是该接口传给BattleUnit进行二层传递
+ *   最终unit寻路攻击表现可以直接在BattleUnit中调用得到静态数据
  */
 #ifndef UNITSTATE_H
 #define UNITSTATE_H
-#include "CharacterData.h"
+#include "BaseUnitData.h"
+#include <memory>
 
 class UnitState
 {
 private:
-	CharacterData base_data_;
+	std::unique_ptr<BaseUnitData> base_data_ptr_;
 
 	//实时状态
 	double current_health_;
@@ -34,90 +33,61 @@ private:
 	bool is_alive_;
 
 public:
-	void Init(const CharacterData& data)
+	//构造函数
+	UnitState();
+	~UnitState() = default;
+
+	//禁止拷贝
+	UnitState(const UnitState&) = delete;
+	UnitState& operator=(const UnitState&) = delete;
+
+	//允许移动
+	UnitState(UnitState&&) = default;
+	UnitState& operator=(UnitState&&) = default;
+
+	//初始化接口
+	//模板化的Init函数，可以接受任何派生自BaseUnitData的类型
+	template<typename T>
+	void Init(const T& data)
 	{
-		base_data_ = data;
-		current_health_ = data.health;
+		base_data_ptr_ = std::make_unique<T>(data);
+		current_health_ = base_data_ptr_->health;
 		is_alive_ = true;
 		attack_cool_down_ = 0;
 		position_X_ = 0;
 		position_Y_ = 0;
 	}
+	
+	//类型判断
+	bool IsAttacker() const;
+	bool IsDefense() const;
 
-	// ============ 新增接口 ============
+	//位置
+	double GetPositionX() const;
+	double GetPositionY() const;
+	void SetPosition(double x, double y);
 
-	// 获取基础数据
-	const CharacterData& GetBaseData() const
-	{
-		return base_data_;
-	}
-
-	// 获取当前位置
-	double GetPositionX() const { return position_X_; }
-	double GetPositionY() const { return position_Y_; }
-
-	// 设置位置
-	void SetPosition(double x, double y)
-	{
-		position_X_ = x;
-		position_Y_ = y;
-	}
-
-	// 获取当前血量（不只是百分比）
-	double GetHealth() const { return current_health_; }
-
-	// ============ 原有接口 ============
-
-	//获取当前血量百分比
-	double GetHealthPercent()const
-	{
-		if (base_data_.health <= 0) return 0;
-		return current_health_ / base_data_.health;
-	}
-
-	//承受伤害
-	void TakeDamage(double damage)
-	{
-		current_health_ -= damage;
-		if (current_health_ <= 0)
-		{
-			current_health_ = 0;
-			is_alive_ = false;
-		}
-	}
-
-	//是否存活
-	bool IsAlive()const
-	{
-		// 简化：只需要检查current_health_
-		return current_health_ > 0;
-	}
+	//血量
+	double GetCurrentHealth() const;
+	double GetHealthPercent() const;
+	void TakeDamage(double damage);
+	bool IsAlive() const;
 
 	//冷却管理部分
-	void UpdateCoolDowns(double dt)
-	{
-		if (attack_cool_down_ > 0)
-			attack_cool_down_ -= dt;
-	}
-	bool CanAttack() const
-	{
-		return attack_cool_down_ <= 0;
-	}
-	void ResetAttackCooldown()
-	{
-		attack_cool_down_ = base_data_.attack_interval;
-	}
+	void UpdateCoolDowns(double dt);
+	bool CanAttack() const;
+	void ResetAttackCooldown();
+	double GetAttackCooldown() const;
 
-	// 新增：获取攻击距离（方便外部使用）
-	double GetAttackDistance() const
-	{
-		return base_data_.attack_distance;
-	}
-
-	// 新增：获取移动速度
-	double GetMoveSpeed() const
-	{
-		return base_data_.move_speed;
-	}
+	//部分静态数据访问
+	double GetMoveSpeed() const;
+	double GetAttackDistance() const;
+	double GetDamage() const;
+	double GetAttackInterval() const;
+	double GetMaxHealth() const;
+	UnitType GetTargetType() const;     //攻击目标类型（地面/空中/两者）
+	AttackType GetAttackType() const;   //攻击类型（单体/范围/连锁）
+	CombatType GetCombatType() const;   //近战/远程
 };
+
 #endif

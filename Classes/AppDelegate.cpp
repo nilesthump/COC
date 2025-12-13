@@ -1,7 +1,5 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-#include "BattleManager.h"
-#include "Windows.h"
 #include <conio.h>
 // #define USE_AUDIO_ENGINE 1
 
@@ -46,9 +44,7 @@ static int register_all_packages()
 }
 
 bool AppDelegate::applicationDidFinishLaunching() {
-    AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-    printf("程序启动！\n");
+    
     // initialize director
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
@@ -99,55 +95,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // run
     director->runWithScene(scene);
 
-    // 测试战斗
-    TestBattle();
+    
     return true;
-}
-
-void AppDelegate::TestBattle()
-{
-    printf("=== 开始战斗测试 ===\n");
-
-    BattleManager battleMgr;
-    battleMgr.CreateTestBattle();
-
-    // 模拟战斗循环
-    const float frameTime = 1.0f / 60.0f; // 60FPS
-    const float maxTime = 30.0f; // 最多30秒
-    float elapsedTime = 0.0f;
-    int frameCount = 0;
-
-    while (elapsedTime < maxTime)
-    {
-        // 更新战斗
-        battleMgr.Update(frameTime);
-
-        // 每秒输出一次状态
-        if (frameCount % 60 == 0)
-        {
-            int seconds = frameCount / 60;
-            printf("\n=== 时间: %d秒 ===\n", seconds);
-            battleMgr.PrintBattleStatus();
-        }
-
-        // 检查战斗是否结束
-        if (battleMgr.IsBattleOver())
-        {
-            printf("战斗结束！\n");
-            battleMgr.PrintBattleStatus();
-            break;
-        }
-
-        elapsedTime += frameTime;
-        frameCount++;
-    }
-
-    if (elapsedTime >= maxTime)
-    {
-        printf("战斗超时结束（30秒）\n");
-    }
-
-    printf("=== 战斗测试结束 ===\n");
 }
 
 // This function will be called when the app is inactive. Note, when receiving a phone call it is invoked.

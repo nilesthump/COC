@@ -1,17 +1,19 @@
-#include "CharacterData.h"
+#include "AttackerData.h"
 #include "BomberBehaviorData.h"
 #include<vector>
 #include<tuple>
 
+//伤害均是每次伤害，不是每秒伤害
 //! 其他细节请看社区
 //! 还没有规定好格子和距离的关系
 //野蛮人Barbarian
-CharacterData CharacterData::CreateBarbarianData(int level)
+AttackerData AttackerData::CreateBarbarianData(int level)
 {
-	CharacterData data;
+	AttackerData data;
 
 	data.id = "barbarian";
 	data.name = "野蛮人";
+	data.level = level;
 	data.combat_type = CombatType::MELEE;
 	data.unit_type = UnitType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
@@ -47,12 +49,13 @@ CharacterData CharacterData::CreateBarbarianData(int level)
 }
 
 //弓箭手Archer
-CharacterData CharacterData::CreateArcherData(int level)
+AttackerData AttackerData::CreateArcherData(int level)
 {
-	CharacterData data;
+	AttackerData data;
 
 	data.id = "archer";
 	data.name = "弓箭手";
+	data.level = level;
 	data.combat_type = CombatType::RANGED;
 	data.unit_type = UnitType::BOTH;
 	data.attack_type = AttackType::SINGLE_TARGET;
@@ -89,12 +92,13 @@ CharacterData CharacterData::CreateArcherData(int level)
 }
 
 //巨人Giant
-CharacterData CharacterData::CreateGiantData(int level)
+AttackerData AttackerData::CreateGiantData(int level)
 {
-	CharacterData data;
+	AttackerData data;
 
 	data.id = "giant";
 	data.name = "巨人";
+	data.level = level;
 	data.combat_type = CombatType::MELEE;
 	data.unit_type = UnitType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
@@ -131,12 +135,13 @@ CharacterData CharacterData::CreateGiantData(int level)
 }
 
 //哥布林Goblin
-CharacterData CharacterData::CreateGoblinData(int level)
+AttackerData AttackerData::CreateGoblinData(int level)
 {
-	CharacterData data;
+	AttackerData data;
 
 	data.id = "goblin";
 	data.name = "哥布林";
+	data.level = level;
 	data.combat_type = CombatType::MELEE;
 	data.unit_type = UnitType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
@@ -174,12 +179,13 @@ CharacterData CharacterData::CreateGoblinData(int level)
 //炸弹人Bomber
 //! 炸弹人有特殊的寻路机制和爆炸伤害机制，参考社区
 //! 架构还没有想清楚
-CharacterData CharacterData::CreateBomberData(int level)
+AttackerData AttackerData::CreateBomberData(int level)
 {
-	CharacterData data;
+	AttackerData data;
 
 	data.id = "bomber";
 	data.name = "炸弹人";
+	data.level = level;
 	data.combat_type = CombatType::MELEE;
 	data.unit_type = UnitType::GROUND;
 	data.attack_type = AttackType::SPLASH;

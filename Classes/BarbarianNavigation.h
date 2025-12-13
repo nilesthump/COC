@@ -12,13 +12,13 @@ public:
         const std::vector<BattleUnit*>& allTargets) override
     {
         BattleUnit* nearest = nullptr;
-        float minDistance = FLT_MAX;
+        double minDistance = FLT_MAX;
 
         for (auto target : allTargets)
         {
             if (!target->IsAlive()) continue;
 
-            float dist = CalculateDistance(self, target);
+            double dist = CalculateDistance(self, target);
             if (dist < minDistance)
             {
                 minDistance = dist;
@@ -28,21 +28,19 @@ public:
         return nearest;
     }
 
-    void CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime) override
+    void CalculateMove(BattleUnit* self, BattleUnit* target, double deltaTime) override
     {
         if (!target) return;
 
-        // 使用UnitState的接口获取速度
-        float speed = self->GetState().GetMoveSpeed();  // 而不是GetBaseData().move_speed
-
-        float dx = target->GetPositionX() - self->GetPositionX();
-        float dy = target->GetPositionY() - self->GetPositionY();
-        float distance = sqrt(dx * dx + dy * dy);
+        double speed = self->GetMoveSpeed();
+        double dx = target->GetPositionX() - self->GetPositionX();
+        double dy = target->GetPositionY() - self->GetPositionY();
+        double distance = sqrt(dx * dx + dy * dy);
 
         if (distance > 0.01f)
         {
-            float moveX = (dx / distance) * speed * deltaTime;
-            float moveY = (dy / distance) * speed * deltaTime;
+            double moveX = (dx / distance) * speed * deltaTime;
+            double moveY = (dy / distance) * speed * deltaTime;
 
             self->SetPosition(
                 self->GetPositionX() + moveX,
@@ -56,9 +54,8 @@ public:
     {
         if (!target) return false;
 
-        float distance = CalculateDistance(self, target);
-        // 使用UnitState的接口获取攻击距离
-        float attackRange = self->GetState().GetAttackDistance();
+        double distance = CalculateDistance(self, target);
+        double attackRange = self->GetAttackDistance();
         return distance <= attackRange;
     }
     std::string GetNavigationType() const override
@@ -67,10 +64,10 @@ public:
     }
 
 private:
-    float CalculateDistance(BattleUnit* a, BattleUnit* b)
+    double CalculateDistance(BattleUnit* a, BattleUnit* b)
     {
-        float dx = a->GetPositionX() - b->GetPositionX();
-        float dy = a->GetPositionY() - b->GetPositionY();
+        double dx = a->GetPositionX() - b->GetPositionX();
+        double dy = a->GetPositionY() - b->GetPositionY();
         return sqrt(dx * dx + dy * dy);
     }
 };

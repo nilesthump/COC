@@ -47,8 +47,8 @@ bool HelloWorld::init()
     }
     else
     {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
-        float y = origin.y + closeItem->getContentSize().height / 2;
+        double x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
+        double y = origin.y + closeItem->getContentSize().height / 2;
         closeItem->setPosition(Vec2(x, y));//设置图标位置
     }
 
@@ -67,8 +67,8 @@ bool HelloWorld::init()
     else
     {
         // 设置位置（屏幕右上）
-        float x = origin.x + visibleSize.width - secondSceneItem->getContentSize().width / 2;
-        float y = origin.y + visibleSize.height - secondSceneItem->getContentSize().height / 2;
+        double x = origin.x + visibleSize.width - secondSceneItem->getContentSize().width / 2;
+        double y = origin.y + visibleSize.height - secondSceneItem->getContentSize().height / 2;
         secondSceneItem->setPosition(Vec2(x, y));
 
         // 可选：在按钮上添加文字
