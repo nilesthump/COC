@@ -15,30 +15,47 @@
 #include "AttackerData.h"
 #include "cocos2d.h"
 #include <stack>
+#include <vector>
 
 #define INF 0x7fffffff
 //带权坐标向量
 struct  VecWithValue {
 	int x_ = 0, y_ = 0;
 	double min_distance_ = INF;//最小加权距离
+	VecWithValue() :x_(0), y_(0), min_distance_(INF) {
+	}
 	VecWithValue(int x, int y) :
 		x_(x), y_(y) {
 	}
 	VecWithValue(int x, int y, double min_distance) :
 		x_(x), y_(y), min_distance_(min_distance) {
 	}
-	bool operator!=(VecWithValue& other)
+	bool operator!=(const VecWithValue& other) const
 	{
 		return x_ != other.x_ || y_ != other.y_;
 	}
+	bool operator==(const VecWithValue& other) const
+	{
+		return x_ == other.x_ && y_ == other.y_;
+	}
+	//用于比较map的键
+	bool operator<(const VecWithValue& other) const
+	{
+		if (x_ != other.x_)
+			return x_ < other.x_;
+		return y_ < other.y_;
+	}
 };
- 
+
 class UnitNavigationLogic
 {
 public:
-      //返回一条坐标通路，相对位置（单位为单元格）
-		static std::stack<VecWithValue> NavigationWithAStar(AttackerData offensive_unit,
-			const VecWithValue& target_cell, const VecWithValue& current_cell);
+      //返回一条坐标通路，绝对位置（单位为单元格）
+		static std::stack<VecWithValue> NavigationWithAStar(
+			const VecWithValue& target_cell,
+			const VecWithValue& current_cell, 
+			bool is_defensive_unit = false,
+			const AttackerData* offensive_unit = nullptr);
 };
 
 #endif  _UNIT_NAVIGATION_H_

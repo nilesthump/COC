@@ -10,6 +10,8 @@
 #include <queue>
 #include <cmath>
 #include <map>
+#include <set>
+
 
 //曼哈顿距离，用于加权
 int ManhattanDistance(const VecWithValue& current_cell, const VecWithValue& target_cell)
@@ -21,87 +23,92 @@ int ManhattanDistance(const VecWithValue& current_cell, const VecWithValue& targ
 //重载优先队列比较函数
 class Compare {
 public:
-	bool operator()(std::pair<VecWithValue, VecWithValue> v1, std::pair<VecWithValue, VecWithValue> v2)
+	bool operator()(const VecWithValue& v1,const VecWithValue& v2)
 	{
-		return v1.second.min_distance_ > v2.second.min_distance_;
+		return v1.min_distance_ > v2.min_distance_;
 	}
 };
 
-std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(CharacterData offensive_unit,
-	const VecWithValue& target_cell, const VecWithValue& current_cell)
+std::stack<VecWithValue> UnitNavigationLogic::NavigationWithAStar(const VecWithValue& target_cell,
+	const VecWithValue& current_cell,
+	bool is_defensive_unit,
+	const AttackerData* offensive_unit)
 {
 	//方向搜索数组
 	int tx[] = { -1,-1,-1,0,0,1,1,1 }, ty[] = { -1,0,1,-1,1,-1,0,1 };
 
-	std::vector<std::vector<double>> graph_2d(2 * offensive_unit.visible_range_ - 1,
-		std::vector<double>(2 * offensive_unit.visible_range_ - 1, 1.0 / offensive_unit.move_speed));
-	graph_2d[offensive_unit.visible_range_ - 1][offensive_unit.visible_range_ - 1] = 0;
+	//假设破墙时间，实际由兵种伤害决定
+	const double OBSTACLE_DESTRUCTION_TIME = 5.0;
 
-	//标记坐标是否被访问
-	std::vector<std::vector<bool>> visit_2d(2 * offensive_unit.visible_range_ - 1,
-		std::vector<bool>(2 * offensive_unit.visible_range_ - 1, false);
+	std::map<VecWithValue, double>distance_map;
+	std::map<VecWithValue, VecWithValue> parent_map;
+	std::set<VecWithValue> visited;
 
-	/*
-		此处添加搜索范围内城墙并为graph_2d对应位置加上破墙所需时间
-	*/
+	std::priority_queue<VecWithValue,
+		std::vector<VecWithValue>, Compare> open_list;
 
-	std::map<VecWithValue, VecWithValue> road;//用于记录某个坐标的前置坐标，构建逆序通路
+	//起点入队
+	auto start_cell = current_cell;
+	start_cell.min_distance_ = ManhattanDistance(start_cell, target_cell);
+	distance_map[start_cell] = 0.0;
+	open_list.push(start_cell);
 
-	int nx = target_cell.x_ - current_cell.x_;
-	int ny = target_cell.y_ - current_cell.y_;
-	std::pair<VecWithValue, VecWithValue> start = { offensive_unit.visible_range_ - 1, offensive_unit.visible_range_ - 1, 0 ,
-	offensive_unit.visible_range_ - 1, offensive_unit.visible_range_ - 1, 0 };
+	bool found_path = false;
 
-	VecWithValue target(start.x + nx, start.y + ny);//目标单元格坐标记录
-
-	std::priority_queue<std::pair<VecWithValue, VecWithValue>,
-		std::vector<std::pair<VecWithValue, VecWithValue>>, Compare> search_2d;
-
-	search_2d.push({ start,start });
-
-
-	/*
-		每次取出一对(first为起点，second为终点)，判断second是否已到达，
-		否则加入路径并继续搜索，已到达过则跳过。
-		向八个方向搜索，将其赋权距离加入队列
-		判定当前出队的是目标坐标则退出循环
-	*/
-	while (!search_2d.empty())
+	//A*算法主循环
+	while (!open_list.empty())
 	{
-		std::pair<VecWithValue, VecWithValue> current = search_2d.top();
-		search_2d.pop();
-		if (current.second.x_ < 0 || current.second.x_ >= 2 * offensive_unit.visible_range_ - 1 ||
-			current.second.y_ < 0 || current.second.y_ >= 2 * offensive_unit.visible_range_ - 1 ||
-			visit[current.second.x_][current.second.y_])
-			continue;
-		visit[current.second.x_][current.second.y_] = true;
-		road[current.second] = current.first;
-		if (current.second.x_ == target.x_ && current.second.y_ == target.y_)
+		auto current = open_list.top();
+		open_list.pop();
+
+		//到达目标
+		if (current == target_cell)
+		{
+			found_path = true;
 			break;
+		}
+
+		//已访问则跳过
+		if (visited.count(current) > 0)
+			continue;
+
+		//标记为已访问
+		visited.insert(current);
 		for (int i = 0; i < 8; i++)
 		{
-			std::pair<VecWithValue, VecWithValue> next = { 
-				current.second.x_,current.second.y_,current.second.min_distance_
-				current.second.x_ + tx[i],current.second.y_ + ty[i],
-				graph_2d[current.second.x_ + tx[i]][current.second.y_ + ty[i]] };
+			VecWithValue next_cell(current.x_ + tx[i], current.y_ + ty[i]);
+			if (visited.count(next_cell) > 0)
+				continue;
+			double move_cost = 1.0;
+			if (offensive_unit != nullptr && offensive_unit->CanMove())
+				move_cost /= offensive_unit->move_speed;
 
-			next.second.min_distance_ += ManhattanDistance(next.second, target);
-
-			search_2d.push(next);
+			double new_cost = distance_map[current] + move_cost;
+			//更新距离与父节点
+			if (distance_map.find(next_cell) == distance_map.end() || new_cost < distance_map[next_cell])
+			{
+				distance_map[next_cell] = new_cost;
+				parent_map[next_cell] = current;
+				next_cell.min_distance_ = new_cost + ManhattanDistance(next_cell, target_cell);
+				open_list.push(next_cell);
+			}
+		}
+	}
+	//构建路径
+	std::stack<VecWithValue> path;
+	if (found_path)
+	{
+		auto current = target_cell;
+		while (true)
+		{
+			path.push(current);
+			if (current == start_cell)
+				break;
+			current = parent_map[current];
 		}
 	}
 
-	std::stack<VecWithValue> target_road;
-	target_road.push(target);
-
-	while (target != start.first)
-	{
-		target = road[target];
-		target_road.push(target);
-	}
-
-	return target_road;
-
+	return path;
 }
 
 
