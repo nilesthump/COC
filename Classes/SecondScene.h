@@ -35,19 +35,19 @@ private:
 	Node* buildPanel;
 
 	//场景底部图精灵
-	cocos2d::Sprite* background_sprite;
+	cocos2d::Sprite* background_sprite_;
 
 	//初始化拖拽相关变量
-	bool is_dragging;
-	cocos2d::Vec2 drag_start_position;
-	cocos2d::Vec2 background_start_position;
+	bool is_dragging_;
+	cocos2d::Vec2 drag_start_position_;
+	cocos2d::Vec2 background_start_position_;
 
 	//缩放相关变量
-	bool is_scaling;
-	float previous_distance;
-	cocos2d::Vec2 scale_center;
-	float min_scale;//最小缩放比例
-	float max_scale;//最大缩放比例
+	bool is_scaling_;
+	float previous_distance_;
+	cocos2d::Vec2 scale_center_;
+	float min_scale_;//最小缩放比例
+	float max_scale_;//最大缩放比例
 };
 
 #endif
