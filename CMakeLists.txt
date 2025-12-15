@@ -38,7 +38,6 @@ list(APPEND GAME_SOURCE
      Classes/SecondScene.cpp
      Classes/CharacterUnitCard.cpp
      Classes/BarracksPopup.cpp
-     Classes/NormalBehavior.cpp
      Classes/BomberBehavior.cpp
      Classes/GoblinBehavior.cpp
      Classes/ArcherNavigation.cpp
@@ -46,22 +45,29 @@ list(APPEND GAME_SOURCE
      Classes/BomberNavigation.cpp
      Classes/GiantNavigation.cpp
      Classes/GoblinNavigation.cpp
+     Classes/UnitNavigation.cpp
+     Classes/BattleUnit.cpp
+     Classes/BaseBehavior.cpp
+     Classes/AttackerNormalBehavior.cpp
+     Classes/DefenderData.cpp
+     Classes/DefenderNormalBehavior.cpp
+     Classes/BattleTestScene.cpp
+     Classes/UnitState.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/BattleManager.h
      Classes/AttackerData.h
-     Classses/BomberBehaviorData.h
+     Classes/BomberBehaviorData.h
      Classes/HelloWorldScene.h
      Classes/SecondScene.h
      Classes/CharacterUnitCard.h
      Classes/BarracksPopup.h
-     Classses/UnitState.h
-     Classses/BattleUnit.h
+     Classes/UnitState.h
+     Classes/BattleUnit.h
      Classes/UnitFactory.h
      Classes/UnitNavigation.h
      Classes/UnitBehavior.h
-     Classes/NormalBehavior.h
      Classes/BomberBehavior.h
      Classes/GoblinBehavior.h
      Classes/ArcherNavigation.h
@@ -69,6 +75,12 @@ list(APPEND GAME_HEADER
      Classes/BomberNavigation.h
      Classes/GiantNavigation.h
      Classes/GoblinNavigation.h
+     Classes/BaseUnitData.h
+     Classes/BaseBehavior.h
+     Classes/AttackerNormalBehavior.h
+     Classes/DefenderData.h
+     Classes/DefenderNormalBehavior.h
+     Classes/BattleTestScene.h
      )
 
 if(ANDROID)
