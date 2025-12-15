@@ -1,14 +1,25 @@
 #ifndef _BATTLE_TEST_SCENE_H_
 #define _BATTLE_TEST_SCENE_H_
-//它只干 4 件事：
-//创建一个 BattleManager
-//scheduleUpdate → battleMgr.Update(dt)
-//把 BattleUnit 映射成 Sprite（UnitView）
-//处理输入（点击放野蛮人）
 
+#include "cocos2d.h"
+#include <memory>
 
+class BattleManager;
 
+class BattleTestScene : public cocos2d::Layer
+{
+private:
+    std::unique_ptr<BattleManager> battleMgr_;
 
+public:
+    static cocos2d::Scene* createScene();
+    
+    virtual bool init();
+    
+    void update(float delta) override;
+    
+    CREATE_FUNC(BattleTestScene);
+};
 
 #endif
 
