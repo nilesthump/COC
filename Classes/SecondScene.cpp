@@ -124,21 +124,8 @@ bool SecondScene::init()
     }
     storageBtn->setScale(0.5f);
 
-    // 面板内的关闭按钮
-    auto closeBtn = MenuItemImage::create(
-        "CloseNormal.png",
-        "CloseSelected.png",
-        [=](Ref* pSender) { // 点击关闭面板
-            buildPanel->setVisible(false);
-        }
-    );
-    if (closeBtn) {
-        closeBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - closeBtn->getContentSize().height*0.5/2)); // 面板底部
-        closeBtn->setScale(0.5f); // 缩小一点
-    }
-
     // 把面板内的按钮加到菜单
-    auto panelMenu = Menu::create(houseBtn, storageBtn, closeBtn, nullptr);
+    auto panelMenu = Menu::create(houseBtn, storageBtn, nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
 
@@ -216,7 +203,7 @@ void SecondScene::menuFirstCallback(Ref* pSender)
 
 void SecondScene::menuBuildCallback(Ref* pSender)
 {
-    buildPanel->setVisible(true);
+    buildPanel->setVisible(!buildPanel->isVisible());
 }
 
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
