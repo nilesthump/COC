@@ -1,8 +1,9 @@
 #if 1
 #include "HelloWorldScene.h"
 #include "SecondScene.h"
+#include <cmath>
 
-//Ìí¼Ó¾«ÁéµÄ×ø±êÒÀ¸½ÓÚ¸¸Ä¸µÄ×óÏÂ½Ç£¬´ýÌí¼ÓµÄ¾«ÁéµÄ×ø±êÊÇÆäÖÐÐÄ×ø±ê
+
 USING_NS_CC;
 
 Scene* SecondScene::createScene()
@@ -27,7 +28,7 @@ bool SecondScene::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // Ìí¼Ó·µ»Ø°´Å¥
+
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
     if (backItem == nullptr ||
@@ -38,18 +39,18 @@ bool SecondScene::init()
     }
     else
     {
-        //×ø±ê×óÉÏ½Ç
+   
         double x = origin.x + backItem->getContentSize().width / 2;
         double y = origin.y + visibleSize.height - backItem->getContentSize().height / 2;
-        backItem->setPosition(Vec2(x, y));//setPositionÉèÖÃµÄ×ø±êÊÇÏà¶ÔÓÚ¸¸½ÚµãµÄ×ø±ê
+        backItem->setPosition(Vec2(x, y));
 
         auto backLabel = Label::createWithSystemFont("BACK", "fonts/Marker Felt.ttf", 24);
         backLabel->setColor(Color3B::WHITE);
         backLabel->setPosition(Vec2(backItem->getContentSize().width / 2, backItem->getContentSize().height / 2));
-        backItem->addChild(backLabel);//backItemÊÇ¸¸½Úµã£¬º¢×ÓÊÇbackLabel
+        backItem->addChild(backLabel);
     }
 
-    //Ìí¼Ó½¨Ôì°´Å¥
+
     auto buildItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuBuildCallback, this));
     if (buildItem == nullptr ||
@@ -61,9 +62,9 @@ bool SecondScene::init()
     }
     else
     {
-        //×ø±ê×óÉÏ½Ç,ÔÝ½ôÁÚ·µ»Ø¼ü
-        double x = origin.x + buildItem->getContentSize().width / 2; // ºÍ·µ»Ø°´Å¥Í¬X
-        double y = origin.y + backItem->getPositionY() - buildItem->getContentSize().height; // ½ô°¤×Å·µ»Ø°´Å¥ÏÂ·½
+        
+        double x = origin.x + buildItem->getContentSize().width / 2; 
+        double y = origin.y + backItem->getPositionY() - buildItem->getContentSize().height;
         buildItem->setPosition(Vec2(x, y));
 
         auto buildLabel = Label::createWithSystemFont("BUILD", "fonts/Marker Felt.ttf", 24);
@@ -76,55 +77,54 @@ bool SecondScene::init()
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
-    //ÏÂÎª½¨ÔìÃæ°åµÄ¾ßÌåÊµÏÖ
+
     buildPanel = Node::create();
-    //×ø±ê
+
     double buildPanelX = buildItem->getContentSize().width;
     double buildPanelY = 0;
     buildPanel->setPosition(Vec2(buildPanelX, buildPanelY));
-    buildPanel->setVisible(false); // Ä¬ÈÏÒþ²Ø
-    buildItem->addChild(buildPanel, 1); // ²ã¼¶1£º¸ßÓÚµ×²ã±³¾°£¨0£©£¬µÍÓÚ°´Å¥£¨2£©
+    buildPanel->setVisible(false);
+    buildItem->addChild(buildPanel, 1); 
 
-    // 3.2 ½¨ÔìÃæ°å±³¾°Í¼£¨Ìæ»»Ö®Ç°µÄ°ëÍ¸Ã÷Layer£©
-    auto panelBg = Sprite::create("btn_long.png"); // ½¨ÔìÃæ°å±³¾°Í¼
+    
+    auto panelBg = Sprite::create("btn_long.png"); 
     if (panelBg == nullptr) {
         problemLoading("'btn_long.png'");
     }
     else {
         double panelBgX = panelBg->getContentSize().width/2 ;
         double panelBgY = buildItem->getContentSize().height -panelBg->getContentSize().height / 2;
-        panelBg->setPosition(Vec2(panelBgX,panelBgY)); // Ïà¶ÔÓÚ¸ù½Úµã
+        panelBg->setPosition(Vec2(panelBgX,panelBgY)); 
         buildPanel->addChild(panelBg);
     }
 
-    //Ãæ°åÄÚ¼ÓÊ¾Àý½¨Öþ°´Å¥£¨Î´À´¿É¼Ó¸ü¶à£©
-    // Ê¾Àý1£º·¿×Ó°´Å¥£¨Í¼Æ¬°´Å¥£©
+
     auto houseBtn = MenuItemImage::create(
-        "HelloWorld.png",  // Õý³£×´Ì¬
-        "HelloWorld.png", // °´ÏÂ×´Ì¬
-        [=](Ref* pSender) {       // µã»÷Âß¼­£¨Î´À´Ð´½¨Ôì·¿×ÓµÄ´úÂë£©
-            log("µã»÷½¨Ôì·¿×Ó£¡");
+        "HelloWorld.png",  
+        "HelloWorld.png",
+        [=](Ref* pSender) {      
+            log("huose");
         }
     );
     if (houseBtn) {
-        houseBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height- houseBtn->getContentSize().height * 0.5/2-10)); // ÕýÉÏ·½
+        houseBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height- houseBtn->getContentSize().height * 0.5/2-10)); // ï¿½ï¿½ï¿½Ï·ï¿½
     }
-    houseBtn->setScale(0.5f);//Ëõ·Å
+    houseBtn->setScale(0.5f);
 
-    // Ê¾Àý2£º²Ö¿â°´Å¥£¨Í¼Æ¬°´Å¥£©
+
     auto storageBtn = MenuItemImage::create(
         "HelloWorld.png",
         "HelloWorld.png",
         [=](Ref* pSender) {
-            log("µã»÷½¨Ôì²Ö¿â£¡");
+            log("storage");
         }
     );
     if (storageBtn) {
-        storageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - houseBtn->getContentSize().height*0.5 *1.5-10-10)); //10ÊÇÁ½¸ö½¨ÖþÖ®¼äµÄ¼ä¸ô
+        storageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - houseBtn->getContentSize().height*0.5 *1.5-10-10)); //10ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½Ä¼ï¿½ï¿½
     }
     storageBtn->setScale(0.5f);
 
-    // °ÑÃæ°åÄÚµÄ°´Å¥¼Óµ½²Ëµ¥
+
     auto panelMenu = Menu::create(houseBtn, storageBtn, nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
@@ -136,7 +136,7 @@ bool SecondScene::init()
     }
     else
     {
-        //ÉÏ¾ÓÖÐ
+        
         label->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height - label->getContentSize().height));
         this->addChild(label, 1);
@@ -154,22 +154,21 @@ bool SecondScene::init()
         float scale = visibleSize.width / background_sprite_->getContentSize().width * 1.5f;
         background_sprite_->setScale(scale);
         // add the sprite as a child to this layer
-        this->addChild(background_sprite_, 0);//µÚ¶þ¸ö²ÎÊý´ú±íÍ¼²ã£¬Ô½´óÔ½¿¿ÉÏ
+        this->addChild(background_sprite_, 0);
     }
 
-    //³õÊ¼»¯ÍÏ×§Ïà¹Ø±äÁ¿
     is_dragging_ = false;
     drag_start_position_ = Vec2::ZERO;
     background_start_position_ = Vec2::ZERO;
 
-    //³õÊ¼»¯Ëõ·ÅÏà¹Ø±äÁ¿
+
     is_scaling_ = false;
     previous_distance_ = 0.0f;
     scale_center_ = Vec2::ZERO;
-    min_scale_ = 0.5f;//×îÐ¡Ëõ·Å±ÈÀýÎª0.5±¶
-    max_scale_ = 2.0f;//×î´óËõ·Å±ÈÀýÎª2.0±¶
+    min_scale_ = 0.5f;
+    max_scale_ = 2.0f;
 
-    //Ìí¼Ó´¥ÃþÊÂ¼þ¼àÌýÆ÷
+
     auto touch_listener = EventListenerTouchOneByOne::create();
     touch_listener->setSwallowTouches(true);
     touch_listener->onTouchBegan = CC_CALLBACK_2(SecondScene::onTouchBegan, this);
@@ -179,12 +178,40 @@ bool SecondScene::init()
 
     _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
 
-    //Ìí¼ÓÊó±ê¹öÂÖÊÂ¼þ¼àÌýÆ÷(ÓÃÓÚµçÄÔ¶ËËõ·Å)
     auto mouse_listener = EventListenerMouse::create();
     mouse_listener->onMouseScroll = CC_CALLBACK_1(SecondScene::onMouseScroll, this);
+    mouse_listener->onMouseMove = CC_CALLBACK_1(SecondScene::onMouseMove, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse_listener, this);
+    
+    // Initialize diamond position information based on precise measurements
+    int left_x = 667;          // Left vertex x-coordinate from left boundary
+    int right_x = 3705 - 556;  // Right vertex x-coordinate (image width - distance to right boundary)
+    int top_y = 264;           // Top vertex y-coordinate from top boundary
+    int bottom_y = 2545 - 471; // Bottom vertex y-coordinate (image height - distance to bottom boundary)
+    
+    diamond_width_ = right_x - left_x;       // Diamond width: 3149 - 667 = 2482
+    diamond_height_ = bottom_y - top_y;      // Diamond height: 2074 - 264 = 1810
+    
+    // Calculate diamond center relative to background sprite center
+    Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
+    diamond_center_ = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2);
+    
+    // Initialize diamond grid information
+    grid_count_ = 44;
+    // Each small square is approximately 30 pixels, recalculated based on actual diamond dimensions
+    grid_cell_size_x_ = diamond_width_ / grid_count_;  // 2482 / 44 â‰ˆ 56.409
+    grid_cell_size_y_ = diamond_height_ / grid_count_; // 1810 / 44 â‰ˆ 41.136
+    
+    // Create coordinate display label
+    coordinate_label_ = Label::createWithTTF("åæ ‡: ", "fonts/STZhongSong_Bold.ttf", 20);
+    coordinate_label_->setColor(Color3B::YELLOW);
+    coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
+    this->addChild(coordinate_label_, 2);
+    
 
-    //Ìí¼Ó¶àµã´¥ÃþÊÂ¼þ¼àÌýÆ÷(ÓÃÓÚÊÖ»ú¶ËË«Ö¸Ëõ·Å)
+    mouse_pos_ = Vec2::ZERO;
+
+  
     auto multi_touch_listener = EventListenerTouchAllAtOnce::create();
     multi_touch_listener->onTouchesBegan = CC_CALLBACK_2(SecondScene::onTouchesBegan, this);
     multi_touch_listener->onTouchesMoved = CC_CALLBACK_2(SecondScene::onTouchesMoved, this);
@@ -197,7 +224,7 @@ bool SecondScene::init()
 
 void SecondScene::menuFirstCallback(Ref* pSender)
 {
-    // ·µ»ØÖ÷³¡¾°
+
     Director::getInstance()->replaceScene(HelloWorld::createScene());
 }
 
@@ -208,7 +235,7 @@ void SecondScene::menuBuildCallback(Ref* pSender)
 
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 {
-    //¼ÇÂ¼´¥Ãþ¿ªÊ¼µÄÎ»ÖÃºÍ±³¾°Í¼µ±Ç°Î»ÖÃ
+   
     drag_start_position_ = touch->getLocation();
     background_start_position_ = background_sprite_->getPosition();
     is_dragging_ = true;
@@ -219,26 +246,24 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
 {
     if (!is_dragging_)
         return;
-    //¼ÆËã´¥ÃþÒÆ¶¯µÄÆ«ÒÆÁ¿
+
     auto current_touch_position = touch->getLocation();
     auto offset = current_touch_position - drag_start_position_;
 
-    //¼ÆËãÐÂÎ»ÖÃ
+  
     auto new_position = background_start_position_ + offset;
 
-    //»ñÈ¡ÆÁÄ»´óÐ¡ºÍ±³¾°Í¼ÐÅÏ¢
     auto visible_size = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     float background_width = background_sprite_->getContentSize().width * background_sprite_->getScale();
     float background_height = background_sprite_->getContentSize().height * background_sprite_->getScale();
 
-    //¼ÆËã±ß½çÏÞÖÆ
+
     float minX = origin.x + visible_size.width / 2;
     float maxX = origin.x + visible_size.width / 2;
     float minY = origin.y + visible_size.height / 2;
     float maxY = origin.y + visible_size.height / 2;
 
-    //Èç¹û±³¾°Í¼±ÈÆÁÄ»´ó£¬ÔòÉèÖÃ±ß½ç
     if (background_width > visible_size.width)
     {
         minX -= (background_width - visible_size.width) / 2;
@@ -251,134 +276,133 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         maxY += (background_height - visible_size.height) / 2;
     }
 
-    //Ó¦ÓÃ±ß½çÏÞÖÆ
+
     new_position.x = clampf(new_position.x, minX, maxX);
     new_position.y = clampf(new_position.y, minY, maxY);
 
-    //¸üÐÂ±³¾°Í¼Î»ÖÃ
+
     background_sprite_->setPosition(new_position);
 }
 
 void SecondScene::onTouchEnded(Touch* touch, Event* event)
 {
-    //½áÊøÍÏ×§
+
     is_dragging_ = false;
 }
 
 void SecondScene::onTouchCancelled(Touch* touch, Event* event)
 {
-    //È¡ÏûÍÏ×§
+
     is_dragging_ = false;
 }
 
-//Êó±ê¹öÂÖËõ·Å¹¦ÄÜÊµÏÖ
+
 void SecondScene::onMouseScroll(EventMouse* event)
 {
-    //»ñÈ¡¹ö¶¯·½Ïò
+  
     float scrollY = event->getScrollY();
 
-    //¼ÆËãËõ·Å±ÈÀý
+
     float scale_factor = scrollY > 0 ? 1.1f : 0.9f;
 
-    //»ñÈ¡µ±Ç°Ëõ·Å±ÈÀý
+
     float current_scale = background_sprite_->getScale();
 
-    //¼ÆËãÐÂµÄËõ·Å±ÈÀý
+
     float new_scale = current_scale * scale_factor;
 
-    //Ó¦ÓÃËõ·Å±ß½çÏÞÖÆ
+
     new_scale = clampf(new_scale, min_scale_, max_scale_);
 
-    //ÉèÖÃÐÂµÄËõ·Å±ÈÀý
+
     background_sprite_->setScale(new_scale);
 
-    //ÖØÐÂ¼ÆËã±ß½ç²¢ÏÞÖÆ±³¾°Í¼Î»ÖÃ
+
     updateBackgroundBounds();
 }
 
-//¶àµã´¥Ãþ¿ªÊ¼ÊÂ¼þ
+
 void SecondScene::onTouchesBegan(const std::vector<Touch*>& touches, Event* event)
 {
     if (touches.size() == 2)
     {
-        //¿ªÊ¼Ë«Ö¸Ëõ·Å
+
         is_scaling_ = true;
 
-        //¼ÆËã³õÊ¼Á½Ö¸¾àÀë
+
         Vec2 touch1 = touches[0]->getLocation();
         Vec2 touch2 = touches[1]->getLocation();
         previous_distance_ = touch1.distance(touch2);
 
-        //¼ÆËãËõ·ÅÖÐÐÄ
+
         scale_center_ = (touch1 + touch2) / 2;
     }
 }
 
-//¶àµã´¥ÃþÒÆ¶¯ÊÂ¼þ£¨Ë«Ö¸Ëõ·Å£©
+
 void SecondScene::onTouchesMoved(const std::vector<Touch*>& touches, Event* event)
 {
     if (!is_scaling_ || touches.size() != 2)
         return;
 
-    //¼ÆËãµ±Ç°Á½Ö¸¾àÀë
+
     Vec2 touch1 = touches[0]->getLocation();
     Vec2 touch2 = touches[1]->getLocation();
     float current_distance = touch1.distance(touch2);
 
-    //¼ÆËãËõ·Å±ÈÀý
     float scale_factor = current_distance / previous_distance_;
 
-    //»ñÈ¡µ±Ç°Ëõ·Å±ÈÀý
+
     float current_scale = background_sprite_->getScale();
 
-    //¼ÆËãÐÂµÄËõ·Å±ÈÀý
+
     float new_scale = current_scale * scale_factor;
 
-    //Ó¦ÓÃËõ·Å±ß½çÏÞÖÆ
+
     new_scale = clampf(new_scale, min_scale_, max_scale_);
 
-    //ÉèÖÃÐÂµÄËõ·Å±ÈÀý
+
     background_sprite_->setScale(new_scale);
 
-    //¸üÐÂÉÏÒ»´ÎµÄ¾àÀë
+
     previous_distance_ = current_distance;
 
-    //ÖØÐÂ¼ÆËã±ß½ç²¢ÏÞÖÆ±³¾°Í¼Î»ÖÃ
+
     updateBackgroundBounds();
 }
 
-//¶àµã´¥Ãþ½áÊøÊÂ¼þ
+
 void SecondScene::onTouchesEnded(const std::vector<Touch*>& touches, Event* event)
 {
-    //½áÊøËõ·Å
+
     is_scaling_ = false;
 }
 
-//¶àµã´¥ÃþÈ¡ÏûÊÂ¼þ
+
 void SecondScene::onTouchesCancelled(const std::vector<Touch*>& touches, Event* event)
 {
-    //È¡ÏûËõ·Å
+
     is_scaling_ = false;
 }
 
-//¸üÐÂ±³¾°Í¼±ß½ç
+
 void SecondScene::updateBackgroundBounds()
 {
-    //»ñÈ¡µ±Ç°Ëõ·Å±ÈÀý
+
     float scale = background_sprite_->getScale();
 
-    //»ñÈ¡¿É¼ûÇøÓò
+
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     Size visible_size = Director::getInstance()->getVisibleSize();
 
-    //»ñÈ¡±³¾°Í¼Ô­Ê¼´óÐ¡
+
     Size background_size = background_sprite_->getContentSize();
 
-    //¼ÆËãËõ·ÅºóµÄ±³¾°Í¼´óÐ¡
+
     float scaled_width = background_size.width * scale;
     float scaled_height = background_size.height * scale;
 
-    //¼ÆËã±ß½ç
+
     Vec2 current_position = background_sprite_->getPosition();
 
     float minX = origin.x + visible_size.width / 2;
@@ -386,7 +410,7 @@ void SecondScene::updateBackgroundBounds()
     float minY = origin.y + visible_size.height / 2;
     float maxY = origin.y + visible_size.height / 2;
 
-    //Èç¹û±³¾°Í¼±ÈÆÁÄ»´ó£¬ÔòÉèÖÃ±ß½ç
+
     if (scaled_width > visible_size.width)
     {
         minX -= (scaled_width - visible_size.width) / 2;
@@ -399,12 +423,78 @@ void SecondScene::updateBackgroundBounds()
         maxY += (scaled_height - visible_size.height) / 2;
     }
 
-    //Ó¦ÓÃ±ß½çÏÞÖÆ
+
     Vec2 new_position;
     new_position.x = clampf(current_position.x, minX, maxX);
     new_position.y = clampf(current_position.y, minY, maxY);
 
-    //¸üÐÂ±³¾°Í¼Î»ÖÃ
+
     background_sprite_->setPosition(new_position);
+}
+
+
+void SecondScene::onMouseMove(EventMouse* event)
+{
+    mouse_pos_ = event->getLocation();
+    
+    // Convert screen coordinates to diamond coordinates
+    Vec2 diamond_pos = convertScreenToDiamond(mouse_pos_);
+    
+    // Check if position is inside diamond
+    if (isInDiamond(diamond_pos))
+    {
+        // Convert diamond coordinates to grid coordinates with proper rounding
+        int grid_x = static_cast<int>(floor(diamond_pos.x / grid_cell_size_x_ + 0.5f));
+        int grid_y = static_cast<int>(floor(diamond_pos.y / grid_cell_size_y_ + 0.5f));
+        
+        // Display grid coordinates
+        coordinate_label_->setString(StringUtils::format("åæ ‡: (%d, %d)", grid_x, grid_y));
+    }
+    else
+    {
+        // Display out of bounds message
+        coordinate_label_->setString("åæ ‡: ç•Œå¤–");
+    }
+}
+
+// Convert screen coordinates to diamond coordinates
+Vec2 SecondScene::convertScreenToDiamond(const Vec2& screenPos)
+{
+    // Get scaling factor
+    float scale = background_sprite_->getScale();
+    
+    // Get background sprite actual position
+    Vec2 background_pos = background_sprite_->getPosition();
+    
+    // Convert screen coordinates to background sprite local coordinates
+    Vec2 local_pos = screenPos - background_pos;
+    
+    // Convert to image pixel coordinates (relative to background sprite center)
+    Vec2 image_pos_relative_to_center = Vec2(
+        local_pos.x / scale,
+        local_pos.y / scale
+    );
+    
+    // Convert to diamond coordinates (diamond center as origin)
+    Vec2 diamond_pos = image_pos_relative_to_center - diamond_center_;
+    
+    // Debug log to trace coordinate transformations
+    log("ScreenPos: (%.2f, %.2f), BackgroundPos: (%.2f, %.2f), LocalPos: (%.2f, %.2f)", 
+        screenPos.x, screenPos.y, background_pos.x, background_pos.y, local_pos.x, local_pos.y);
+    log("ImagePosRelativeToCenter: (%.2f, %.2f), DiamondCenter: (%.2f, %.2f), DiamondPos: (%.2f, %.2f)", 
+        image_pos_relative_to_center.x, image_pos_relative_to_center.y, diamond_center_.x, diamond_center_.y, diamond_pos.x, diamond_pos.y);
+    
+    return diamond_pos;
+}
+
+// Check if position is inside diamond
+bool SecondScene::isInDiamond(const Vec2& diamondPos)
+{
+    // Convert diamond coordinates to grid coordinates with proper rounding
+    int grid_x = static_cast<int>(floor(diamondPos.x / grid_cell_size_x_ + 0.5f));
+    int grid_y = static_cast<int>(floor(diamondPos.y / grid_cell_size_y_ + 0.5f));
+    
+    // Check if absolute sum of grid coordinates is within 22
+    return (fabs(grid_x) + fabs(grid_y) <= 22);
 }
 #endif

@@ -39,7 +39,7 @@ bool BattleTestScene::init()
 
     // 初始化战斗管理器
     battleMgr_ = std::make_unique<BattleManager>();
-    battleMgr_->SetBattleActive(true);
+    //battleMgr_->SetBattleActive(true);
 
     // ⭐ 2. 地图背景添加到游戏世界容器（而不是this）
     background_sprite_ = Sprite::create("normal(winter).jpg");
