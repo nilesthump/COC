@@ -28,7 +28,7 @@ bool BattleTestScene::init()
 
     // 初始化战斗管理器
     battleMgr_ = std::make_unique<BattleManager>();
-    battleMgr_->SetBattleActive(true);
+    //battleMgr_->SetBattleActive(true);
 
     // 创建战场背景
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -51,7 +51,7 @@ bool BattleTestScene::init()
     cannon->Init(cannonData);
     cannon->SetPosition(500, 200);
     cannon->SetBehavior(new DefenderNormalBehavior());
-    cannon->SetNavigation(new CannonNavigation());
+   // cannon->SetNavigation(new CannonNavigation());
 
     // 添加到战斗管理器
     battleMgr_->AddUnit(std::move(barbarian), true);
