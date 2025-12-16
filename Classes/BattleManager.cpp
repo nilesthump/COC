@@ -46,13 +46,12 @@ void BattleManager::Update(double deltaTime)
         }
     }
 
-    //清理死亡单位（可选）
-    //RemoveDeadUnits();
+    RemoveDeadUnits();
 
     // 检查战斗是否结束
     if (IsBattleOver())
     {
-        EndBattle();
+        battle_active_ = false;
     }
 }
 
@@ -83,4 +82,40 @@ bool BattleManager::IsBattleOver() const
     }
 
     return !attackers_alive || !defenders_alive;
+}
+
+void BattleManager::SetBattleActive(bool s)
+{
+    battle_active_ = s;
+}
+
+//移除死亡单位
+void BattleManager::RemoveDeadUnits()
+{
+    // 遍历所有单位，找出死亡的单位
+    for (auto it = all_units_.begin(); it != all_units_.end(); )
+    {
+        BattleUnit* unit = it->get();
+        if (!unit->IsAlive())
+        {
+            // 从attackers_或defenders_中移除对应的指针
+            auto remove_from_vector = [unit](std::vector<BattleUnit*>& vec)
+                {
+                    vec.erase(std::remove(vec.begin(), vec.end(), unit), vec.end());
+                };
+
+            remove_from_vector(attackers_);
+            remove_from_vector(defenders_);
+
+            // 移除视觉元素
+            unit->RemoveSprite();
+
+            // 从all_units_中移除
+            it = all_units_.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }

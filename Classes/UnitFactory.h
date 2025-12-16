@@ -2,33 +2,44 @@
  * UnitFactory.h - 单位工厂类
  *
  * 核心职责：创建和配置战斗单位的工厂类
- * 设计模式：工厂模式 + 简单工厂
+ * 设计模式：抽象工厂模式 + 建造者模式
  *
- * 为什么需要工厂：
- * 1. 封装对象创建逻辑，避免在业务代码中直接new
- * 2. 统一单位创建接口，便于管理
- * 3. 隔离具体实现，便于扩展新单位
- * 4. 集中管理组件依赖关系
+ * 设计原则：
+ * 1. 单一职责原则：工厂只负责创建，不负责业务逻辑
+ * 2. 开闭原则：新增单位类型无需修改现有代码
+ * 3. 依赖倒置原则：高层模块不依赖低层模块，都依赖抽象
  *
- * 创建流程：
- * 1. 获取静态数据（AttackerData/DefenderData）
- * 2. 创建BattleUnit空壳
- * 3. 根据角色类型注入对应组件
- * 4. 返回配置完成的战斗单位
+ * 核心功能：
+ * 1. 创建基础单位（仅数据层）
+ * 2. 创建完整单位（带视觉和音效）
+ *
+ * 使用方式：
+ * 1. 简单创建：UnitFactory::CreateBarbarian(1)
+ * 2. 完整创建：UnitFactory::CreateCompleteBarbarian(1, parentNode)
  */
+
+//12/16 下一步把别的角色工厂也添加，然后试着提取共有部分批量创建
+//（但是初始位置还是得从scene读取，这里对角色自己的工厂而已）
 #ifndef UNITFACTORY_H
 #define UNITFACTORY_H
 #include "BattleUnit.h"
 #include "AttackerNormalBehavior.h"
 #include "DefenderNormalBehavior.h"
 #include "BarbarianNavigation.h"
+#include "CannonNavigation.h"
 #include "AttackerData.h"
 #include "DefenderData.h"
+#include "cocos2d.h" 
+
+namespace cocos2d
+{
+    class Node;
+}
 
 class UnitFactory
 {
 public:
-    //创建进攻单位
+    //创建野蛮人单位
     static BattleUnit* CreateBarbarian(int level = 1)
     {
         AttackerData data = AttackerData::CreateBarbarianData(level);
@@ -39,24 +50,59 @@ public:
         return unit;
     }
 
-    static BattleUnit* CreateArcher(int level = 1)
+    // 创建加农炮单位
+    static BattleUnit* CreateCannon(int level = 1)
     {
-        AttackerData data = AttackerData::CreateArcherData(level);
-        BattleUnit* unit = new BattleUnit();
-        unit->Init(data);
-        unit->SetBehavior(new AttackerNormalBehavior());
-        unit->SetNavigation(new BarbarianNavigation()); // 先用野蛮人导航
-        return unit;
-    }
-
-    // 创建防御建筑
-    static BattleUnit* CreateArcherTower(int level = 1)
-    {
-        DefenderData data = DefenderData::CreateArcherTowerData(level);
+        DefenderData data = DefenderData::CreateCannonData(level);
         BattleUnit* unit = new BattleUnit();
         unit->Init(data);
         unit->SetBehavior(new DefenderNormalBehavior());
-        unit->SetNavigation(nullptr); // 防御建筑无导航
+        unit->SetNavigation(new CannonNavigation()); // 使用加农炮导航（固定，无移动）
+        return unit;
+    }
+
+    // 创建带有视觉效果的完整单位（用于场景直接使用）
+    static BattleUnit* CreateCompleteBarbarian(int level, cocos2d::Node* parent)
+    {
+        BattleUnit* unit = CreateBarbarian(level);
+
+        // 设置精灵
+        auto sprite = cocos2d::Sprite::create("shenhe.png");
+        if (sprite)
+        {
+            sprite->setScale(0.5f);
+            unit->SetSprite(sprite, parent);  //需要修改SetSprite方法
+        }
+
+        // 设置血条
+        unit->SetupHealthBar(parent);
+
+        // 设置音效
+        unit->SetAttackSound("sounds/barbarian_attack.mp3");
+        unit->SetDeathSound("sounds/barbarian_death.mp3");
+
+        return unit;
+    }
+
+    static BattleUnit* CreateCompleteCannon(int level, cocos2d::Node* parent)
+    {
+        BattleUnit* unit = CreateCannon(level);
+
+        // 设置精灵
+        auto sprite = cocos2d::Sprite::create("ArcherTowerLv1.png");
+        if (sprite)
+        {
+            sprite->setScale(0.3f);
+            unit->SetSprite(sprite, parent);
+        }
+
+        // 设置血条
+        unit->SetupHealthBar(parent);
+
+        // 设置音效
+        unit->SetAttackSound("sounds/cannon_attack.mp3");
+        unit->SetDeathSound("sounds/cannon_death.mp3");
+
         return unit;
     }
 };

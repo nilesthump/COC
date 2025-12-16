@@ -48,22 +48,11 @@ public:
     //! 这里还有个时间限制检查没加进去
     bool IsBattleOver() const;
     
-    void BattleManager::StartBattle()
-    {
-        battle_active_ = true;
-    }
+    //设置战斗是否进行进程
+    void SetBattleActive(bool s);
 
-    void BattleManager::EndBattle()
-    {
-        battle_active_ = false;
-    }
-
-    //给到Scene用于添加血条、音效、战斗姿态等
-    const std::vector<std::unique_ptr<BattleUnit>>& GetAllUnits() const
-    {
-        return all_units_;
-    }
-
+    //清理死亡单位
+    void RemoveDeadUnits();
 };
 #endif 
 

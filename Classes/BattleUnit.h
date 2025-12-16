@@ -18,6 +18,11 @@
  * 2. 初始化：设置初始位置、血量等状态
  * 3. 战斗：每帧Update，协调各组件工作
  * 4. 销毁：死亡或战斗结束后删除
+ * 
+ * 12/16
+ * Update:BattleUnit = UnitState + UnitBehavior + UnitNavigation + VisualComponet
+ * BattleUnit作为一个战斗单位，血条/音效/图片/死亡效果都跟着角色走
+ * 而且visual部分可以根据实际快速更新，注意和战斗逻辑分离即可
  */
 
 #ifndef BATTLEUNIT_H
@@ -26,6 +31,15 @@
 #include "UnitBehavior.h"
 #include "UnitNavigation.h"
 #include <vector>
+#include <string>
+
+//前向声明一下视觉组件
+namespace cocos2d
+{
+	class Sprite;
+	class ProgressTimer;
+	class Node;
+}
 
 class BattleUnit
 {
@@ -35,6 +49,15 @@ private:
 	UnitNavigation* navigation_;
 	BattleUnit* target_;
 
+	//视觉组件
+	cocos2d::Sprite* unit_sprite_;
+	cocos2d::Sprite* health_bar_bg_;
+	cocos2d::ProgressTimer* health_bar_;
+	cocos2d::Node* parent_node_;
+
+	//音效组件
+	std::string attack_sound_;
+	std::string death_sound_;
 public:
 	BattleUnit();
 	~BattleUnit() = default;
@@ -77,9 +100,25 @@ public:
 	AttackType GetAttackType() const;
 	CombatType GetCombatType() const;
 	BattleUnit* GetTarget() const;
+	UnitNavigation* GetNavigation() const;
+	UnitBehavior* GetBehavior() const;
 
-	//新增：是否为资源建筑（给哥布林用）
-	bool IsResourceBuilding() const;
+	//获取parent
+	cocos2d::Node* GetParentNode() const;
+
+	//视觉方法
+	void SetSprite(cocos2d::Sprite* sprite, cocos2d::Node* parent);
+	cocos2d::Sprite* GetSprite() const;
+	void SetupHealthBar(cocos2d::Node* parent);
+	void UpdateSpritePosition();
+	void UpdateHealthBar();
+	void RemoveSprite();
+
+	//音效方法
+	void SetAttackSound(const std::string& sound);
+	void SetDeathSound(const std::string& sound);
+	void PlayAttackSound();
+	void PlayDeathSound();
 };
 
 #endif

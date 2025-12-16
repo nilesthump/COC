@@ -19,17 +19,18 @@
 
 #define INF 0x7fffffff
 //带权坐标向量
-struct  VecWithValue {
+struct  VecWithValue
+{
 	int x_ = 0, y_ = 0;
 	double min_distance_ = INF;//最小加权距离
-	VecWithValue() :x_(0), y_(0), min_distance_(INF) {
-	}
+	VecWithValue() :x_(0), y_(0), min_distance_(INF)
+	{}
 	VecWithValue(int x, int y) :
-		x_(x), y_(y) {
-	}
+		x_(x), y_(y)
+	{}
 	VecWithValue(int x, int y, double min_distance) :
-		x_(x), y_(y), min_distance_(min_distance) {
-	}
+		x_(x), y_(y), min_distance_(min_distance)
+	{}
 	bool operator!=(const VecWithValue& other) const
 	{
 		return x_ != other.x_ || y_ != other.y_;
@@ -50,12 +51,12 @@ struct  VecWithValue {
 class UnitNavigationLogic
 {
 public:
-      //返回一条坐标通路，绝对位置（单位为单元格）
-		static std::stack<VecWithValue> NavigationWithAStar(
-			const VecWithValue& target_cell,
-			const VecWithValue& current_cell, 
-			bool is_defensive_unit = false,
-			const AttackerData* offensive_unit = nullptr);
+	//返回一条坐标通路，绝对位置（单位为单元格）
+	static std::stack<VecWithValue> NavigationWithAStar(
+		const VecWithValue& target_cell,
+		const VecWithValue& current_cell,
+		bool is_defensive_unit = false,
+		const AttackerData* offensive_unit = nullptr);
 };
 
 #endif  _UNIT_NAVIGATION_H_
@@ -75,25 +76,27 @@ public:
 #include <string>
 
 class BattleUnit;
+class GridSystem;
 
 class UnitNavigation
 {
+
 public:
-    virtual ~UnitNavigation() = default;
+	virtual ~UnitNavigation() = default;
 
-    //寻找目标
-    virtual BattleUnit* FindTarget(BattleUnit* self,
-        const std::vector<BattleUnit*>& allTargets) = 0;
+	//寻找目标
+	virtual BattleUnit* FindTarget(BattleUnit* self,
+		const std::vector<BattleUnit*>& allTargets) = 0;
 
-    //计算移动
-    virtual void CalculateMove(BattleUnit* self,
-        BattleUnit* target,
-        double deltaTime) = 0;
+	//计算移动
+	virtual void CalculateMove(BattleUnit* self,
+		BattleUnit* target,
+		double deltaTime) = 0;
 
-    //是否在攻击范围内
-    virtual bool IsInAttackRange(BattleUnit* self, BattleUnit* target) = 0;
+	//是否在攻击范围内
+	virtual bool IsInAttackRange(BattleUnit* self, BattleUnit* target) = 0;
 
-    //获取导航类型
-    virtual std::string GetNavigationType() const = 0;
+	//获取导航类型
+	virtual std::string GetNavigationType() const = 0;
 };
 #endif
