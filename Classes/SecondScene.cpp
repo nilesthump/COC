@@ -191,7 +191,10 @@ bool SecondScene::init()
     
     diamond_width_ = right_x - left_x;       // Diamond width: 3149 - 667 = 2482
     diamond_height_ = bottom_y - top_y;      // Diamond height: 2074 - 264 = 1810
-    diamond_center_ = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f); // Center point (1908, 1169)
+    
+    // Calculate diamond center relative to background sprite center
+    Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
+    diamond_center_ = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2);
     
     // Initialize diamond grid information
     grid_count_ = 44;
@@ -466,14 +469,20 @@ Vec2 SecondScene::convertScreenToDiamond(const Vec2& screenPos)
     // Convert screen coordinates to background sprite local coordinates
     Vec2 local_pos = screenPos - background_pos;
     
-    // Convert to image pixel coordinates
-    Vec2 image_pos = Vec2(
-        local_pos.x / scale + background_sprite_->getContentSize().width / 2,
-        local_pos.y / scale + background_sprite_->getContentSize().height / 2
+    // Convert to image pixel coordinates (relative to background sprite center)
+    Vec2 image_pos_relative_to_center = Vec2(
+        local_pos.x / scale,
+        local_pos.y / scale
     );
     
     // Convert to diamond coordinates (diamond center as origin)
-    Vec2 diamond_pos = image_pos - diamond_center_;
+    Vec2 diamond_pos = image_pos_relative_to_center - diamond_center_;
+    
+    // Debug log to trace coordinate transformations
+    log("ScreenPos: (%.2f, %.2f), BackgroundPos: (%.2f, %.2f), LocalPos: (%.2f, %.2f)", 
+        screenPos.x, screenPos.y, background_pos.x, background_pos.y, local_pos.x, local_pos.y);
+    log("ImagePosRelativeToCenter: (%.2f, %.2f), DiamondCenter: (%.2f, %.2f), DiamondPos: (%.2f, %.2f)", 
+        image_pos_relative_to_center.x, image_pos_relative_to_center.y, diamond_center_.x, diamond_center_.y, diamond_pos.x, diamond_pos.y);
     
     return diamond_pos;
 }
@@ -481,11 +490,11 @@ Vec2 SecondScene::convertScreenToDiamond(const Vec2& screenPos)
 // Check if position is inside diamond
 bool SecondScene::isInDiamond(const Vec2& diamondPos)
 {
-    // Diamond position judgment formula
-    // |x|/(width/2) + |y|/(height/2) <= 1
-    float x_ratio = fabs(diamondPos.x) / (diamond_width_ / 2);
-    float y_ratio = fabs(diamondPos.y) / (diamond_height_ / 2);
+    // Convert diamond coordinates to grid coordinates with proper rounding
+    int grid_x = static_cast<int>(floor(diamondPos.x / grid_cell_size_x_ + 0.5f));
+    int grid_y = static_cast<int>(floor(diamondPos.y / grid_cell_size_y_ + 0.5f));
     
-    return (x_ratio + y_ratio <= 1.0f);
+    // Check if absolute sum of grid coordinates is within 22
+    return (fabs(grid_x) + fabs(grid_y) <= 22);
 }
 #endif
