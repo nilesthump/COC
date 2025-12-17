@@ -107,7 +107,7 @@ bool SecondScene::init()
         }
     );
     if (houseBtn) {
-        houseBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height- houseBtn->getContentSize().height * 0.5/2-10)); // ���Ϸ�
+        houseBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - houseBtn->getContentSize().height * 0.5 / 2 - 10));
     }
     houseBtn->setScale(0.5f);
 
@@ -120,7 +120,7 @@ bool SecondScene::init()
         }
     );
     if (storageBtn) {
-        storageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - houseBtn->getContentSize().height*0.5 *1.5-10-10)); //10����������֮��ļ��
+        storageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - houseBtn->getContentSize().height * 0.5 * 1.5 - 10 - 10));
     }
     storageBtn->setScale(0.5f);
 
@@ -218,6 +218,44 @@ bool SecondScene::init()
     multi_touch_listener->onTouchesEnded = CC_CALLBACK_2(SecondScene::onTouchesEnded, this);
     multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(SecondScene::onTouchesCancelled, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
+    //以下为网格绘制
+    _cellSize = 50.0f;
+
+    float scaledWidth = background_sprite_->getContentSize().width * background_sprite_->getScale();
+    float scaledHeight = background_sprite_->getContentSize().height * background_sprite_->getScale();
+    _gridDraw = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
+    _gridDraw->setPosition(Vec2::ZERO);
+    background_sprite_->addChild(_gridDraw, 1);
+
+    // 在背景精灵中心绘制一个菱形作为示例
+    Vec2 diamondCenter = Vec2(scaledWidth / 2 - 24.0f, scaledHeight / 2 - 1.5f);
+    float horizontalSize = 56.0f;  // 水平对角线长度
+    float verticalSize = 42.0f;    // 垂直对角线长度
+    _gridDraw->drawDiamond(diamondCenter, horizontalSize, verticalSize);
+    //标注四个角
+    auto grid_draw = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
+    grid_draw->setPosition(Vec2::ZERO);
+    background_sprite_->addChild(grid_draw, 1);
+    Vec2 diamond_center = Vec2(diamondCenter.x - 13 * horizontalSize, diamondCenter.y + 9 * verticalSize);
+    grid_draw->drawDiamond(diamond_center, horizontalSize, verticalSize);
+
+    auto grid_draw2 = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
+    grid_draw2->setPosition(Vec2::ZERO);
+    background_sprite_->addChild(grid_draw2, 1);
+    Vec2 diamond_center2 = Vec2(diamond_center.x + 43 * horizontalSize, diamond_center.y);
+    grid_draw2->drawDiamond(diamond_center2, horizontalSize, verticalSize);
+
+    auto grid_draw3 = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
+    grid_draw3->setPosition(Vec2::ZERO);
+    background_sprite_->addChild(grid_draw3, 1);
+    Vec2 diamond_center3 = Vec2(diamond_center.x + 21.5 * horizontalSize, diamond_center.y + 21.5 * verticalSize);
+    grid_draw3->drawDiamond(diamond_center3, horizontalSize, verticalSize);
+
+    auto grid_draw4 = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
+    grid_draw4->setPosition(Vec2::ZERO);
+    background_sprite_->addChild(grid_draw4, 1);
+    Vec2 diamond_center4 = Vec2(diamond_center.x + 21.5 * horizontalSize, diamond_center.y - 21.5 * verticalSize);
+    grid_draw4->drawDiamond(diamond_center4, horizontalSize, verticalSize);
 
     return true;
 }
@@ -497,4 +535,117 @@ bool SecondScene::isInDiamond(const Vec2& diamondPos)
     // Check if absolute sum of grid coordinates is within 22
     return (fabs(grid_x) + fabs(grid_y) <= 22);
 }
+
+// GridDraw类实现
+GridDraw* GridDraw::create(float cellSize, float width, float height)
+{
+    GridDraw* grid = new (std::nothrow) GridDraw();
+    if (grid && grid->init(cellSize, width, height))
+    {
+        grid->autorelease();
+        return grid;
+    }
+    CC_SAFE_DELETE(grid);
+    return nullptr;
+}
+
+bool GridDraw::init(float cellSize, float width, float height)
+{
+    if (!Node::init())
+    {
+        return false;
+    }
+
+    // 初始化参数
+    _cellSize = cellSize;
+    _width = width;
+    _height = height;
+    _diamondCenter = Vec2::ZERO;
+
+    // 创建DrawNode
+    _drawNode = DrawNode::create();
+    this->addChild(_drawNode);
+
+    // 绘制隐形网格
+    drawGrid();
+
+    return true;
+}
+
+void GridDraw::drawGrid()
+{
+    // 清空之前的绘制
+    _drawNode->clear();
+
+    // 计算网格线数量
+    int rows = static_cast<int>(_height / _cellSize) + 1;
+    int cols = static_cast<int>(_width / _cellSize) + 1;
+
+    // 绘制垂直线（隐形）
+    for (int i = 0; i < cols; ++i)
+    {
+        float x = i * _cellSize;
+        Vec2 start(x, 0);
+        Vec2 end(x, _height);
+        // 使用完全透明的颜色，实现隐形网格
+        _drawNode->drawSegment(start, end, 1.0f, Color4F(0.0f, 0.0f, 0.0f, 0.0f));
+    }
+
+    // 绘制水平线（隐形）
+    for (int i = 0; i < rows; ++i)
+    {
+        float y = i * _cellSize;
+        Vec2 start(0, y);
+        Vec2 end(_width, y);
+        // 使用完全透明的颜色，实现隐形网格
+        _drawNode->drawSegment(start, end, 1.0f, Color4F(0.0f, 0.0f, 0.0f, 0.0f));
+    }
+}
+
+void GridDraw::drawDiamond(const Vec2& center, float horizontalSize, float verticalSize, const Color4F& color)
+{
+    // 记录菱形中心点
+    _diamondCenter = center;
+
+    // 计算菱形的四个顶点
+    // horizontalSize: 水平对角线长度
+    // verticalSize: 垂直对角线长度
+    Vec2 top(center.x, center.y + verticalSize / 2);     // 上顶点（垂直方向）
+    Vec2 right(center.x + horizontalSize / 2, center.y);  // 右顶点（水平方向）
+    Vec2 bottom(center.x, center.y - verticalSize / 2);   // 下顶点（垂直方向）
+    Vec2 left(center.x - horizontalSize / 2, center.y);   // 左顶点（水平方向）
+
+    // 创建顶点数组
+    std::vector<Vec2> vertices = { top, right, bottom, left };
+
+    // 绘制菱形
+    _drawNode->drawPolygon(&vertices[0], vertices.size(), color, 1.0f, color);
+}
+
+Vec2 GridDraw::getDiamondCenter() const
+{
+    return _diamondCenter;
+}
+
+// SecondScene网格相关方法实现
+Vec2 SecondScene::getDiamondCenter() const
+{
+    if (_gridDraw)
+    {
+        return _gridDraw->getDiamondCenter();
+    }
+    return Vec2::ZERO;
+}
+
+Vec2 SecondScene::getCellPosition(int gridX, int gridY) const
+{
+    Vec2 diamondCenter = getDiamondCenter();
+
+    // 根据菱形中心点计算指定网格坐标的单元格位置
+    float x = diamondCenter.x + gridX * _cellSize;
+    float y = diamondCenter.y + gridY * _cellSize;
+
+    return Vec2(x, y);
+}
+
 #endif
