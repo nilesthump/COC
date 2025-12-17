@@ -39,7 +39,7 @@ bool SecondScene::init()
     }
     else
     {
-   
+
         double x = origin.x + backItem->getContentSize().width / 2;
         double y = origin.y + visibleSize.height - backItem->getContentSize().height / 2;
         backItem->setPosition(Vec2(x, y));
@@ -62,8 +62,8 @@ bool SecondScene::init()
     }
     else
     {
-        
-        double x = origin.x + buildItem->getContentSize().width / 2; 
+
+        double x = origin.x + buildItem->getContentSize().width / 2;
         double y = origin.y + backItem->getPositionY() - buildItem->getContentSize().height;
         buildItem->setPosition(Vec2(x, y));
 
@@ -84,25 +84,25 @@ bool SecondScene::init()
     double buildPanelY = 0;
     buildPanel->setPosition(Vec2(buildPanelX, buildPanelY));
     buildPanel->setVisible(false);
-    buildItem->addChild(buildPanel, 1); 
+    buildItem->addChild(buildPanel, 1);
 
-    
-    auto panelBg = Sprite::create("btn_long.png"); 
+
+    auto panelBg = Sprite::create("btn_long.png");
     if (panelBg == nullptr) {
         problemLoading("'btn_long.png'");
     }
     else {
-        double panelBgX = panelBg->getContentSize().width/2 ;
-        double panelBgY = buildItem->getContentSize().height -panelBg->getContentSize().height / 2;
-        panelBg->setPosition(Vec2(panelBgX,panelBgY)); 
+        double panelBgX = panelBg->getContentSize().width / 2;
+        double panelBgY = buildItem->getContentSize().height - panelBg->getContentSize().height / 2;
+        panelBg->setPosition(Vec2(panelBgX, panelBgY));
         buildPanel->addChild(panelBg);
     }
 
 
     auto houseBtn = MenuItemImage::create(
-        "HelloWorld.png",  
         "HelloWorld.png",
-        [=](Ref* pSender) {      
+        "HelloWorld.png",
+        [=](Ref* pSender) {
             log("huose");
         }
     );
@@ -136,7 +136,7 @@ bool SecondScene::init()
     }
     else
     {
-        
+
         label->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height - label->getContentSize().height));
         this->addChild(label, 1);
@@ -182,36 +182,36 @@ bool SecondScene::init()
     mouse_listener->onMouseScroll = CC_CALLBACK_1(SecondScene::onMouseScroll, this);
     mouse_listener->onMouseMove = CC_CALLBACK_1(SecondScene::onMouseMove, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse_listener, this);
-    
+
     // Initialize diamond position information based on precise measurements
     int left_x = 667;          // Left vertex x-coordinate from left boundary
     int right_x = 3705 - 556;  // Right vertex x-coordinate (image width - distance to right boundary)
     int top_y = 264;           // Top vertex y-coordinate from top boundary
     int bottom_y = 2545 - 471; // Bottom vertex y-coordinate (image height - distance to bottom boundary)
-    
+
     diamond_width_ = right_x - left_x;       // Diamond width: 3149 - 667 = 2482
     diamond_height_ = bottom_y - top_y;      // Diamond height: 2074 - 264 = 1810
-    
+
     // Calculate diamond center relative to background sprite center
     Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
     diamond_center_ = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2);
-    
+
     // Initialize diamond grid information
     grid_count_ = 44;
     // Each small square is approximately 30 pixels, recalculated based on actual diamond dimensions
     grid_cell_size_x_ = diamond_width_ / grid_count_;  // 2482 / 44 ≈ 56.409
     grid_cell_size_y_ = diamond_height_ / grid_count_; // 1810 / 44 ≈ 41.136
-    
+
     // Create coordinate display label
     coordinate_label_ = Label::createWithTTF("坐标: ", "fonts/STZhongSong_Bold.ttf", 20);
     coordinate_label_->setColor(Color3B::YELLOW);
     coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
     this->addChild(coordinate_label_, 2);
-    
+
 
     mouse_pos_ = Vec2::ZERO;
 
-  
+
     auto multi_touch_listener = EventListenerTouchAllAtOnce::create();
     multi_touch_listener->onTouchesBegan = CC_CALLBACK_2(SecondScene::onTouchesBegan, this);
     multi_touch_listener->onTouchesMoved = CC_CALLBACK_2(SecondScene::onTouchesMoved, this);
@@ -232,30 +232,31 @@ bool SecondScene::init()
     float horizontalSize = 56.0f;  // 水平对角线长度
     float verticalSize = 42.0f;    // 垂直对角线长度
     _gridDraw->drawDiamond(diamondCenter, horizontalSize, verticalSize);
-    //标注四个角
+    //标注角
     auto grid_draw = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
     grid_draw->setPosition(Vec2::ZERO);
     background_sprite_->addChild(grid_draw, 1);
-    Vec2 diamond_center = Vec2(diamondCenter.x - 13 * horizontalSize, diamondCenter.y + 9 * verticalSize);
+    Vec2 diamond_center = Vec2(diamondCenter.x - 16 * horizontalSize, diamondCenter.y + 9 * verticalSize);//最左侧的角
     grid_draw->drawDiamond(diamond_center, horizontalSize, verticalSize);
 
     auto grid_draw2 = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
     grid_draw2->setPosition(Vec2::ZERO);
     background_sprite_->addChild(grid_draw2, 1);
-    Vec2 diamond_center2 = Vec2(diamond_center.x + 43 * horizontalSize, diamond_center.y);
+    Vec2 diamond_center2 = Vec2(diamond_center.x + 49 * horizontalSize, diamond_center.y);//最右侧的角
     grid_draw2->drawDiamond(diamond_center2, horizontalSize, verticalSize);
+    for (int i = 0; i < 50; i += 2)
+        for (int j = 0; j < 50; j += 2)
+        {
+            Vec2 dia = Vec2(diamond_center.x + (j + i) * horizontalSize / 2, diamond_center.y + (j - i) * verticalSize / 2);
+            grid_draw->drawDiamond(dia, horizontalSize, verticalSize);
+        }
 
-    auto grid_draw3 = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
-    grid_draw3->setPosition(Vec2::ZERO);
-    background_sprite_->addChild(grid_draw3, 1);
-    Vec2 diamond_center3 = Vec2(diamond_center.x + 21.5 * horizontalSize, diamond_center.y + 21.5 * verticalSize);
-    grid_draw3->drawDiamond(diamond_center3, horizontalSize, verticalSize);
-
-    auto grid_draw4 = GridDraw::create(_cellSize, scaledWidth, scaledHeight);
-    grid_draw4->setPosition(Vec2::ZERO);
-    background_sprite_->addChild(grid_draw4, 1);
-    Vec2 diamond_center4 = Vec2(diamond_center.x + 21.5 * horizontalSize, diamond_center.y - 21.5 * verticalSize);
-    grid_draw4->drawDiamond(diamond_center4, horizontalSize, verticalSize);
+    for (int i = 0; i < 50; i += 2)
+        for (int j = 0; j < 50; j += 2)
+        {
+            Vec2 dia = Vec2(diamond_center2.x - (j + i) * horizontalSize / 2, diamond_center2.y - (j - i) * verticalSize / 2);
+            grid_draw2->drawDiamond(dia, horizontalSize, verticalSize);
+        }
 
     return true;
 }
