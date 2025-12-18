@@ -49,6 +49,7 @@ public:
     void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event);
+
     void onMouseScroll(cocos2d::EventMouse* event);
     void onTouchesBegan(const std::vector<cocos2d::Touch*>& touches, cocos2d::Event* event);
     void onTouchesMoved(const std::vector<cocos2d::Touch*>& touches, cocos2d::Event* event);
