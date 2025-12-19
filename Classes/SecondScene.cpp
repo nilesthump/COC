@@ -102,11 +102,32 @@ bool SecondScene::init()
     }
 
 
-    auto houseBtn = MenuItemImage::create(
+    // 创建房子按钮
+    houseBtn = MenuItemImage::create(
         "ArcherTowerLv10.png",
         "ArcherTowerLv10.png",
         [=](Ref* pSender) {
-            log("huose");
+            if (!isDragging) {
+                log("house ");
+                isDragging = true;
+                draggingItem = houseBtn;
+                dragStartPosition = houseBtn->getPosition();
+                
+                // 创建拖拽副本
+                auto dragSprite = Sprite::create("ArcherTowerLv10.png");
+                if (dragSprite) {
+                    // 获取按钮在屏幕上的位置
+                    Vec2 worldPos = houseBtn->getParent()->convertToWorldSpace(houseBtn->getPosition());
+                    // 转换为背景精灵的本地坐标
+                    Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
+                    dragSprite->setScale(0.5f);
+                    dragSprite->setPosition(localPos);
+                    background_sprite_->addChild(dragSprite, 10);
+                    houseBtn->setUserData(dragSprite);
+                }
+                
+                houseBtn->setVisible(false);
+            }
         }
     );
     if (houseBtn) {
@@ -115,11 +136,32 @@ bool SecondScene::init()
     houseBtn->setScale(0.5f);
 
 
-    auto storageBtn = MenuItemImage::create(
+    // 创建仓库按钮
+    storageBtn = MenuItemImage::create(
         "CannonLv10.png",
         "CannonLv10.png",
         [=](Ref* pSender) {
-            log("storage");
+            if (!isDragging) {
+                log("storage ");
+                isDragging = true;
+                draggingItem = storageBtn;
+                dragStartPosition = storageBtn->getPosition();
+                
+                // 创建拖拽副本
+                auto dragSprite = Sprite::create("CannonLv10.png");
+                if (dragSprite) {
+                    // 获取按钮在屏幕上的位置
+                    Vec2 worldPos = storageBtn->getParent()->convertToWorldSpace(storageBtn->getPosition());
+                    // 转换为背景精灵的本地坐标
+                    Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
+                    dragSprite->setScale(0.5f);
+                    dragSprite->setPosition(localPos);
+                    background_sprite_->addChild(dragSprite, 10);
+                    storageBtn->setUserData(dragSprite);
+                }
+                
+                storageBtn->setVisible(false);
+            }
         }
     );
     if (storageBtn) {
@@ -131,6 +173,10 @@ bool SecondScene::init()
     auto panelMenu = Menu::create(houseBtn, storageBtn, nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
+
+    // 初始化拖拽状态
+    isDragging = false;
+    draggingItem = nullptr;
 
     auto label = Label::createWithTTF("Your Clan!!!", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
@@ -280,31 +326,136 @@ void SecondScene::menuBuildCallback(Ref* pSender)
 
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 {
+    // 不需要检测按钮点击，因为已经在按钮回调中处理了
+    // 只处理拖拽状态下的逻辑和缩放管理器的逻辑
+    
+    if (isDragging) {
+        return true; // 正在拖拽时返回true，保持事件被捕获
+    }
+    
+    // 如果没有拖拽，则使用缩放管理器的触摸处理
     return zoom_manager_->onTouchBegan(touch, event);
 }
 
 void SecondScene::onTouchMoved(Touch* touch, Event* event)
 {
-    if (zoom_manager_)
-    {
+    if (isDragging && draggingItem) {
+        // 移动拖拽的精灵
+        Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
+        if (dragSprite) {
+            // 将屏幕坐标转换为相对于背景精灵的本地坐标
+            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+            dragSprite->setPosition(localPos);
+        }
+    }
+    else if (zoom_manager_) {
         zoom_manager_->onTouchMoved(touch, event);
     }
 }
 
 void SecondScene::onTouchEnded(Touch* touch, Event* event)
 {
-
-    if (zoom_manager_)
-    {
+    if (isDragging && draggingItem) {
+        // 获取拖拽结束位置
+        Vec2 screenPos = touch->getLocation();
+        // 将屏幕坐标转换为相对于背景精灵的本地坐标
+        Vec2 localPos = background_sprite_->convertToNodeSpace(screenPos);
+        
+        // 获取拖拽的精灵
+        Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
+        if (dragSprite) {
+            // 移除拖拽的精灵
+            dragSprite->removeFromParentAndCleanup(true);
+            draggingItem->setUserData(nullptr);
+        }
+        
+        // 检查是否在有效区域内放置
+        // 使用原始屏幕坐标进行菱形坐标转换检查
+        Vec2 diamondPos = convertScreenToDiamond(screenPos);
+        if (isInDiamond(diamondPos)) {
+            // 在有效区域内，可以放置
+            
+            // 创建一个放置后的精灵
+            std::string textureName = (draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png");
+            // 创建放置精灵
+            auto placedSprite = Sprite::create(textureName);
+            if (placedSprite) {
+                placedSprite->setScale(0.3f); // 缩小一点放置
+                placedSprite->setPosition(localPos); // 使用背景精灵的本地坐标
+                background_sprite_->addChild(placedSprite, 5); // 设置更高的Z轴层级，确保在网格之上
+                
+                // 添加成功的视觉反馈（绿色闪烁）
+                auto blink = Blink::create(0.5f, 2);
+                placedSprite->runAction(blink);
+            }
+            
+            // 记录放置日志
+            log("放置成功: %s, 屏幕坐标: (%.2f, %.2f), 本地坐标: (%.2f, %.2f)", 
+                (draggingItem == houseBtn ? "house" : "storage"), 
+                screenPos.x, screenPos.y, localPos.x, localPos.y);
+        } else {
+            // 添加放置失败的视觉反馈 - 红色闪烁效果
+            auto failSprite = Sprite::create((draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png"));
+            if (failSprite) {
+                failSprite->setScale(0.3f);
+                failSprite->setPosition(localPos); // 使用背景精灵的本地坐标
+                failSprite->setColor(Color3B::RED); // 设置为红色
+                background_sprite_->addChild(failSprite, 15); // 设置更高的Z轴层级，确保在网格之上
+                
+                // 淡出并移除
+                auto fadeOut = FadeOut::create(0.5f);
+                auto remove = RemoveSelf::create(true);
+                failSprite->runAction(Sequence::create(fadeOut, remove, nullptr));
+            }
+            
+            // 记录放置失败日志
+            log("放置失败: 超出有效区域");
+        }
+        
+        // 恢复原按钮
+        if (draggingItem == houseBtn) {
+            houseBtn->setPosition(dragStartPosition);
+            houseBtn->setVisible(true);
+        } else if (draggingItem == storageBtn) {
+            storageBtn->setPosition(dragStartPosition);
+            storageBtn->setVisible(true);
+        }
+        
+        // 重置拖拽状态
+        isDragging = false;
+        draggingItem = nullptr;
+    }
+    else if (zoom_manager_) {
         zoom_manager_->onTouchEnded(touch, event);
     }
 }
 
 void SecondScene::onTouchCancelled(Touch* touch, Event* event)
 {
-
-    if (zoom_manager_)
-    {
+    // 处理触摸取消，类似于结束但不执行放置逻辑
+    if (isDragging && draggingItem) {
+        // 获取拖拽的精灵
+        Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
+        if (dragSprite) {
+            // 移除拖拽的精灵
+            dragSprite->removeFromParentAndCleanup(true);
+            draggingItem->setUserData(nullptr);
+        }
+        
+        // 恢复原按钮
+        if (draggingItem == houseBtn) {
+            houseBtn->setPosition(dragStartPosition);
+            houseBtn->setVisible(true);
+        } else if (draggingItem == storageBtn) {
+            storageBtn->setPosition(dragStartPosition);
+            storageBtn->setVisible(true);
+        }
+        
+        // 重置拖拽状态
+        isDragging = false;
+        draggingItem = nullptr;
+    }
+    else if (zoom_manager_) {
         zoom_manager_->onTouchCancelled(touch, event);
     }
 }
@@ -321,36 +472,48 @@ void SecondScene::onMouseScroll(EventMouse* event)
 
 void SecondScene::onTouchesBegan(const std::vector<Touch*>& touches, Event* event)
 {
-    if (zoom_manager_)
-    {
+    // 如果正在拖拽，不执行缩放功能
+    if (isDragging) {
+        return;
+    }
+    
+    if (zoom_manager_) {
         zoom_manager_->onTouchesBegan(touches, event);
     }
 }
 
-
 void SecondScene::onTouchesMoved(const std::vector<Touch*>& touches, Event* event)
 {
-    if (zoom_manager_)
-    {
+    // 如果正在拖拽，不执行缩放功能
+    if (isDragging) {
+        return;
+    }
+    
+    if (zoom_manager_) {
         zoom_manager_->onTouchesMoved(touches, event);
     }
 }
 
-
 void SecondScene::onTouchesEnded(const std::vector<Touch*>& touches, Event* event)
 {
-
-    if (zoom_manager_)
-    {
+    // 如果正在拖拽，不执行缩放功能
+    if (isDragging) {
+        return;
+    }
+    
+    if (zoom_manager_) {
         zoom_manager_->onTouchesEnded(touches, event);
     }
 }
 
-
 void SecondScene::onTouchesCancelled(const std::vector<Touch*>& touches, Event* event)
 {
-    if (zoom_manager_)
-    {
+    // 如果正在拖拽，不执行缩放功能
+    if (isDragging) {
+        return;
+    }
+    
+    if (zoom_manager_) {
         zoom_manager_->onTouchesCancelled(touches, event);
     }
 }
