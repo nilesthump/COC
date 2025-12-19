@@ -15,7 +15,7 @@ public:
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
 
-	// ¶¨Ê±Æ÷¸üĞÂº¯Êı
+	// ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½
 	void update(float delta);
 
 	// Touch event handlers
@@ -54,18 +54,32 @@ private:
 
 	cocos2d::Label* coordinate_label_;
 
-	// Ê¥Ë®Ïà¹ØUI
-	cocos2d::Sprite* elixirIcon; // Ê¥Ë®Í¼±ê
-	cocos2d::Label* elixirLabel; // Ê¥Ë®ÊıÁ¿±êÇ©
-	cocos2d::Label* elixirNameLabel; // Ê¥Ë®Ãû³Æ±êÇ©
+
+	cocos2d::Sprite* elixirIcon; 
+	cocos2d::Label* elixirLabel; 
+	cocos2d::Label* elixirNameLabel; 
+    
+    // é‡‘å¸ç›¸å…³æˆå‘˜å˜é‡
+    cocos2d::Sprite* goldIcon; 
+	cocos2d::Label* goldLabel; 
+	cocos2d::Label* goldNameLabel; 
 
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
 
 	std::vector<std::vector<cocos2d::Vec2>>* grids_;
+
+	// æ‹–æ‹½ç›¸å…³æˆå‘˜å˜é‡
+	cocos2d::MenuItemImage* houseBtn;
+	cocos2d::MenuItemImage* storageBtn;
+	cocos2d::MenuItemImage* draggingItem; // å½“å‰æ­£åœ¨æ‹–æ‹½çš„é¡¹
+	cocos2d::Vec2 dragStartPosition; // æ‹–æ‹½å¼€å§‹æ—¶çš„ä½ç½®
+	bool isDragging; // æ˜¯å¦æ­£åœ¨æ‹–æ‹½
 };
 
-// ¶¨Òå¾²Ì¬È«¾Ö±äÁ¿±íÊ¾Ê¥Ë®ÊıÁ¿
+//åœ£æ°´
 extern int g_elixirCount;
+//é‡‘å¸
+extern int g_goldCount;
 
 #endif
