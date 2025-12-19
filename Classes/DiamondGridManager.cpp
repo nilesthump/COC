@@ -112,10 +112,10 @@ bool DiamondGridManager::isInDiamond(const Vec2& diamondPos)
     return (fabs(grid_x) + fabs(grid_y) <= 22);
 }
 
-void DiamondGridManager::drawDiamondGrid(Sprite* backgroundSprite, float cellSize)
+std::vector<std::vector<cocos2d::Vec2>>* DiamondGridManager::drawDiamondGrid(Sprite* backgroundSprite, float cellSize)
 {
     if (!backgroundSprite)
-        return;
+        return nullptr;
 
     float scaledWidth = backgroundSprite->getContentSize().width * backgroundSprite->getScale();
     float scaledHeight = backgroundSprite->getContentSize().height * backgroundSprite->getScale();
@@ -155,7 +155,10 @@ void DiamondGridManager::drawDiamondGrid(Sprite* backgroundSprite, float cellSiz
     Vec2 rightCorner = Vec2(leftCorner.x + 49 * horizontalSize, leftCorner.y);
     grid_draw2->drawDiamond(rightCorner, horizontalSize, verticalSize);
 
+    std::vector<std::vector<cocos2d::Vec2>>* grids =
+        new std::vector<std::vector<cocos2d::Vec2>>(50, std::vector<cocos2d::Vec2>(50, cocos2d::Vec2::ZERO));
     // ªÊ÷∆¡‚–ŒÕ¯∏Ò
+    /*
     for (int i = 0; i < 50; i += 2)
     {
         for (int j = 0; j < 50; j += 2)
@@ -175,6 +178,17 @@ void DiamondGridManager::drawDiamondGrid(Sprite* backgroundSprite, float cellSiz
             grid_draw2->drawDiamond(dia, horizontalSize, verticalSize);
         }
     }
+    */
+    for (int i = 0; i < 50; i++)
+    {
+        for (int j = 0; j < 50; j++)
+        {
+            Vec2 dia = Vec2(leftCorner.x + (j + i) * horizontalSize / 2, leftCorner.y + (j - i) * verticalSize / 2);
+            grid_draw->drawDiamond(dia, horizontalSize, verticalSize);
+            (*grids)[i][j] = dia;
+        }
+    }
+    return grids;
 }
 
 void DiamondGridManager::drawTestDiamond(Sprite* backgroundSprite,

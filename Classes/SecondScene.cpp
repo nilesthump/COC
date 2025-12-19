@@ -1,8 +1,11 @@
 #if 1
 #include "HelloWorldScene.h"
 #include "SecondScene.h"
+#include "cocos2d.h"
 #include <cmath>
 
+// 初始化全局变量
+int g_elixirCount = 0;
 
 USING_NS_CC;
 
@@ -100,8 +103,8 @@ bool SecondScene::init()
 
 
     auto houseBtn = MenuItemImage::create(
-        "HelloWorld.png",
-        "HelloWorld.png",
+        "ArcherTowerLv10.png",
+        "ArcherTowerLv10.png",
         [=](Ref* pSender) {
             log("huose");
         }
@@ -113,8 +116,8 @@ bool SecondScene::init()
 
 
     auto storageBtn = MenuItemImage::create(
-        "HelloWorld.png",
-        "HelloWorld.png",
+        "CannonLv10.png",
+        "CannonLv10.png",
         [=](Ref* pSender) {
             log("storage");
         }
@@ -179,13 +182,40 @@ bool SecondScene::init()
     this->addChild(grid_manager_);
 
     // 绘制菱形网格
-    grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
+    grids_ = grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
 
     // 创建坐标显示标签
     coordinate_label_ = Label::createWithTTF("坐标: ", "fonts/STZhongSong_Bold.ttf", 20);
     coordinate_label_->setColor(Color3B::YELLOW);
     coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
     this->addChild(coordinate_label_, 2);
+
+    // 创建圣水图标和标签
+    // 尝试加载圣水图标，如果失败则使用HelloWorld.png作为替代
+    elixirIcon = Sprite::create("btn_normal.png"); // 实际项目中应该替换为正确的圣水图标资源名
+    if (elixirIcon == nullptr)
+    {
+        problemLoading("'btn_normal.png' (作为圣水图标的替代)");
+    }
+    else
+    {
+        // 设置图标位置和大小
+        elixirIcon->setPosition(Vec2(origin.x + visibleSize.width - elixirIcon->getContentSize().width / 4, origin.y + visibleSize.height - elixirIcon->getContentSize().height / 4));
+        elixirIcon->setScale(0.5f);
+        this->addChild(elixirIcon, 2);
+
+        // 创建"圣水"文字标签
+        elixirNameLabel = Label::createWithTTF("圣水", "fonts/STZhongSong_Bold.ttf", 20);
+        elixirNameLabel->setColor(Color3B::BLUE);
+        elixirNameLabel->setPosition(Vec2(elixirIcon->getPositionX() - elixirNameLabel->getContentSize().width / 2, elixirIcon->getPositionY()));
+        this->addChild(elixirNameLabel, 2);
+
+        // 创建圣水数量标签
+        elixirLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
+        elixirLabel->setColor(Color3B::RED);
+        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 40, elixirIcon->getPositionY()));
+        this->addChild(elixirLabel, 2);
+    }
 
     // 设置事件监听器（使用新类的成员函数）
     auto touch_listener = EventListenerTouchOneByOne::create();
@@ -208,7 +238,33 @@ bool SecondScene::init()
     multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(SecondScene::onTouchesCancelled, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
 
+    // 启动定时器，每秒更新一次
+    this->scheduleUpdate();
+
     return true;
+}
+
+void SecondScene::update(float delta)
+{
+    // 累计时间并每秒增加圣水数量
+    static float elapsedTime = 0.0f;
+    elapsedTime += delta;
+
+    // 当经过1秒时
+    if (elapsedTime >= 1.0f)
+    {
+        // 增加圣水数量
+        g_elixirCount++;
+
+        // 更新标签显示
+        if (elixirLabel)
+        {
+            elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+        }
+
+        // 重置计时器
+        elapsedTime = 0.0f;
+    }
 }
 
 void SecondScene::menuFirstCallback(Ref* pSender)
