@@ -46,7 +46,7 @@ public:
     int getGridCount() const { return grid_count_; }
 
     // 绘制菱形网格
-    void drawDiamondGrid(cocos2d::Sprite* backgroundSprite, float cellSize = 50.0f);
+    std::vector<std::vector<cocos2d::Vec2>>* drawDiamondGrid(cocos2d::Sprite* backgroundSprite, float cellSize = 50.0f);
 
     // 在指定位置绘制菱形（用于测试）
     void drawTestDiamond(cocos2d::Sprite* backgroundSprite,
