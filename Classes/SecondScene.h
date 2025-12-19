@@ -75,6 +75,11 @@ private:
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
 	bool isDragging; // 是否正在拖拽
+    
+    // 建筑移动相关成员变量
+    std::vector<cocos2d::Sprite*> placedBuildings; // 已放置的建筑列表
+    cocos2d::Sprite* movingBuilding; // 当前正在移动的建筑
+    bool isMovingBuilding; // 是否正在移动建筑
 };
 
 //圣水
@@ -83,3 +88,4 @@ extern int g_elixirCount;
 extern int g_goldCount;
 
 #endif
+
