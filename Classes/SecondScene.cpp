@@ -6,6 +6,7 @@
 
 // 初始化全局变量
 int g_elixirCount = 0;
+int g_goldCount = 0;
 
 USING_NS_CC;
 
@@ -260,12 +261,41 @@ bool SecondScene::init()
 
         // 创建圣水数量标签
         elixirLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
-        elixirLabel->setColor(Color3B::RED);
+        elixirLabel->setColor(Color3B::BLUE);
         elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 40, elixirIcon->getPositionY()));
         this->addChild(elixirLabel, 2);
     }
 
+    // 创建金币图标和标签
+    // 尝试加载金币图标，如果失败则使用btn_pressed.png作为替代
+    goldIcon = Sprite::create("btn_pressed.png"); // 实际项目中应该替换为正确的金币图标资源名
+    if (goldIcon == nullptr)
+    {
+        problemLoading("'btn_pressed.png' (作为金币图标的替代)");
+    }
+    else
+    {
+        // 设置图标位置和大小，紧挨着圣水图标
+        float spacing = 40.0f; // 与圣水图标之间的间距
+        goldIcon->setPosition(Vec2(elixirIcon->getPositionX(), elixirIcon->getPositionY()-spacing));
+        goldIcon->setScale(0.5f);
+        this->addChild(goldIcon, 2);
+
+        // 创建"金币"文字标签
+        goldNameLabel = Label::createWithTTF("金币", "fonts/STZhongSong_Bold.ttf", 20);
+        goldNameLabel->setColor(Color3B::YELLOW);
+        goldNameLabel->setPosition(Vec2(goldIcon->getPositionX() - goldNameLabel->getContentSize().width / 2, goldIcon->getPositionY()));
+        this->addChild(goldNameLabel, 2);
+
+        // 创建金币数量标签
+        goldLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
+        goldLabel->setColor(Color3B::YELLOW);
+        goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 40, goldIcon->getPositionY()));
+        this->addChild(goldLabel, 2);
+    }
+
     // 设置事件监听器（使用新类的成员函数）
+
     auto touch_listener = EventListenerTouchOneByOne::create();
     touch_listener->setSwallowTouches(true);
     touch_listener->onTouchBegan = CC_CALLBACK_2(SecondScene::onTouchBegan, this);
@@ -303,11 +333,20 @@ void SecondScene::update(float delta)
     {
         // 增加圣水数量
         g_elixirCount++;
+        
+        // 增加金币数量
+        g_goldCount++;
 
         // 更新标签显示
         if (elixirLabel)
         {
             elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+        }
+        
+        // 更新金币标签显示
+        if (goldLabel)
+        {
+            goldLabel->setString(StringUtils::format("%d", g_goldCount));
         }
 
         // 重置计时器
