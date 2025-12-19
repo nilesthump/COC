@@ -43,8 +43,8 @@ struct BaseUnitData
     //战斗属性
     int health;                 //生命值
     int damage;                 //攻击力
-    double attack_interval;     //攻击间隔（秒）
-    double attack_distance;     //攻击距离（格）
+    float attack_interval;     //攻击间隔（秒）
+    float attack_distance;     //攻击距离（格）
 
     //攻击特性
     AttackType attack_type;     //单体/范围/连锁
@@ -53,7 +53,7 @@ struct BaseUnitData
     ResourceType resource_type; //圣水/暗黑重油/金币
 
     //移动属性（防御建筑为0）
-    double move_speed;          //移动速度（格/秒）
+    float move_speed;          //移动速度（格/秒）
 
     // 构造函数
     BaseUnitData()

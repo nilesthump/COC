@@ -11,10 +11,12 @@ public:
 	BarbarianNavigation();
 	~BarbarianNavigation();
 	BattleUnit* FindTarget(BattleUnit* self,const std::vector<BattleUnit*>& allTargets) override;
-	void CalculateMove(BattleUnit* self, BattleUnit* target, double deltaTime) override;
+	void CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime) override;
 	bool IsInAttackRange(BattleUnit* self, BattleUnit* target) override;
 	std::string GetNavigationType() const;
+	float CalculateDistance(BattleUnit* a, BattleUnit* b);
 private:
-	double CalculateDistance(BattleUnit* a, BattleUnit* b);
+	float CalculateManhattanDistance(BattleUnit* a, BattleUnit* b);
+	
 };
 #endif

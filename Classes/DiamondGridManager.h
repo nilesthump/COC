@@ -20,11 +20,15 @@ public:
         float diamondHeight,
         int gridCount);
 
-    // 将屏幕坐标转换为菱形坐标
-    cocos2d::Vec2 convertScreenToDiamond(const cocos2d::Vec2& screenPos,
+    // 将屏幕坐标转换为地图(菱形)坐标！！！核心功能了
+    cocos2d::Vec2 convertScreenToMap(const cocos2d::Vec2& screenPos,
         cocos2d::Sprite* backgroundSprite);
 
-    // 检查位置是否在菱形内
+    // 将菱形坐标转换为世界坐标
+    cocos2d::Vec2 convertMapToDisplay(const cocos2d::Vec2& diamondPos,
+        cocos2d::Sprite* backgroundSprite);
+
+    // 检查位置是否在菱形内！！！
     bool isInDiamond(const cocos2d::Vec2& diamondPos);
 
     // 获取菱形中心点坐标
@@ -42,7 +46,7 @@ public:
     // 获取Y方向单元格大小
     float getGridCellSizeY() const { return grid_cell_size_y_; }
 
-    // 获取网格数量
+    // 获取网格数量44
     int getGridCount() const { return grid_count_; }
 
     // 绘制菱形网格

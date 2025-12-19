@@ -324,7 +324,7 @@ cocos2d::Vec2 SecondScene::convertScreenToDiamond(const cocos2d::Vec2& screenPos
 {
     if (grid_manager_ && background_sprite_)
     {
-        return grid_manager_->convertScreenToDiamond(screenPos, background_sprite_);
+        return grid_manager_->convertScreenToMap(screenPos, background_sprite_);
     }
     return Vec2::ZERO;
 }
@@ -339,6 +339,5 @@ bool SecondScene::isInDiamond(const Vec2& diamondPos)
     }
     return false;
 }
-
 
 #endif

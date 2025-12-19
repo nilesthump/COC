@@ -27,9 +27,9 @@ private:
 	std::unique_ptr<BaseUnitData> base_data_ptr_;
 
 	//实时状态
-	double current_health_;
-	double position_X_, position_Y_;
-	double attack_cool_down_;
+	float current_health_;
+	float position_X_, position_Y_;
+	float attack_cool_down_;
 	bool is_alive_;
 
 public:
@@ -63,28 +63,28 @@ public:
 	bool IsDefense() const;
 
 	//位置
-	double GetPositionX() const;
-	double GetPositionY() const;
-	void SetPosition(double x, double y);
+	float GetPositionX() const;
+	float GetPositionY() const;
+	void SetPosition(float x, float y);
 
 	//血量
-	double GetCurrentHealth() const;
-	double GetHealthPercent() const;
-	void TakeDamage(double damage);
+	float GetCurrentHealth() const;
+	float GetHealthPercent() const;
+	void TakeDamage(float damage);
 	bool IsAlive() const;
 
 	//冷却管理部分
-	void UpdateCoolDowns(double dt);
+	void UpdateCoolDowns(float dt);
 	bool CanAttack() const;
 	void ResetAttackCooldown();
-	double GetAttackCooldown() const;
+	float GetAttackCooldown() const;
 
 	//部分静态数据访问
-	double GetMoveSpeed() const;
-	double GetAttackDistance() const;
-	double GetDamage() const;
-	double GetAttackInterval() const;
-	double GetMaxHealth() const;
+	float GetMoveSpeed() const;
+	float GetAttackDistance() const;
+	float GetDamage() const;
+	float GetAttackInterval() const;
+	float GetMaxHealth() const;
 	UnitType GetTargetType() const;     //攻击目标类型（地面/空中/两者）
 	AttackType GetAttackType() const;   //攻击类型（单体/范围/连锁）
 	CombatType GetCombatType() const;   //近战/远程

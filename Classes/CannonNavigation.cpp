@@ -17,7 +17,7 @@ BattleUnit* CannonNavigation::FindTarget(BattleUnit* self, const std::vector<Bat
     if (allTargets.empty())
         return nullptr;
     BattleUnit* nearestTarget = nullptr;
-    double minDistance = std::numeric_limits<double>::max();
+    float minDistance = std::numeric_limits<float>::max();
 
     // 寻找最近的目标
     for (auto target : allTargets)
@@ -25,7 +25,7 @@ BattleUnit* CannonNavigation::FindTarget(BattleUnit* self, const std::vector<Bat
         if (!target || !target->IsAlive()) 
             continue;
 
-        double distance = CalculateDistance(self, target);
+        float distance = CalculateDistance(self, target);
         if (distance < minDistance)
         {
             minDistance = distance;
@@ -36,7 +36,7 @@ BattleUnit* CannonNavigation::FindTarget(BattleUnit* self, const std::vector<Bat
     return nearestTarget;
 }
 
-void CannonNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, double deltaTime)
+void CannonNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime)
 {
     // 加农炮固定，无需移动
     (void)self;
@@ -49,8 +49,8 @@ bool CannonNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)
     if (!self || !target)
         return false;
 
-    double distance = CalculateDistance(self, target);
-    double attackRange = self->GetAttackDistance();
+    float distance = CalculateDistance(self, target);
+    float attackRange = self->GetAttackDistance();
     // 攻击范围现在表示格子数
     return distance <= attackRange;
 }
@@ -60,13 +60,14 @@ std::string CannonNavigation::GetNavigationType() const
     return "Cannon";
 }
 
-double CannonNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
+//目前使用曼哈顿距离
+float CannonNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
 {
     if (!a || !b)
-        return std::numeric_limits<double>::max();
+        return std::numeric_limits<float>::max();
 
-    // 直接使用屏幕坐标计算欧几里得距离
-    double dx = a->GetPositionX() - b->GetPositionX();
-    double dy = a->GetPositionY() - b->GetPositionY();
-    return sqrt(dx * dx + dy * dy);
+    // 同样使用曼哈顿距离
+    float dx = a->GetPositionX() - b->GetPositionX();
+    float dy = a->GetPositionY() - b->GetPositionY();
+    return fabs(dx) + fabs(dy);
 }

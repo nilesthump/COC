@@ -33,6 +33,28 @@ bool ZoomScrollManager::init(Sprite* targetSprite, float minScale, float maxScal
     previous_distance_ = 0.0f;
     scale_center_ = Vec2::ZERO;
 
+    // 添加单点触摸监听器（拖拽）
+    auto touch_listener = EventListenerTouchOneByOne::create();
+    touch_listener->setSwallowTouches(true);
+    touch_listener->onTouchBegan = CC_CALLBACK_2(ZoomScrollManager::onTouchBegan, this);
+    touch_listener->onTouchMoved = CC_CALLBACK_2(ZoomScrollManager::onTouchMoved, this);
+    touch_listener->onTouchEnded = CC_CALLBACK_2(ZoomScrollManager::onTouchEnded, this);
+    touch_listener->onTouchCancelled = CC_CALLBACK_2(ZoomScrollManager::onTouchCancelled, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
+
+    // 添加鼠标滚轮监听器（缩放）
+    auto mouse_listener = EventListenerMouse::create();
+    mouse_listener->onMouseScroll = CC_CALLBACK_1(ZoomScrollManager::onMouseScroll, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse_listener, this);
+
+    // 添加双指触摸监听器（缩放）
+    auto multi_touch_listener = EventListenerTouchAllAtOnce::create();
+    multi_touch_listener->onTouchesBegan = CC_CALLBACK_2(ZoomScrollManager::onTouchesBegan, this);
+    multi_touch_listener->onTouchesMoved = CC_CALLBACK_2(ZoomScrollManager::onTouchesMoved, this);
+    multi_touch_listener->onTouchesEnded = CC_CALLBACK_2(ZoomScrollManager::onTouchesEnded, this);
+    multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(ZoomScrollManager::onTouchesCancelled, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
+
     return true;
 }
 
@@ -121,7 +143,7 @@ void ZoomScrollManager::onTouchMoved(Touch* touch, Event* event)
     }
 
     // 如果精灵高度大于可见高度，调整Y轴边界
-    if (sprite_height > visible_size.width)
+    if (sprite_height > visible_size.height)
     {
         minY -= (sprite_height - visible_size.height) / 2;
         maxY += (sprite_height - visible_size.height) / 2;

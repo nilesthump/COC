@@ -22,13 +22,13 @@
 struct  VecWithValue
 {
 	int x_ = 0, y_ = 0;
-	double min_distance_ = INF;//最小加权距离
+	float min_distance_ = INF;//最小加权距离
 	VecWithValue() :x_(0), y_(0), min_distance_(INF)
 	{}
 	VecWithValue(int x, int y) :
 		x_(x), y_(y)
 	{}
-	VecWithValue(int x, int y, double min_distance) :
+	VecWithValue(int x, int y, float min_distance) :
 		x_(x), y_(y), min_distance_(min_distance)
 	{}
 	bool operator!=(const VecWithValue& other) const
@@ -91,7 +91,7 @@ public:
 	//计算移动
 	virtual void CalculateMove(BattleUnit* self,
 		BattleUnit* target,
-		double deltaTime) = 0;
+		float deltaTime) = 0;
 
 	//是否在攻击范围内
 	virtual bool IsInAttackRange(BattleUnit* self, BattleUnit* target) = 0;

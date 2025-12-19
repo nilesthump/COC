@@ -67,7 +67,7 @@ public:
         BattleUnit* unit = CreateBarbarian(level);
 
         // ÉèÖÃ¾«Áé
-        auto sprite = cocos2d::Sprite::create("shenhe.png");
+        auto sprite = cocos2d::Sprite::create("BarbarianLv1.png");
         if (sprite)
         {
             sprite->setScale(0.5f);

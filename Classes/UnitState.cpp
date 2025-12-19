@@ -20,28 +20,28 @@ bool UnitState::IsDefense() const
     return base_data_ptr_ && base_data_ptr_->IsDefender();
 }
 
-double UnitState::GetPositionX() const
+float UnitState::GetPositionX() const
 {
     return position_X_;
 }
 
-double UnitState::GetPositionY() const
+float UnitState::GetPositionY() const
 {
     return position_Y_;
 }
 
-void UnitState::SetPosition(double x, double y)
+void UnitState::SetPosition(float x, float y)
 {
     position_X_ = x;
     position_Y_ = y;
 }
 
-double UnitState::GetCurrentHealth() const
+float UnitState::GetCurrentHealth() const
 {
     return current_health_;
 }
 
-double UnitState::GetHealthPercent() const
+float UnitState::GetHealthPercent() const
 {
     if (!base_data_ptr_ || base_data_ptr_->health <= 0)
         return 0.0;
@@ -49,7 +49,7 @@ double UnitState::GetHealthPercent() const
     return current_health_ / base_data_ptr_->health;
 }
 
-void UnitState::TakeDamage(double damage)
+void UnitState::TakeDamage(float damage)
 {
     current_health_ -= damage;
     if (current_health_ <= 0)
@@ -64,7 +64,7 @@ bool UnitState::IsAlive() const
     return current_health_ > 0;
 }
 
-void UnitState::UpdateCoolDowns(double dt)
+void UnitState::UpdateCoolDowns(float dt)
 {
     if (attack_cool_down_ > 0)
         attack_cool_down_ -= dt;
@@ -86,34 +86,34 @@ void UnitState::ResetAttackCooldown()
     }
 }
 
-double UnitState::GetAttackCooldown() const
+float UnitState::GetAttackCooldown() const
 {
     return attack_cool_down_;
 }
 
-double UnitState::GetMoveSpeed() const
+float UnitState::GetMoveSpeed() const
 {
     return base_data_ptr_ ? base_data_ptr_->move_speed : 0.0;
 }
 
-double UnitState::GetAttackDistance() const
+float UnitState::GetAttackDistance() const
 {
     return base_data_ptr_ ? base_data_ptr_->attack_distance : 0.0;
 }
 
-double UnitState::GetDamage() const
+float UnitState::GetDamage() const
 {
-    return base_data_ptr_ ? static_cast<double>(base_data_ptr_->damage) : 0.0;
+    return base_data_ptr_ ? static_cast<float>(base_data_ptr_->damage) : 0.0;
 }
 
-double UnitState::GetAttackInterval() const
+float UnitState::GetAttackInterval() const
 {
     return base_data_ptr_ ? base_data_ptr_->attack_interval : 1.0;
 }
 
-double UnitState::GetMaxHealth() const
+float UnitState::GetMaxHealth() const
 {
-    return base_data_ptr_ ? static_cast<double>(base_data_ptr_->health) : 0.0;
+    return base_data_ptr_ ? static_cast<float>(base_data_ptr_->health) : 0.0;
 }
 
 UnitType UnitState::GetTargetType() const

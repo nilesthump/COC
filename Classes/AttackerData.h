@@ -33,11 +33,11 @@ struct AttackerData : public BaseUnitData
 	// int level;              // 已在基类
 	// int health;             // 已在基类
 	// int damage;             // 已在基类
-	// double attack_interval; // 已在基类
-	// double attack_distance; // 已在基类
+	// float attack_interval; // 已在基类
+	// float attack_distance; // 已在基类
 	// AttackType attack_type; // 已在基类
 	// UnitType unit_type;     // 已在基类
-	// double move_speed;      // 已在基类
+	// float move_speed;      // 已在基类
 	
 	TargetPriority preferred_target; // 优先目标
 	int housing_space;             // 占用兵营人口数

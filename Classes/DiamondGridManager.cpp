@@ -42,8 +42,12 @@ bool DiamondGridManager::init(const Vec2& diamondCenter,
     return true;
 }
 
-Vec2 DiamondGridManager::convertScreenToDiamond(const Vec2& screenPos, Sprite* backgroundSprite)
+//屏幕坐标->地图坐标
+//这里map实际是就是diamond坐标，以及我们建筑战斗逻辑需要使用的坐标
+Vec2 DiamondGridManager::convertScreenToMap(const Vec2& screenPos, Sprite* backgroundSprite)
 {
+    //这里做了两个转换
+    //屏幕坐标->场景坐标->地图坐标
     if (!backgroundSprite)
         return Vec2::ZERO;
 
@@ -74,6 +78,29 @@ Vec2 DiamondGridManager::convertScreenToDiamond(const Vec2& screenPos, Sprite* b
 
     return diamond_pos;
 }
+
+//将地图坐标（菱形坐标）转换为显示坐标
+Vec2 DiamondGridManager::convertMapToDisplay(const Vec2& diamondPos, Sprite* backgroundSprite)
+{
+    if (!backgroundSprite) 
+        return Vec2::ZERO;
+
+    // 步骤1：菱形坐标 → 图像像素坐标（相对于图像中心）
+    Vec2 image_pos_relative_to_center = diamondPos + diamond_center_;
+
+    // 步骤2：考虑背景缩放
+    float scale = backgroundSprite->getScale();
+    Vec2 local_pos = Vec2(
+        image_pos_relative_to_center.x * scale,
+        image_pos_relative_to_center.y * scale
+    );
+
+    // 步骤3：加上背景位置，得到场景坐标
+    Vec2 display_pos = local_pos + backgroundSprite->getPosition();
+
+    return display_pos;
+}
+
 
 bool DiamondGridManager::isInDiamond(const Vec2& diamondPos)
 {
@@ -175,7 +202,7 @@ void DiamondGridManager::updateMouseGridPosition(const Vec2& mousePos,
         return;
 
     // 将屏幕坐标转换为菱形坐标
-    Vec2 diamond_pos = convertScreenToDiamond(mousePos, backgroundSprite);
+    Vec2 diamond_pos = convertScreenToMap(mousePos, backgroundSprite);
 
     // 检查位置是否在菱形内
     if (isInDiamond(diamond_pos))

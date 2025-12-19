@@ -1,5 +1,6 @@
 #include "HelloWorldScene.h"
 #include "SecondScene.h"
+#include "BattleTestLayer.h"
 
 USING_NS_CC;
 
@@ -75,8 +76,33 @@ bool HelloWorld::init()
         secondSceneItem->addChild(secondLabel);
     }
 
+    auto battleTestItem = MenuItemImage::create(
+        "btn_normal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(HelloWorld::menuBattleTestCallback, this));
 
-    auto menu = Menu::create(closeItem, secondSceneItem, NULL);  
+    if (battleTestItem == nullptr ||
+        battleTestItem->getContentSize().width <= 0 ||
+        battleTestItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+
+        double x = origin.x + visibleSize.width - battleTestItem->getContentSize().width/2;
+        double y = origin.y + visibleSize.height - secondSceneItem->getContentSize().height - battleTestItem->getContentSize().height / 2;
+        battleTestItem->setPosition(Vec2(x, y));
+
+
+        auto testLabel = Label::createWithSystemFont("TEST GAME", "fonts/Marker Felt.ttf", 24);
+        testLabel->setColor(Color3B::WHITE);
+        testLabel->setPosition(Vec2(battleTestItem->getContentSize().width / 2,
+            battleTestItem->getContentSize().height / 2));
+        battleTestItem->addChild(testLabel);
+    }
+
+    auto menu = Menu::create(closeItem, secondSceneItem,battleTestItem, NULL);  
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -170,6 +196,12 @@ void HelloWorld::menuSecondSceneCallback(Ref* pSender)
 {
 
     Director::getInstance()->replaceScene(SecondScene::createScene());
+}
+
+void HelloWorld::menuBattleTestCallback(Ref* pSender)
+{
+
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)

@@ -21,7 +21,7 @@ void BattleUnit::SetNavigation(UnitNavigation* navigation)
 	navigation_ = navigation;
 }
 
-void BattleUnit::Update(double deltaTime, std::vector<BattleUnit*>& enemies)
+void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 {
 	if (!state_.IsAlive())
 		return;
@@ -51,7 +51,7 @@ void BattleUnit::Update(double deltaTime, std::vector<BattleUnit*>& enemies)
 	{
 		if (behavior_->CanAttack(this, target_))
 		{
-			double damage = behavior_->CalculateDamage(this, target_);
+			float damage = behavior_->CalculateDamage(this, target_);
 			target_->TakeDamage(damage, this);
 			behavior_->OnAttack(this, target_);
 			state_.ResetAttackCooldown();
@@ -68,7 +68,7 @@ void BattleUnit::Update(double deltaTime, std::vector<BattleUnit*>& enemies)
 	UpdateHealthBar();
 }
 
-void BattleUnit::TakeDamage(double damage, BattleUnit* source)
+void BattleUnit::TakeDamage(float damage, BattleUnit* source)
 {
 	state_.TakeDamage(damage);
 	if (behavior_)
@@ -99,55 +99,47 @@ bool BattleUnit::IsAlive() const
 	return state_.IsAlive();
 }
 
-double BattleUnit::GetPositionX() const
+float BattleUnit::GetPositionX() const
 {
 	return state_.GetPositionX();
 }
 
-double BattleUnit::GetPositionY() const
+float BattleUnit::GetPositionY() const
 {
 	return state_.GetPositionY();
 }
 
-void BattleUnit::SetPosition(double x, double y)
-{
-	state_.SetPosition(x, y);
-	// 同时更新精灵位置
-	UpdateSpritePosition();
-	UpdateHealthBar();
-}
-
-double BattleUnit::GetHealthPercent() const
+float BattleUnit::GetHealthPercent() const
 {
 	return state_.GetHealthPercent();
 }
 
-double BattleUnit::GetCurrentHealth() const
+float BattleUnit::GetCurrentHealth() const
 {
 	return state_.GetCurrentHealth();
 }
 
-double BattleUnit::GetMoveSpeed() const
+float BattleUnit::GetMoveSpeed() const
 {
 	return state_.GetMoveSpeed();
 }
 
-double BattleUnit::GetAttackDistance() const
+float BattleUnit::GetAttackDistance() const
 {
 	return state_.GetAttackDistance();
 }
 
-double BattleUnit::GetDamage() const
+float BattleUnit::GetDamage() const
 {
 	return state_.GetDamage();
 }
 
-double BattleUnit::GetAttackInterval() const
+float BattleUnit::GetAttackInterval() const
 {
 	return state_.GetAttackInterval();
 }
 
-double BattleUnit::GetMaxHealth() const
+float BattleUnit::GetMaxHealth() const
 {
 	return state_.GetMaxHealth();
 }
@@ -248,41 +240,6 @@ void BattleUnit::SetupHealthBar(Node* parent)
 	}
 }
 
-void BattleUnit::UpdateSpritePosition()
-{
-	if (unit_sprite_)
-	{
-		unit_sprite_->setPosition(Vec2(state_.GetPositionX(), state_.GetPositionY()));
-	}
-}
-
-void BattleUnit::UpdateHealthBar()
-{
-	if (!state_.IsAlive())
-	{
-		// 单位死亡时隐藏血条
-		if (health_bar_bg_)
-			health_bar_bg_->setVisible(false);
-		if (health_bar_)
-			health_bar_->setVisible(false);
-		return;
-	}
-
-	double healthPercent = GetHealthPercent() * 100.0f;
-
-	// 更新血条位置
-	Vec2 unitPos = Vec2(state_.GetPositionX(), state_.GetPositionY());
-	if (health_bar_bg_)
-	{
-		health_bar_bg_->setPosition(unitPos + Vec2(0, 30));
-	}
-	if (health_bar_)
-	{
-		health_bar_->setPosition(unitPos + Vec2(0, 30));
-		health_bar_->setPercentage(healthPercent);
-	}
-}
-
 void BattleUnit::RemoveSprite()
 {
 	if (unit_sprite_ && unit_sprite_->getParent())
@@ -336,4 +293,73 @@ void BattleUnit::PlayDeathSound()
 Node* BattleUnit::GetParentNode() const
 {
 	return parent_node_;
+}
+
+void BattleUnit::SetCoordinateConverter(std::function<cocos2d::Vec2(float, float)> converter)
+{
+	coordinate_converter_ = converter;
+}
+
+void BattleUnit::UpdateSpritePosition()
+{
+	if (unit_sprite_)
+	{
+		cocos2d::Vec2 sprite_position;
+
+		if (coordinate_converter_)
+		{
+			// 如果有坐标转换器，使用转换器
+			sprite_position = coordinate_converter_(state_.GetPositionX(), state_.GetPositionY());
+		}
+		else
+		{
+			// 如果没有转换器，直接使用地图坐标（兼容旧代码）
+			sprite_position = cocos2d::Vec2(state_.GetPositionX(), state_.GetPositionY());
+		}
+
+		unit_sprite_->setPosition(sprite_position);
+	}
+}
+
+void BattleUnit::UpdateHealthBar()
+{
+	if (!state_.IsAlive())
+	{
+		if (health_bar_bg_) health_bar_bg_->setVisible(false);
+		if (health_bar_) health_bar_->setVisible(false);
+		return;
+	}
+
+	// 计算显示位置
+	cocos2d::Vec2 unit_display_pos;
+	if (coordinate_converter_)
+	{
+		unit_display_pos = coordinate_converter_(state_.GetPositionX(), state_.GetPositionY());
+	}
+	else
+	{
+		unit_display_pos = cocos2d::Vec2(state_.GetPositionX(), state_.GetPositionY());
+	}
+
+	// 更新血条位置（在单位上方）
+	Vec2 health_bar_offset(0, 30);  // 血条在单位上方30像素
+	Vec2 health_bar_pos = unit_display_pos + health_bar_offset;
+
+	if (health_bar_bg_)
+	{
+		health_bar_bg_->setPosition(health_bar_pos);
+	}
+	if (health_bar_)
+	{
+		health_bar_->setPosition(health_bar_pos);
+		float healthPercent = GetHealthPercent() * 100.0f;
+		health_bar_->setPercentage(healthPercent);
+	}
+}
+
+void BattleUnit::SetPosition(float x, float y)
+{
+	state_.SetPosition(x, y);
+	UpdateSpritePosition();  // 这里会自动进行坐标转换
+	UpdateHealthBar();
 }

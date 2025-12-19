@@ -27,19 +27,13 @@
 
 #ifndef BATTLEUNIT_H
 #define BATTLEUNIT_H
+#include "cocos2d.h"
 #include "UnitState.h"
 #include "UnitBehavior.h"
 #include "UnitNavigation.h"
 #include <vector>
 #include <string>
-
-//前向声明一下视觉组件
-namespace cocos2d
-{
-	class Sprite;
-	class ProgressTimer;
-	class Node;
-}
+#include <functional>
 
 class BattleUnit
 {
@@ -58,6 +52,9 @@ private:
 	//音效组件
 	std::string attack_sound_;
 	std::string death_sound_;
+
+	//坐标转换函数指针
+	std::function<cocos2d::Vec2(float, float)> coordinate_converter_;
 public:
 	BattleUnit();
 	~BattleUnit() = default;
@@ -74,27 +71,27 @@ public:
 	void SetNavigation(UnitNavigation* navigation);
 
 	//更新函数
-	void Update(double deltaTime, std::vector<BattleUnit*>& enemies);
+	void Update(float deltaTime, std::vector<BattleUnit*>& enemies);
 
 	//受到伤害
-	void TakeDamage(double damage, BattleUnit* source);
+	void TakeDamage(float damage, BattleUnit* source);
 
 	//Getter接口
 	UnitState& GetState();
 	const UnitState& GetState() const;
 
 	bool IsAlive() const;
-	double GetPositionX() const;
-	double GetPositionY() const;
-	void SetPosition(double x, double y);
+	float GetPositionX() const;
+	float GetPositionY() const;
+	void SetPosition(float x, float y);
 
-	double GetHealthPercent() const;
-	double GetCurrentHealth() const;
-	double GetMaxHealth()const;
-	double GetMoveSpeed() const;
-	double GetAttackDistance() const;
-	double GetDamage() const;
-	double GetAttackInterval() const;
+	float GetHealthPercent() const;
+	float GetCurrentHealth() const;
+	float GetMaxHealth()const;
+	float GetMoveSpeed() const;
+	float GetAttackDistance() const;
+	float GetDamage() const;
+	float GetAttackInterval() const;
 
 	UnitType GetTargetType() const;
 	AttackType GetAttackType() const;
@@ -119,6 +116,10 @@ public:
 	void SetDeathSound(const std::string& sound);
 	void PlayAttackSound();
 	void PlayDeathSound();
+
+	// 设置坐标转换器
+	void SetCoordinateConverter(std::function<cocos2d::Vec2(float, float)> converter);
+
 };
 
 #endif
