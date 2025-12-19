@@ -15,6 +15,9 @@ public:
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
 
+	// 定时器更新函数
+	void update(float delta);
+
 	// Touch event handlers
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 	void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
@@ -37,24 +40,30 @@ public:
 
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
-
 	CREATE_FUNC(SecondScene);
 private:
-	// 建造面板节点
+
 	Node* buildPanel;
 
-	// 背景精灵引用
+
 	cocos2d::Sprite* background_sprite_;
 
-	// 鼠标位置
+
 	cocos2d::Vec2 mouse_pos_;
 
-	// UI元素
+
 	cocos2d::Label* coordinate_label_;
 
-	// 管理器实例
+	// 圣水相关UI
+	cocos2d::Sprite* elixirIcon; // 圣水图标
+	cocos2d::Label* elixirLabel; // 圣水数量标签
+	cocos2d::Label* elixirNameLabel; // 圣水名称标签
+
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
 };
+
+// 定义静态全局变量表示圣水数量
+extern int g_elixirCount;
 
 #endif
