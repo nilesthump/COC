@@ -103,8 +103,8 @@ bool SecondScene::init()
 
 
     auto houseBtn = MenuItemImage::create(
-        "HelloWorld.png",
-        "HelloWorld.png",
+        "ArcherTowerLv10.png",
+        "ArcherTowerLv10.png",
         [=](Ref* pSender) {
             log("huose");
         }
@@ -116,8 +116,8 @@ bool SecondScene::init()
 
 
     auto storageBtn = MenuItemImage::create(
-        "HelloWorld.png",
-        "HelloWorld.png",
+        "CannonLv10.png",
+        "CannonLv10.png",
         [=](Ref* pSender) {
             log("storage");
         }
@@ -182,7 +182,7 @@ bool SecondScene::init()
     this->addChild(grid_manager_);
 
     // 绘制菱形网格
-    grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
+    grids_ = grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
 
     // 创建坐标显示标签
     coordinate_label_ = Label::createWithTTF("坐标: ", "fonts/STZhongSong_Bold.ttf", 20);

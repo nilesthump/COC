@@ -61,6 +61,8 @@ private:
 
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
+
+	std::vector<std::vector<cocos2d::Vec2>>* grids_;
 };
 
 // 定义静态全局变量表示圣水数量
