@@ -157,7 +157,7 @@ std::vector<std::vector<cocos2d::Vec2>>* DiamondGridManager::drawDiamondGrid(Spr
         for (int j = 0; j < 50; j++)
         {
             Vec2 dia = Vec2(leftCorner.x + (j + i) * horizontalSize / 2, leftCorner.y + (j - i) * verticalSize / 2);
-            grid_draw->drawDiamond(dia, horizontalSize, verticalSize);
+            //grid_draw->drawDiamond(dia, horizontalSize, verticalSize);
             (*grids)[i][j] = dia;
         }
     }

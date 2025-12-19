@@ -120,13 +120,14 @@ bool SecondScene::init()
                     Vec2 worldPos = houseBtn->getParent()->convertToWorldSpace(houseBtn->getPosition());
                     // 转换为背景精灵的本地坐标
                     Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    dragSprite->setScale(0.5f);
+                    dragSprite->setScale(1.0f);
                     dragSprite->setPosition(localPos);
                     background_sprite_->addChild(dragSprite, 10);
                     houseBtn->setUserData(dragSprite);
                 }
                 
-                houseBtn->setVisible(false);
+                // 移除隐藏按钮的代码，这样在拖拽时原始按钮仍然可见
+                // houseBtn->setVisible(false);
             }
         }
     );
@@ -154,13 +155,14 @@ bool SecondScene::init()
                     Vec2 worldPos = storageBtn->getParent()->convertToWorldSpace(storageBtn->getPosition());
                     // 转换为背景精灵的本地坐标
                     Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    dragSprite->setScale(0.5f);
+                    dragSprite->setScale(1.0f);
                     dragSprite->setPosition(localPos);
                     background_sprite_->addChild(dragSprite, 10);
                     storageBtn->setUserData(dragSprite);
                 }
                 
-                storageBtn->setVisible(false);
+                // 移除隐藏按钮的代码，这样在拖拽时原始按钮仍然可见
+                // storageBtn->setVisible(false);
             }
         }
     );
@@ -235,7 +237,7 @@ bool SecondScene::init()
     coordinate_label_->setColor(Color3B::YELLOW);
     coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
     this->addChild(coordinate_label_, 2);
-
+  
     // 创建圣水图标和标签
     // 尝试加载圣水图标，如果失败则使用HelloWorld.png作为替代
     elixirIcon = Sprite::create("btn_normal.png"); // 实际项目中应该替换为正确的圣水图标资源名
@@ -345,7 +347,17 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         if (dragSprite) {
             // 将屏幕坐标转换为相对于背景精灵的本地坐标
             Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-            dragSprite->setPosition(localPos);
+            
+            // 获取网格单元格大小
+            float gridCellSizeX = grid_manager_->getGridCellSizeX();
+            float gridCellSizeY = grid_manager_->getGridCellSizeY();
+            
+            // 将坐标按网格单元格大小的整数倍进行向上取整
+            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+            
+            // 设置拖拽精灵的位置为网格对齐的位置
+            dragSprite->setPosition(Vec2(snappedX, snappedY));
         }
     }
     else if (zoom_manager_) {
@@ -361,6 +373,13 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         // 将屏幕坐标转换为相对于背景精灵的本地坐标
         Vec2 localPos = background_sprite_->convertToNodeSpace(screenPos);
         
+        // 获取网格单元格大小并进行向上取整
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+        Vec2 snappedPos = Vec2(snappedX, snappedY);
+        
         // 获取拖拽的精灵
         Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
         if (dragSprite) {
@@ -375,50 +394,49 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         if (isInDiamond(diamondPos)) {
             // 在有效区域内，可以放置
             
-            // 创建一个放置后的精灵
+            // 根据拖拽的按钮获取相应的纹理名称
             std::string textureName = (draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png");
-            // 创建放置精灵
+            
+            // 创建一个放置后的精灵
             auto placedSprite = Sprite::create(textureName);
             if (placedSprite) {
-                placedSprite->setScale(0.3f); // 缩小一点放置
-                placedSprite->setPosition(localPos); // 使用背景精灵的本地坐标
-                background_sprite_->addChild(placedSprite, 5); // 设置更高的Z轴层级，确保在网格之上
+                placedSprite->setScale(1.0f); // 与拖拽时保持一致的大小
+                placedSprite->setPosition(snappedPos); // 使用网格对齐的位置
+                background_sprite_->addChild(placedSprite, 15); // 设置更高的Z轴层级，确保显示在网格之上
                 
-                // 添加成功的视觉反馈（绿色闪烁）
-                auto blink = Blink::create(0.5f, 2);
-                placedSprite->runAction(blink);
+                // 添加成功的视觉反馈（闪烁）
+                placedSprite->runAction(Blink::create(1.0f, 3));
             }
             
-            // 记录放置日志
-            log("放置成功: %s, 屏幕坐标: (%.2f, %.2f), 本地坐标: (%.2f, %.2f)", 
-                (draggingItem == houseBtn ? "house" : "storage"), 
-                screenPos.x, screenPos.y, localPos.x, localPos.y);
+            // 记录成功放置的位置
+            log("成功放置建筑物在位置: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
+            
+            // 添加到已放置的建筑物列表（已移除，因为该成员变量未在类中声明）
+            // placedBuildings.push_back(placedSprite);
         } else {
-            // 添加放置失败的视觉反馈 - 红色闪烁效果
-            auto failSprite = Sprite::create((draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png"));
+            // 不在有效区域内，不能放置
+            
+            // 根据拖拽的按钮获取相应的纹理名称
+            std::string textureName = (draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png");
+            
+            // 创建一个失败放置的精灵
+            auto failSprite = Sprite::create(textureName);
             if (failSprite) {
-                failSprite->setScale(0.3f);
-                failSprite->setPosition(localPos); // 使用背景精灵的本地坐标
+                failSprite->setScale(1.0f); // 与拖拽时保持一致的大小
+                failSprite->setPosition(snappedPos); // 使用网格对齐的位置
                 failSprite->setColor(Color3B::RED); // 设置为红色
-                background_sprite_->addChild(failSprite, 15); // 设置更高的Z轴层级，确保在网格之上
+                background_sprite_->addChild(failSprite, 15); // 设置更高的Z轴层级，确保显示在网格之上
                 
-                // 淡出并移除
-                auto fadeOut = FadeOut::create(0.5f);
-                auto remove = RemoveSelf::create(true);
-                failSprite->runAction(Sequence::create(fadeOut, remove, nullptr));
+                // 添加红色闪烁效果作为失败的视觉反馈
+                failSprite->runAction(Sequence::create(
+                    Blink::create(0.5f, 3),
+                    RemoveSelf::create(),
+                    nullptr
+                ));
             }
             
-            // 记录放置失败日志
-            log("放置失败: 超出有效区域");
-        }
-        
-        // 恢复原按钮
-        if (draggingItem == houseBtn) {
-            houseBtn->setPosition(dragStartPosition);
-            houseBtn->setVisible(true);
-        } else if (draggingItem == storageBtn) {
-            storageBtn->setPosition(dragStartPosition);
-            storageBtn->setVisible(true);
+            // 记录失败放置的位置
+            log("尝试在无效位置放置建筑物: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
         }
         
         // 重置拖拽状态
@@ -444,11 +462,13 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
         
         // 恢复原按钮
         if (draggingItem == houseBtn) {
-            houseBtn->setPosition(dragStartPosition);
-            houseBtn->setVisible(true);
+            // 不需要恢复位置和可见性，因为按钮没有被隐藏
+            // houseBtn->setPosition(dragStartPosition);
+            // houseBtn->setVisible(true);
         } else if (draggingItem == storageBtn) {
-            storageBtn->setPosition(dragStartPosition);
-            storageBtn->setVisible(true);
+            // 不需要恢复位置和可见性，因为按钮没有被隐藏
+            // storageBtn->setPosition(dragStartPosition);
+            // storageBtn->setVisible(true);
         }
         
         // 重置拖拽状态
