@@ -126,24 +126,24 @@ bool HelloWorld::init()
         // add the label as a child to this layer
         this->addChild(label, 1);
     }
-#if 0
+
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("mimi.png");
+    auto sprite = Sprite::create("LoadingScene.jpg");
     if (sprite == nullptr)
     {
-        problemLoading("'mimi.png'");
+        problemLoading("'LoadingScene.jpg'");
     }
     else
     {
         // position the sprite on the center of the screen
         sprite->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-        sprite->setScale(0.5);
+        sprite->setScale(1.0);
 
         // add the sprite as a child to this layer
         this->addChild(sprite, 0);
     }
-
+#if 0
     auto head_pic_left = Sprite::create("headpic.png");
     if (head_pic_left == nullptr)
     {
