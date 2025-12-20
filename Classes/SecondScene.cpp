@@ -180,6 +180,10 @@ bool SecondScene::init()
     // 初始化拖拽状态
     isDragging = false;
     draggingItem = nullptr;
+    
+    // 初始化建筑移动相关变量
+    isMovingBuilding = false;
+    movingBuilding = nullptr;
 
     auto label = Label::createWithTTF("Your Clan!!!", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
@@ -368,13 +372,42 @@ void SecondScene::menuBuildCallback(Ref* pSender)
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 {
     // 不需要检测按钮点击，因为已经在按钮回调中处理了
-    // 只处理拖拽状态下的逻辑和缩放管理器的逻辑
+    // 只处理拖拽状态下的逻辑、建筑移动逻辑和缩放管理器的逻辑
     
     if (isDragging) {
         return true; // 正在拖拽时返回true，保持事件被捕获
     }
     
-    // 如果没有拖拽，则使用缩放管理器的触摸处理
+    // 检查是否点击了已放置的建筑
+    Vec2 touchPos = touch->getLocation();
+    for (auto& building : placedBuildings) {
+        // 将建筑位置转换为屏幕坐标
+        Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
+        
+        // 计算建筑的边界框
+        Size buildingSize = building->getContentSize();
+        float scale = building->getScale();
+        Rect buildingRect(buildingScreenPos.x - buildingSize.width * scale / 2,
+                          buildingScreenPos.y - buildingSize.height * scale / 2,
+                          buildingSize.width * scale,
+                          buildingSize.height * scale);
+        
+        // 检查点击是否在建筑范围内
+        if (buildingRect.containsPoint(touchPos)) {
+            // 找到被点击的建筑
+            isMovingBuilding = true;
+            movingBuilding = building;
+            
+            // 设置建筑为半透明状态
+            building->setOpacity(128); // 255为不透明，128为半透明
+            
+            // 将建筑移到最顶层
+            background_sprite_->reorderChild(building, 20);
+            return true;
+        }
+    }
+    
+    // 如果没有拖拽且没有点击建筑，则使用缩放管理器的触摸处理
     return zoom_manager_->onTouchBegan(touch, event);
 }
 
@@ -398,6 +431,22 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
             // 设置拖拽精灵的位置为网格对齐的位置
             dragSprite->setPosition(Vec2(snappedX, snappedY));
         }
+    }
+    else if (isMovingBuilding && movingBuilding) {
+        // 移动已放置的建筑
+        // 将屏幕坐标转换为相对于背景精灵的本地坐标
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        
+        // 获取网格单元格大小
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        
+        // 将坐标按网格单元格大小的整数倍进行向上取整
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+        
+        // 设置建筑的位置为网格对齐的位置
+        movingBuilding->setPosition(Vec2(snappedX, snappedY));
     }
     else if (zoom_manager_) {
         zoom_manager_->onTouchMoved(touch, event);
@@ -443,6 +492,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 placedSprite->setPosition(snappedPos); // 使用网格对齐的位置
                 background_sprite_->addChild(placedSprite, 15); // 设置更高的Z轴层级，确保显示在网格之上
                 
+                // 添加到已放置的建筑物列表
+                placedBuildings.push_back(placedSprite);
+                
                 // 添加成功的视觉反馈（闪烁）
                 placedSprite->runAction(Blink::create(1.0f, 3));
             }
@@ -482,39 +534,50 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         isDragging = false;
         draggingItem = nullptr;
     }
-    else if (zoom_manager_) {
+    else if (isMovingBuilding && movingBuilding) {
+        // 处理建筑移动结束
+        // 记录移动后的位置
+        log("建筑移动到新位置: (%.2f, %.2f)", movingBuilding->getPosition().x, movingBuilding->getPosition().y);
+        
+        // 将建筑透明度恢复为完全不透明
+        movingBuilding->setOpacity(255);
+        
+        // 将建筑Z轴层级恢复为正常
+        background_sprite_->reorderChild(movingBuilding, 15);
+        
+        // 重置移动状态
+        isMovingBuilding = false;
+        movingBuilding = nullptr;
+    } else if (zoom_manager_) {
         zoom_manager_->onTouchEnded(touch, event);
     }
 }
 
 void SecondScene::onTouchCancelled(Touch* touch, Event* event)
 {
-    // 处理触摸取消，类似于结束但不执行放置逻辑
     if (isDragging && draggingItem) {
-        // 获取拖拽的精灵
+        // 获取拖拽的精灵并移除
         Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
         if (dragSprite) {
-            // 移除拖拽的精灵
             dragSprite->removeFromParentAndCleanup(true);
             draggingItem->setUserData(nullptr);
-        }
-        
-        // 恢复原按钮
-        if (draggingItem == houseBtn) {
-            // 不需要恢复位置和可见性，因为按钮没有被隐藏
-            // houseBtn->setPosition(dragStartPosition);
-            // houseBtn->setVisible(true);
-        } else if (draggingItem == storageBtn) {
-            // 不需要恢复位置和可见性，因为按钮没有被隐藏
-            // storageBtn->setPosition(dragStartPosition);
-            // storageBtn->setVisible(true);
         }
         
         // 重置拖拽状态
         isDragging = false;
         draggingItem = nullptr;
     }
-    else if (zoom_manager_) {
+    else if (isMovingBuilding && movingBuilding) {
+        // 将建筑透明度恢复为完全不透明
+        movingBuilding->setOpacity(255);
+        
+        // 恢复建筑Z轴层级
+        background_sprite_->reorderChild(movingBuilding, 15);
+        
+        // 重置移动状态
+        isMovingBuilding = false;
+        movingBuilding = nullptr;
+    } else if (zoom_manager_) {
         zoom_manager_->onTouchCancelled(touch, event);
     }
 }
