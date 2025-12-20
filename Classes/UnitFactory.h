@@ -11,11 +11,11 @@
  *
  * 核心功能：
  * 1. 创建基础单位（仅数据层）
- * 2. 创建完整单位（带视觉和音效）
+ * 2. 创建完整单位（带视觉和音效，background是为了和地图坐标匹配）
  *
  * 使用方式：
  * 1. 简单创建：UnitFactory::CreateBarbarian(1)
- * 2. 完整创建：UnitFactory::CreateCompleteBarbarian(1, parentNode)
+ * 2. 完整创建：UnitFactory::CreateCompleteBarbarian(1, parentNode,background)
  */
 
 //12/16 下一步把别的角色工厂也添加，然后试着提取共有部分批量创建
@@ -68,10 +68,10 @@ public:
 
         unit->SetBackgroundSprite(background);
         // 设置精灵
-        auto sprite = cocos2d::Sprite::create("ArcherTowerLv1.png");
+        auto sprite = cocos2d::Sprite::create("BarbarianLv1.png");
         if (sprite)
         {
-            sprite->setScale(0.3f);
+            sprite->setScale(0.5f);
             unit->SetSprite(sprite, parent); //这里会调用UpdateSpritePosition
         }
 

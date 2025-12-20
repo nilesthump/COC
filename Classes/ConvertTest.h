@@ -34,7 +34,7 @@ public:
      * @param backgroundSprite 背景精灵
      * @return game_world_本地坐标
      */
-    static Vec2 convertGridToLocal(int gridX, int gridY, Sprite* backgroundSprite)
+    static Vec2 convertGridToLocal(float gridX, float gridY, Sprite* backgroundSprite)
     {
         if (!backgroundSprite)
             return Vec2::ZERO;

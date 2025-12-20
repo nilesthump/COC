@@ -27,42 +27,42 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	if (!state_.IsAlive())
 		return;
 
-	////1.行为更新
-	//if (behavior_)
-	//{
-	//	behavior_->OnUpdate(this, deltaTime);
-	//}
+	//1.行为更新
+	if (behavior_)
+	{
+		behavior_->OnUpdate(this, deltaTime);
+	}
 
-	////2.寻找目标
-	//if (navigation_ && (!target_ || !target_->IsAlive()))
-	//{
-	//	target_ = navigation_->FindTarget(this, enemies);
-	//}
+	//2.寻找目标
+	if (navigation_ && (!target_ || !target_->IsAlive()))
+	{
+		target_ = navigation_->FindTarget(this, enemies);
+	}
 
-	////3.移动
-	//if (navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
-	//{
-	//	navigation_->CalculateMove(this, target_, deltaTime);
-	//}
+	//3.移动
+	if (navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
+	{
+		navigation_->CalculateMove(this, target_, deltaTime);
+	}
 
-	////4.攻击
-	//if (behavior_ && target_ && navigation_ &&
-	//	navigation_->IsInAttackRange(this, target_) &&
-	//	state_.CanAttack())
-	//{
-	//	if (behavior_->CanAttack(this, target_))
-	//	{
-	//		float damage = behavior_->CalculateDamage(this, target_);
-	//		target_->TakeDamage(damage, this);
-	//		behavior_->OnAttack(this, target_);
-	//		state_.ResetAttackCooldown();
-	//		//播放攻击音效
-	//		PlayAttackSound();
-	//	}
-	//}
+	//4.攻击
+	if (behavior_ && target_ && navigation_ &&
+		navigation_->IsInAttackRange(this, target_) &&
+		state_.CanAttack())
+	{
+		if (behavior_->CanAttack(this, target_))
+		{
+			float damage = behavior_->CalculateDamage(this, target_);
+			target_->TakeDamage(damage, this);
+			behavior_->OnAttack(this, target_);
+			state_.ResetAttackCooldown();
+			//播放攻击音效
+			PlayAttackSound();
+		}
+	}
 
-	////5.更新状态
-	//state_.UpdateCoolDowns(deltaTime);
+	//5.更新状态
+	state_.UpdateCoolDowns(deltaTime);
 
 	//6.更新视觉表现
 	UpdateSpritePosition();
@@ -302,8 +302,8 @@ void BattleUnit::UpdateSpritePosition()
 	// 使用新的转换方法
 	// state_中存储的是网格坐标(0-43, 0-43)
 	Vec2 local_pos = ConvertTest::convertGridToLocal(
-		static_cast<int>(state_.GetPositionX()),
-		static_cast<int>(state_.GetPositionY()),
+		state_.GetPositionX(),
+		state_.GetPositionY(),
 		background_sprite_
 	);
 
@@ -323,8 +323,8 @@ void BattleUnit::UpdateHealthBar()
 
 	// 获取单位的本地坐标
 	Vec2 unit_local_pos = ConvertTest::convertGridToLocal(
-		static_cast<int>(state_.GetPositionX()),
-		static_cast<int>(state_.GetPositionY()),
+		state_.GetPositionX(),
+		state_.GetPositionY(),
 		background_sprite_
 	);
 

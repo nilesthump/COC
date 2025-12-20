@@ -66,8 +66,7 @@ float CannonNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
     if (!a || !b)
         return std::numeric_limits<float>::max();
 
-    // 同样使用曼哈顿距离
     float dx = a->GetPositionX() - b->GetPositionX();
     float dy = a->GetPositionY() - b->GetPositionY();
-    return fabs(dx) + fabs(dy);
+    return sqrt(dx * dx + dy * dy);
 }

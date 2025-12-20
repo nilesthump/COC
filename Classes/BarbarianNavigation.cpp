@@ -5,8 +5,7 @@
 #include <vector>
 #include <string>
 
-//目前都是基于菱形网格用曼哈顿距离来计算的，但是感觉还是不太准确
-//试着虽然是菱形网格但是变成正常的格数来看
+
 BarbarianNavigation::BarbarianNavigation()
 {}
 
@@ -33,56 +32,50 @@ BattleUnit* BarbarianNavigation::FindTarget(BattleUnit* self,
 	return nearest;
 }
 
+//这里没有用A*，直接朝目标移动
 void BarbarianNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime)
 {
-    if (!target)
+    if (!target || !self)
         return;
 
-    // 使用地图坐标（菱形网格坐标）
+    // 获取当前位置和目标位置
     float selfX = self->GetPositionX();
     float selfY = self->GetPositionY();
     float targetX = target->GetPositionX();
     float targetY = target->GetPositionY();
 
-    // 计算方向
+    // 计算到目标的距离
     float dx = targetX - selfX;
     float dy = targetY - selfY;
+    float distance = sqrt(dx * dx + dy * dy);  // 直接计算欧几里得距离
 
-    // 计算曼哈顿距离
-    float manhattanDist = fabs(dx) + fabs(dy);
-
-    if (manhattanDist > 0.01f)
+    // 如果已经非常接近目标，就不需要移动
+    if (distance < 0.01f)
     {
-        // 移动速度：网格单位/秒
-        float speed = self->GetMoveSpeed();  // 2.0格/秒
-        float moveAmount = speed * deltaTime;  // 本次可移动的网格数
-
-        float newX = selfX;
-        float newY = selfY;
-
-        // 在菱形网格中移动：优先移动X方向
-        if (fabs(dx) > 0)
-        {
-            // 计算X方向移动量
-            float moveX = (dx > 0) ?
-                std::min(moveAmount, fabs(dx)) :
-                -std::min(moveAmount, fabs(dx));
-            newX += moveX;
-            moveAmount -= fabs(moveX);
-        }
-
-        // 如果还有移动量，移动Y方向
-        if (moveAmount > 0 && fabs(dy) > 0)
-        {
-            float moveY = (dy > 0) ?
-                std::min(moveAmount, fabs(dy)) :
-                -std::min(moveAmount, fabs(dy));
-            newY += moveY;
-        }
-
-        // 设置新的地图坐标位置
-        self->SetPosition(newX, newY);
+        return;
     }
+
+    // 获取移动速度并计算本次移动量
+    float speed = self->GetMoveSpeed();  // 网格单位/秒，如2.0
+    float moveAmount = speed * deltaTime;
+
+    // 如果本次移动会超过目标位置，则直接移动到目标位置
+    if (moveAmount >= distance)
+    {
+        self->SetPosition(targetX, targetY);
+        return;
+    }
+
+    // 计算移动方向（单位向量）
+    float dirX = dx / distance;
+    float dirY = dy / distance;
+
+    // 计算新位置
+    float newX = selfX + dirX * moveAmount;
+    float newY = selfY + dirY * moveAmount;
+
+    // 设置新的位置
+    self->SetPosition(newX, newY);
 }
 
 bool BarbarianNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)
@@ -99,20 +92,13 @@ std::string BarbarianNavigation::GetNavigationType() const
 	return "Barbarian";
 }
 
+//欧几里得距离
 float BarbarianNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
 {
-	// 保持兼容性，但使用曼哈顿距离
-	return CalculateManhattanDistance(a, b);
-}
+    if(!a || !b)
+        return std::numeric_limits<float>::max();
 
-// 新的曼哈顿距离计算方法
-float BarbarianNavigation::CalculateManhattanDistance(BattleUnit* a, BattleUnit* b)
-{
-	if (!a || !b)
-		return std::numeric_limits<float>::max();
-
-	// 曼哈顿距离：|dx| + |dy|
-	float dx = a->GetPositionX() - b->GetPositionX();
-	float dy = a->GetPositionY() - b->GetPositionY();
-	return fabs(dx) + fabs(dy);
+    float dx = a->GetPositionX() - b->GetPositionX();
+    float dy = a->GetPositionY() - b->GetPositionY();
+    return sqrt(dx * dx + dy * dy);
 }
