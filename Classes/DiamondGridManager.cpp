@@ -44,7 +44,7 @@ bool DiamondGridManager::init(const Vec2& diamondCenter,
 
 //屏幕坐标->地图坐标
 //这里map实际是就是diamond坐标，以及我们建筑战斗逻辑需要使用的坐标
-Vec2 DiamondGridManager::convertScreenToMap(const Vec2& screenPos, Sprite* backgroundSprite)
+Vec2 DiamondGridManager::convertScreenToDiamond(const Vec2& screenPos, Sprite* backgroundSprite)
 {
     //这里做了两个转换
     //屏幕坐标->场景坐标->地图坐标
@@ -216,7 +216,7 @@ void DiamondGridManager::updateMouseGridPosition(const Vec2& mousePos,
         return;
 
     // 将屏幕坐标转换为菱形坐标
-    Vec2 diamond_pos = convertScreenToMap(mousePos, backgroundSprite);
+    Vec2 diamond_pos = convertScreenToDiamond(mousePos, backgroundSprite);
 
     // 检查位置是否在菱形内
     if (isInDiamond(diamond_pos))

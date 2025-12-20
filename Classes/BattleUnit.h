@@ -31,6 +31,7 @@
 #include "UnitState.h"
 #include "UnitBehavior.h"
 #include "UnitNavigation.h"
+#include "ConvertTest.h"
 #include <vector>
 #include <string>
 #include <functional>
@@ -46,6 +47,7 @@ private:
 	//视觉组件
 	cocos2d::Sprite* unit_sprite_;
 	cocos2d::Sprite* health_bar_bg_;
+	cocos2d::Sprite* background_sprite_;
 	cocos2d::ProgressTimer* health_bar_;
 	cocos2d::Node* parent_node_;
 
@@ -53,8 +55,6 @@ private:
 	std::string attack_sound_;
 	std::string death_sound_;
 
-	//坐标转换函数指针
-	std::function<cocos2d::Vec2(float, float)> coordinate_converter_;
 public:
 	BattleUnit();
 	~BattleUnit() = default;
@@ -69,6 +69,7 @@ public:
 	//设置组件
 	void SetBehavior(UnitBehavior* behavior);
 	void SetNavigation(UnitNavigation* navigation);
+	void SetBackgroundSprite(cocos2d::Sprite* background_sprite);
 
 	//更新函数
 	void Update(float deltaTime, std::vector<BattleUnit*>& enemies);
@@ -116,9 +117,6 @@ public:
 	void SetDeathSound(const std::string& sound);
 	void PlayAttackSound();
 	void PlayDeathSound();
-
-	// 设置坐标转换器
-	void SetCoordinateConverter(std::function<cocos2d::Vec2(float, float)> converter);
 
 };
 

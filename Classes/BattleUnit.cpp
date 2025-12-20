@@ -183,7 +183,7 @@ void BattleUnit::SetSprite(cocos2d::Sprite* sprite, cocos2d::Node* parent)
 	}
 
 	unit_sprite_ = sprite;
-
+	parent_node_ = parent;
 	if (unit_sprite_ && parent)
 	{
 		// 检查精灵是否已经有父节点
@@ -192,8 +192,7 @@ void BattleUnit::SetSprite(cocos2d::Sprite* sprite, cocos2d::Node* parent)
 			unit_sprite_->removeFromParent();
 		}
 		parent->addChild(unit_sprite_);
-		unit_sprite_->setPosition(
-			Vec2(state_.GetPositionX(), state_.GetPositionY()));
+		UpdateSpritePosition();
 	}
 }
 
@@ -295,28 +294,13 @@ Node* BattleUnit::GetParentNode() const
 	return parent_node_;
 }
 
-void BattleUnit::SetCoordinateConverter(std::function<cocos2d::Vec2(float, float)> converter)
-{
-	coordinate_converter_ = converter;
-}
-
 void BattleUnit::UpdateSpritePosition()
 {
-	if (unit_sprite_)
+	if (unit_sprite_ && background_sprite_)
 	{
 		cocos2d::Vec2 sprite_position;
-
-		if (coordinate_converter_)
-		{
-			// 如果有坐标转换器，使用转换器
-			sprite_position = coordinate_converter_(state_.GetPositionX(), state_.GetPositionY());
-		}
-		else
-		{
-			// 如果没有转换器，直接使用地图坐标（兼容旧代码）
-			sprite_position = cocos2d::Vec2(state_.GetPositionX(), state_.GetPositionY());
-		}
-
+		const cocos2d::Vec2 logic_position = Vec2(state_.GetPositionX(), state_.GetPositionY());
+		sprite_position = ConvertTest::convertLogicToDisplay(logic_position, background_sprite_);
 		unit_sprite_->setPosition(sprite_position);
 	}
 }
@@ -330,16 +314,14 @@ void BattleUnit::UpdateHealthBar()
 		return;
 	}
 
-	// 计算显示位置
+	// 如果没有背景精灵，直接返回
+	if (!background_sprite_)
+		return;
+
 	cocos2d::Vec2 unit_display_pos;
-	if (coordinate_converter_)
-	{
-		unit_display_pos = coordinate_converter_(state_.GetPositionX(), state_.GetPositionY());
-	}
-	else
-	{
-		unit_display_pos = cocos2d::Vec2(state_.GetPositionX(), state_.GetPositionY());
-	}
+	const cocos2d::Vec2 logic_position = Vec2(state_.GetPositionX(), state_.GetPositionY());
+	unit_display_pos = ConvertTest::convertLogicToDisplay(logic_position, background_sprite_);
+
 
 	// 更新血条位置（在单位上方）
 	Vec2 health_bar_offset(0, 30);  // 血条在单位上方30像素
@@ -362,4 +344,9 @@ void BattleUnit::SetPosition(float x, float y)
 	state_.SetPosition(x, y);
 	UpdateSpritePosition();  // 这里会自动进行坐标转换
 	UpdateHealthBar();
+}
+
+void BattleUnit::SetBackgroundSprite(cocos2d::Sprite* background_sprite)
+{
+	background_sprite_ = background_sprite;
 }

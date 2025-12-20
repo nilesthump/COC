@@ -127,70 +127,35 @@ void BattleTestLayer::setupBattleScene()
     battle_manager_ = std::make_unique<BattleManager>();
     battle_manager_->SetBattleActive(true);
 
-    // 6. 在菱形网格中心放置加农炮
-    placeCannonAtGridCenter();
+    placeCannon();
+    placeBarbarian();
 }
 
-void BattleTestLayer::placeBarbarianAtScreenPos(const cocos2d::Vec2& screenPos)
+void BattleTestLayer::placeBarbarian()
 {
-    // 1. 屏幕坐标 → 菱形坐标（地图逻辑坐标）
-    Vec2 diamond_pos = grid_manager_->convertScreenToMap(screenPos, background_sprite_);
-
-    // 2. 检查是否在菱形范围内
-    if (!grid_manager_->isInDiamond(diamond_pos))
-    {
-        log("位置超出菱形范围，无法放置野蛮人");
-        return;
-    }
-
-    // 3. 使用UnitFactory创建完整野蛮人
+    // 创建Barbarian(攻击者)
     BattleUnit* barbarian = UnitFactory::CreateCompleteBarbarian(1, game_world_);
-
-    // 4. 设置坐标转换器
-    barbarian->SetCoordinateConverter([this](double mapX, double mapY)
-        {
-            // 地图坐标 → 显示坐标
-            Vec2 mapPos(mapX, mapY);
-            return grid_manager_->convertMapToDisplay(mapPos, background_sprite_);
-        });
-
-    // 5. 设置地图位置（会自动更新显示位置）
-    barbarian->SetPosition(diamond_pos.x, diamond_pos.y);
-
-    // 6. 添加到战斗管理器
-    battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(barbarian), true);
-
-    log("野蛮人已放置，地图坐标: (%.2f, %.2f)", diamond_pos.x, diamond_pos.y);
+    if (barbarian)
+    {
+        // 设置背景精灵，用于坐标转换
+        barbarian->SetBackgroundSprite(background_sprite_);
+        // 这里需要将屏幕坐标转换为网格坐标，暂时使用示例位置
+        barbarian->SetPosition(10, 10);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(barbarian), true);
+    }
 }
 
-void BattleTestLayer::placeCannonAtGridCenter()
+void BattleTestLayer::placeCannon()
 {
-    // 1. 菱形坐标系中心 (0, 0)
-    Vec2 diamond_center(0, 0);
-
-    // 2. 使用UnitFactory创建完整加农炮
     cannon_unit_ = UnitFactory::CreateCompleteCannon(1, game_world_);
 
-    // 3. 设置坐标转换器
-    cannon_unit_->SetCoordinateConverter([this](double mapX, double mapY)
-        {
-            Vec2 mapPos(mapX, mapY);
-            return grid_manager_->convertMapToDisplay(mapPos, background_sprite_);
-        });
+    cannon_unit_->SetBackgroundSprite(background_sprite_);
 
-    // 4. 设置地图位置（会自动更新显示位置）
-    cannon_unit_->SetPosition(diamond_center.x, diamond_center.y);
+    cannon_unit_->SetPosition(21, 21);
 
-    // 5. 添加到战斗管理器（防守方）
     battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit_), false);
 }
 
-bool BattleTestLayer::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
-{
-    // 点击放置野蛮人
-    placeBarbarianAtScreenPos(touch->getLocation());
-    return true;
-}
 
 void BattleTestLayer::update(float delta)
 {

@@ -21,7 +21,7 @@ public:
         int gridCount);
 
     // 将屏幕坐标转换为地图(菱形)坐标！！！核心功能了
-    cocos2d::Vec2 convertScreenToMap(const cocos2d::Vec2& screenPos,
+    cocos2d::Vec2 convertScreenToDiamond(const cocos2d::Vec2& screenPos,
         cocos2d::Sprite* backgroundSprite);
 
     // 将菱形坐标转换为世界坐标

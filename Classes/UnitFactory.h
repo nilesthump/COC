@@ -67,10 +67,10 @@ public:
         BattleUnit* unit = CreateBarbarian(level);
 
         // 设置精灵
-        auto sprite = cocos2d::Sprite::create("BarbarianLv1.png");
+        auto sprite = cocos2d::Sprite::create("ArcherTowerLv1.png");
         if (sprite)
         {
-            sprite->setScale(0.5f);
+            sprite->setScale(0.3f);
             unit->SetSprite(sprite, parent);  //需要修改SetSprite方法
         }
 

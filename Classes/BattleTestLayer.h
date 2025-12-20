@@ -32,14 +32,12 @@ public:
     void menuFirstCallback(cocos2d::Ref* pSender);
     // 初始化函数
     void setupBattleScene();
-    void placeCannonAtGridCenter();
-    void placeBarbarianAtScreenPos(const cocos2d::Vec2& screenPos);
+    void placeCannon();
+    void placeBarbarian();
 
-    // 触摸事件
-    bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 
-    // 坐标转换辅助函数
-    cocos2d::Vec2 convertScreenToWorld(const cocos2d::Vec2& screenPos);
+
+
 
     CREATE_FUNC(BattleTestLayer);
 };
