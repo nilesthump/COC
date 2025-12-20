@@ -15,7 +15,7 @@ public:
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
 
-	// ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½
+
 	void update(float delta);
 
 	// Touch event handlers
@@ -59,7 +59,7 @@ private:
 	cocos2d::Label* elixirLabel; 
 	cocos2d::Label* elixirNameLabel; 
     
-    // é‡‘å¸ç›¸å…³æˆå‘˜å˜é‡
+    // ½ğ±ÒÏà¹Ø³ÉÔ±±äÁ¿
     cocos2d::Sprite* goldIcon; 
 	cocos2d::Label* goldLabel; 
 	cocos2d::Label* goldNameLabel; 
@@ -69,22 +69,22 @@ private:
 
 	std::vector<std::vector<cocos2d::Vec2>>* grids_;
 
-	// æ‹–æ‹½ç›¸å…³æˆå‘˜å˜é‡
+	// ÍÏ×§Ïà¹Ø³ÉÔ±±äÁ¿
 	cocos2d::MenuItemImage* houseBtn;
 	cocos2d::MenuItemImage* storageBtn;
-	cocos2d::MenuItemImage* draggingItem; // å½“å‰æ­£åœ¨æ‹–æ‹½çš„é¡¹
-	cocos2d::Vec2 dragStartPosition; // æ‹–æ‹½å¼€å§‹æ—¶çš„ä½ç½®
-	bool isDragging; // æ˜¯å¦æ­£åœ¨æ‹–æ‹½
+	cocos2d::MenuItemImage* draggingItem; // µ±Ç°ÕıÔÚÍÏ×§µÄÏî
+	cocos2d::Vec2 dragStartPosition; // ÍÏ×§¿ªÊ¼Ê±µÄÎ»ÖÃ
+	bool isDragging; // ÊÇ·ñÕıÔÚÍÏ×§
     
-    // å»ºç­‘ç§»åŠ¨ç›¸å…³æˆå‘˜å˜é‡
-    std::vector<cocos2d::Sprite*> placedBuildings; // å·²æ”¾ç½®çš„å»ºç­‘åˆ—è¡¨
-    cocos2d::Sprite* movingBuilding; // å½“å‰æ­£åœ¨ç§»åŠ¨çš„å»ºç­‘
-    bool isMovingBuilding; // æ˜¯å¦æ­£åœ¨ç§»åŠ¨å»ºç­‘
+    // ½¨ÖşÒÆ¶¯Ïà¹Ø³ÉÔ±±äÁ¿
+    std::vector<cocos2d::Sprite*> placedBuildings; // ÒÑ·ÅÖÃµÄ½¨ÖşÁĞ±í
+    cocos2d::Sprite* movingBuilding; // µ±Ç°ÕıÔÚÒÆ¶¯µÄ½¨Öş
+    bool isMovingBuilding; // ÊÇ·ñÕıÔÚÒÆ¶¯½¨Öş
 };
 
-//åœ£æ°´
+//Ê¥Ë®
 extern int g_elixirCount;
-//é‡‘å¸
+//½ğ±Ò
 extern int g_goldCount;
 
 #endif
