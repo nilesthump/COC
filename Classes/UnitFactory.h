@@ -62,16 +62,17 @@ public:
     }
 
     // 创建带有视觉效果的完整单位（用于场景直接使用）
-    static BattleUnit* CreateCompleteBarbarian(int level, cocos2d::Node* parent)
+    static BattleUnit* CreateCompleteBarbarian(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
     {
         BattleUnit* unit = CreateBarbarian(level);
 
+        unit->SetBackgroundSprite(background);
         // 设置精灵
         auto sprite = cocos2d::Sprite::create("ArcherTowerLv1.png");
         if (sprite)
         {
             sprite->setScale(0.3f);
-            unit->SetSprite(sprite, parent);  //需要修改SetSprite方法
+            unit->SetSprite(sprite, parent); //这里会调用UpdateSpritePosition
         }
 
         // 设置血条
@@ -84,10 +85,11 @@ public:
         return unit;
     }
 
-    static BattleUnit* CreateCompleteCannon(int level, cocos2d::Node* parent)
+    static BattleUnit* CreateCompleteCannon(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
     {
         BattleUnit* unit = CreateCannon(level);
 
+        unit->SetBackgroundSprite(background);
         // 设置精灵
         auto sprite = cocos2d::Sprite::create("ArcherTowerLv1.png");
         if (sprite)

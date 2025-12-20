@@ -20,8 +20,6 @@ private:
     cocos2d::Sprite* background_sprite_;
     cocos2d::Node* game_world_;  // 世界容器，包含所有游戏对象
 
-    // 加农炮单位指针（用于后续引用）
-    BattleUnit* cannon_unit_;
 
 public:
     static cocos2d::Scene* createScene();
@@ -34,8 +32,6 @@ public:
     void setupBattleScene();
     void placeCannon();
     void placeBarbarian();
-
-
 
 
 

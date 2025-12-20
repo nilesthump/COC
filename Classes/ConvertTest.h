@@ -8,138 +8,162 @@ USING_NS_CC;
 class ConvertTest
 {
 private:
-    // 数学常量
-    static constexpr float SIN_45 = 0.70710678118f;  // sqrt(2)/2
-    static constexpr float COS_45 = 0.70710678118f;  // sqrt(2)/2
+    // 菱形网格参数
+    static constexpr float HORIZONTAL_SPACING = 56.0f;   // 水平间距
+    static constexpr float VERTICAL_SPACING = 42.0f;     // 垂直间距
 
-    // 菱形网格参数（基于实际测量）
-    static constexpr float HORIZONTAL_SPACING = 56.0f;   // 菱形水平对角线长度
-    static constexpr float VERTICAL_SPACING = 42.0f;     // 菱形垂直对角线长度
-    static constexpr float CENTER_OFFSET_X = 21.5f;      // 菱形中心偏移倍数
+    // 背景图片中的菱形区域边界（像素坐标）
+    static constexpr int LEFT_X = 667;
+    static constexpr int RIGHT_X = 3705 - 556;  // 3149
+    static constexpr int TOP_Y = 264;
+    static constexpr int BOTTOM_Y = 2545 - 471; // 2074
 
-    // 背景图片中的菱形区域边界（像素坐标，相对于图片左上角）
-    static constexpr int LEFT_X = 667;           // 菱形左边界
-    static constexpr int RIGHT_X = 3705 - 556;   // 菱形右边界
-    static constexpr int TOP_Y = 264;            // 菱形上边界  
-    static constexpr int BOTTOM_Y = 2545 - 471;  // 菱形下边界
+    static constexpr int GRID_COUNT = 44;
 
 public:
+    // ============================================
+    // 核心转换：网格坐标 → game_world本地坐标
+    // ============================================
     /**
-     * 将屏幕坐标转换为逻辑坐标
-     * @param screenPos 屏幕坐标（原点：屏幕左下角）
+     * 参考DiamondGridManager::drawDiamondGrid的逻辑
+     * Vec2 dia = Vec2(leftCorner.x + (j + i) * horizontalSize / 2,
+     *                 leftCorner.y + (j - i) * verticalSize / 2);
+     *
+     * @param gridX 网格X坐标 (0-43，从左到右)
+     * @param gridY 网格Y坐标 (0-43，从下到上)
      * @param backgroundSprite 背景精灵
-     * @return 逻辑坐标（斜45度坐标系，原点：菱形网格左下角）
+     * @return game_world_本地坐标
      */
-    static Vec2 convertScreenToLogic(const Vec2& screenPos, Sprite* backgroundSprite)
+    static Vec2 convertGridToLocal(int gridX, int gridY, Sprite* backgroundSprite)
     {
         if (!backgroundSprite)
-        {
-            log("[ConvertTest] 错误：backgroundSprite为空");
             return Vec2::ZERO;
-        }
 
-        // 1. 计算菱形区域尺寸
-        float diamond_width = static_cast<float>(RIGHT_X - LEFT_X);    // 2482
-        float diamond_height = static_cast<float>(BOTTOM_Y - TOP_Y);   // 1810
+        // 1. 计算菱形区域的中心（相对于背景图片中心）
+        float diamond_center_x = (LEFT_X + RIGHT_X) / 2.0f;  // 1908
+        float diamond_center_y = (TOP_Y + BOTTOM_Y) / 2.0f;  // 1169
 
-        // 2. 获取背景精灵当前变换
-        float scale = backgroundSprite->getScale();
-        Vec2 background_pos = backgroundSprite->getPosition();
+        Vec2 diamond_center_absolute = Vec2(diamond_center_x, diamond_center_y);
 
-        // 3. 屏幕坐标 → 背景精灵局部坐标
-        Vec2 local_pos = screenPos - background_pos;
-
-        // 4. 局部坐标 → 图像像素坐标（考虑缩放）
-        Vec2 image_pos_relative_to_center = Vec2(
-            local_pos.x / scale,
-            local_pos.y / scale
+        // 转换为相对于背景精灵中心的坐标
+        Vec2 diamond_center = diamond_center_absolute - Vec2(
+            backgroundSprite->getContentSize().width / 2.0f,
+            backgroundSprite->getContentSize().height / 2.0f
         );
 
-        // 5. 计算菱形中心在图像坐标系中的位置
-        Vec2 diamond_center_absolute = Vec2(
-            (LEFT_X + RIGHT_X) / 2.0f,
-            (TOP_Y + BOTTOM_Y) / 2.0f
-        );
-        Vec2 diamond_center = diamond_center_absolute -
-            Vec2(backgroundSprite->getContentSize().width / 2,
-                backgroundSprite->getContentSize().height / 2);
+        // 2. 计算左角的位置（参考DiamondGridManager的逻辑）
+        // DiamondGridManager中：
+        // Vec2 leftCorner = Vec2(diamondCenterPos.x - 16 * horizontalSize,
+        //                        diamondCenterPos.y + 9 * verticalSize);
+        // 
+        // 这表示44x44网格的左角（gridX=0, gridY=43）的位置
+        // 实际上网格布局是：
+        //      (0,43)
+        //     /     \
+        // (0,22)   (21,43)
+        //   /  \   /  \
+        // (0,0)  (21,21) (43,43)
+        //        \  /   /
+        //       (21,0) (43,21)
+        //            \
+        //           (43,0)
 
-        // 6. 转换为菱形坐标系（原点：菱形中心）
-        Vec2 diamond_pos = image_pos_relative_to_center - diamond_center;
-
-        // 7. 关键转换：从菱形坐标系 → 斜45度逻辑坐标系
-        //    平移：+ HORIZONTAL_SPACING * CENTER_OFFSET_X
-        //    旋转：顺时针45度
-        Vec2 bridge1 = Vec2(
-            diamond_pos.x + HORIZONTAL_SPACING * CENTER_OFFSET_X,
-            diamond_pos.y
-        );
-
-        float x_new = COS_45 * bridge1.x - SIN_45 * bridge1.y;
-        float y_new = SIN_45 * bridge1.x + COS_45 * bridge1.y;
-
-        Vec2 logic_pos = Vec2(x_new, y_new);
-
-
-        return logic_pos;
-    }
-
-    /**
-     * 将逻辑坐标转换为显示坐标
-     * @param logicPos 逻辑坐标（斜45度坐标系）
-     * @param backgroundSprite 背景精灵
-     * @return 显示坐标（屏幕坐标）
-     */
-    static Vec2 convertLogicToDisplay(const Vec2& logicPos, Sprite* backgroundSprite)
-    {
-        if (!backgroundSprite)
-        {
-            log("[ConvertTest] 错误：backgroundSprite为空");
-            return Vec2::ZERO;
-        }
-
-        // 1. 计算菱形区域尺寸
-        float diamond_width = static_cast<float>(RIGHT_X - LEFT_X);
-        float diamond_height = static_cast<float>(BOTTOM_Y - TOP_Y);
-
-        // 2. 计算菱形中心在图像坐标系中的位置
-        Vec2 diamond_center_absolute = Vec2(
-            (LEFT_X + RIGHT_X) / 2.0f,
-            (TOP_Y + BOTTOM_Y) / 2.0f
-        );
-        Vec2 diamond_center = diamond_center_absolute -
-            Vec2(backgroundSprite->getContentSize().width / 2,
-                backgroundSprite->getContentSize().height / 2);
-
-        // 3. 关键转换：从斜45度逻辑坐标系 → 菱形坐标系
-        //    旋转：逆时针45度
-        //    平移：- HORIZONTAL_SPACING * CENTER_OFFSET_X
-        float x_rotated = COS_45 * logicPos.x + SIN_45 * logicPos.y;
-        float y_rotated = -SIN_45 * logicPos.x + COS_45 * logicPos.y;
-
-        Vec2 bridge1 = Vec2(
-            x_rotated - HORIZONTAL_SPACING * CENTER_OFFSET_X,
-            y_rotated
+        // 根据DiamondGridManager的偏移量计算左角
+        //! 整体网格调整在这里，如果整体偏右把-21.75调小，偏左调大；如果整体偏上把4.68调小，偏下调大
+        Vec2 left_corner = diamond_center + Vec2(
+            -21.75 * HORIZONTAL_SPACING, 
+            4.68 * VERTICAL_SPACING       
         );
 
-        Vec2 diamond_pos = bridge1;
-
-        // 4. 菱形坐标 → 图像像素坐标（相对于图像中心）
-        Vec2 image_pos_relative_to_center = diamond_pos + diamond_center;
-
-        // 5. 考虑背景缩放
-        float scale = backgroundSprite->getScale();
+        // 3. 使用DiamondGridManager的公式计算位置
+        // Vec2 dia = Vec2(leftCorner.x + (j + i) * horizontalSize / 2,
+        //                 leftCorner.y + (j - i) * verticalSize / 2);
+        // 这里gridX对应i，gridY对应j
         Vec2 local_pos = Vec2(
-            image_pos_relative_to_center.x * scale,
-            image_pos_relative_to_center.y * scale
+            left_corner.x + (gridY + gridX) * HORIZONTAL_SPACING / 2.0f,
+            left_corner.y + (gridY - gridX) * VERTICAL_SPACING / 2.0f
         );
 
-        // 6. 加上背景位置，得到场景坐标
-        Vec2 display_pos = local_pos + backgroundSprite->getPosition();
-
-        return display_pos;
+        return local_pos;
     }
 
+    // ============================================
+    // 核心转换：game_world本地坐标 → 网格坐标
+    // ============================================
+    /**
+     * 逆向转换
+     * 已知：
+     * x = leftCorner.x + (gridY + gridX) * (H/2)
+     * y = leftCorner.y + (gridY - gridX) * (V/2)
+     *
+     * 求解：
+     * gridY = [(x - leftCorner.x) / (H/2) + (y - leftCorner.y) / (V/2)] / 2
+     * gridX = [(x - leftCorner.x) / (H/2) - (y - leftCorner.y) / (V/2)] / 2
+     */
+    static Vec2 convertLocalToGrid(const Vec2& localPos, Sprite* backgroundSprite)
+    {
+        if (!backgroundSprite)
+            return Vec2::ZERO;
+
+        // 1. 计算菱形中心和左角
+        float diamond_center_x = (LEFT_X + RIGHT_X) / 2.0f;
+        float diamond_center_y = (TOP_Y + BOTTOM_Y) / 2.0f;
+
+        Vec2 diamond_center_absolute = Vec2(diamond_center_x, diamond_center_y);
+        Vec2 diamond_center = diamond_center_absolute - Vec2(
+            backgroundSprite->getContentSize().width / 2.0f,
+            backgroundSprite->getContentSize().height / 2.0f
+        );
+
+        // 使用与convertGridToLocal相同的左角计算
+        Vec2 left_corner = diamond_center + Vec2(
+            -21.75 * HORIZONTAL_SPACING,
+            4.68 * VERTICAL_SPACING
+        );
+
+        // 2. 计算相对于左角的偏移
+        Vec2 relative = localPos - left_corner;
+
+        // 3. 逆向计算网格坐标
+        float norm_x = relative.x / (HORIZONTAL_SPACING / 2.0f);
+        float norm_y = relative.y / (VERTICAL_SPACING / 2.0f);
+
+        float gridY = (norm_x + norm_y) / 2.0f;
+        float gridX = (norm_x - norm_y) / 2.0f;
+
+        return Vec2(gridX, gridY);
+    }
+
+    // ============================================
+    // 辅助转换：屏幕坐标 → 网格坐标
+    // ============================================
+    static Vec2 convertScreenToGrid(
+        const Vec2& screenPos,
+        Sprite* backgroundSprite,
+        Node* gameWorld)
+    {
+        if (!backgroundSprite || !gameWorld)
+            return Vec2::ZERO;
+
+        Vec2 localPos = gameWorld->convertToNodeSpace(screenPos);
+        return convertLocalToGrid(localPos, backgroundSprite);
+    }
+
+    // ============================================
+    // 辅助转换：网格坐标 → 屏幕坐标
+    // ============================================
+    static Vec2 convertGridToScreen(
+        int gridX,
+        int gridY,
+        Sprite* backgroundSprite,
+        Node* gameWorld)
+    {
+        if (!backgroundSprite || !gameWorld)
+            return Vec2::ZERO;
+
+        Vec2 localPos = convertGridToLocal(gridX, gridY, backgroundSprite);
+        return gameWorld->convertToWorldSpace(localPos);
+    }
 };
 
 #endif // _CONVERT_TEST_

@@ -7,6 +7,7 @@ BattleUnit::BattleUnit()
 	: target_(nullptr),
 	unit_sprite_(nullptr),
 	health_bar_bg_(nullptr),
+	background_sprite_(nullptr),
 	health_bar_(nullptr),
 	parent_node_(nullptr)
 {}
@@ -26,42 +27,42 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	if (!state_.IsAlive())
 		return;
 
-	//1.行为更新
-	if (behavior_)
-	{
-		behavior_->OnUpdate(this, deltaTime);
-	}
+	////1.行为更新
+	//if (behavior_)
+	//{
+	//	behavior_->OnUpdate(this, deltaTime);
+	//}
 
-	//2.寻找目标
-	if (navigation_ && (!target_ || !target_->IsAlive()))
-	{
-		target_ = navigation_->FindTarget(this, enemies);
-	}
+	////2.寻找目标
+	//if (navigation_ && (!target_ || !target_->IsAlive()))
+	//{
+	//	target_ = navigation_->FindTarget(this, enemies);
+	//}
 
-	//3.移动
-	if (navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
-	{
-		navigation_->CalculateMove(this, target_, deltaTime);
-	}
+	////3.移动
+	//if (navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
+	//{
+	//	navigation_->CalculateMove(this, target_, deltaTime);
+	//}
 
-	//4.攻击
-	if (behavior_ && target_ && navigation_ &&
-		navigation_->IsInAttackRange(this, target_) &&
-		state_.CanAttack())
-	{
-		if (behavior_->CanAttack(this, target_))
-		{
-			float damage = behavior_->CalculateDamage(this, target_);
-			target_->TakeDamage(damage, this);
-			behavior_->OnAttack(this, target_);
-			state_.ResetAttackCooldown();
-			//播放攻击音效
-			PlayAttackSound();
-		}
-	}
+	////4.攻击
+	//if (behavior_ && target_ && navigation_ &&
+	//	navigation_->IsInAttackRange(this, target_) &&
+	//	state_.CanAttack())
+	//{
+	//	if (behavior_->CanAttack(this, target_))
+	//	{
+	//		float damage = behavior_->CalculateDamage(this, target_);
+	//		target_->TakeDamage(damage, this);
+	//		behavior_->OnAttack(this, target_);
+	//		state_.ResetAttackCooldown();
+	//		//播放攻击音效
+	//		PlayAttackSound();
+	//	}
+	//}
 
-	//5.更新状态
-	state_.UpdateCoolDowns(deltaTime);
+	////5.更新状态
+	//state_.UpdateCoolDowns(deltaTime);
 
 	//6.更新视觉表现
 	UpdateSpritePosition();
@@ -296,13 +297,19 @@ Node* BattleUnit::GetParentNode() const
 
 void BattleUnit::UpdateSpritePosition()
 {
-	if (unit_sprite_ && background_sprite_)
-	{
-		cocos2d::Vec2 sprite_position;
-		const cocos2d::Vec2 logic_position = Vec2(state_.GetPositionX(), state_.GetPositionY());
-		sprite_position = ConvertTest::convertLogicToDisplay(logic_position, background_sprite_);
-		unit_sprite_->setPosition(sprite_position);
-	}
+	if (!unit_sprite_ || !background_sprite_ || !parent_node_)
+		return;
+	// 使用新的转换方法
+	// state_中存储的是网格坐标(0-43, 0-43)
+	Vec2 local_pos = ConvertTest::convertGridToLocal(
+		static_cast<int>(state_.GetPositionX()),
+		static_cast<int>(state_.GetPositionY()),
+		background_sprite_
+	);
+
+	// 设置相对于game_world_的本地坐标
+	// 这样当background缩放/移动时，单位会自动跟随
+	unit_sprite_->setPosition(local_pos);
 }
 
 void BattleUnit::UpdateHealthBar()
@@ -314,23 +321,21 @@ void BattleUnit::UpdateHealthBar()
 		return;
 	}
 
-	// 如果没有背景精灵，直接返回
-	if (!background_sprite_)
-		return;
+	// 获取单位的本地坐标
+	Vec2 unit_local_pos = ConvertTest::convertGridToLocal(
+		static_cast<int>(state_.GetPositionX()),
+		static_cast<int>(state_.GetPositionY()),
+		background_sprite_
+	);
 
-	cocos2d::Vec2 unit_display_pos;
-	const cocos2d::Vec2 logic_position = Vec2(state_.GetPositionX(), state_.GetPositionY());
-	unit_display_pos = ConvertTest::convertLogicToDisplay(logic_position, background_sprite_);
-
-
-	// 更新血条位置（在单位上方）
-	Vec2 health_bar_offset(0, 30);  // 血条在单位上方30像素
-	Vec2 health_bar_pos = unit_display_pos + health_bar_offset;
+	// 血条在单位上方30像素（本地坐标）
+	Vec2 health_bar_pos = unit_local_pos + Vec2(0, 30);
 
 	if (health_bar_bg_)
 	{
 		health_bar_bg_->setPosition(health_bar_pos);
 	}
+
 	if (health_bar_)
 	{
 		health_bar_->setPosition(health_bar_pos);
