@@ -1,6 +1,7 @@
 #if 1
 #include "HelloWorldScene.h"
 #include "SecondScene.h"
+#include "GoldMine.h"
 #include "cocos2d.h"
 #include <cmath>
 
@@ -105,8 +106,8 @@ bool SecondScene::init()
 
     // 创建房子按钮
     houseBtn = MenuItemImage::create(
-        "ArcherTowerLv10.png",
-        "ArcherTowerLv10.png",
+        "GoldMineLv1.png",
+        "GoldMineLv1.png",
         [=](Ref* pSender) {
             if (!isDragging) {
                 log("house ");
@@ -114,20 +115,28 @@ bool SecondScene::init()
                 draggingItem = houseBtn;
                 dragStartPosition = houseBtn->getPosition();
                 
-                // 创建拖拽副本
-                auto dragSprite = Sprite::create("ArcherTowerLv10.png");
-                if (dragSprite) {
-                    // 获取按钮在屏幕上的位置
+                auto goldMinePreview = GoldMine::create(
+                    0, 0,        // 网格坐标
+                    100,         // 初始血量
+                    1,           // 初始等级
+                    2.0f,        // 产金速度
+                    "GoldMineLv1.png"  // 纹理
+                );
+
+                if (goldMinePreview) {
+                    goldMinePreview->setOpacity(150);
+                    goldMinePreview->setScale(0.5f);
+
+                    // --- 修复：getParent()的对象是houseBtn ---
                     Vec2 worldPos = houseBtn->getParent()->convertToWorldSpace(houseBtn->getPosition());
-                    // 转换为背景精灵的本地坐标
                     Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    dragSprite->setScale(1.0f);
-                    dragSprite->setPosition(localPos);
-                    background_sprite_->addChild(dragSprite, 10);
-                    houseBtn->setUserData(dragSprite);
+                    goldMinePreview->setPosition(localPos);
+
+                    background_sprite_->addChild(goldMinePreview, 10);
+                    // --- 修复：setUserData的对象是houseBtn ---
+                    houseBtn->setUserData(goldMinePreview);
                 }
-                
-                // 移除隐藏按钮的代码，这样在拖拽时原始按钮仍然可见
+
                 // houseBtn->setVisible(false);
             }
         }
@@ -483,7 +492,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             // 在有效区域内，可以放置
             
             // 根据拖拽的按钮获取相应的纹理名称
-            std::string textureName = (draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png");
+            std::string textureName = (draggingItem == houseBtn ? "GoldMineLv1.png" : "CannonLv10.png");
             
             // 创建一个放置后的精灵
             auto placedSprite = Sprite::create(textureName);
