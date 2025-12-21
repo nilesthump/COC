@@ -130,7 +130,6 @@ bool SecondScene::init()
                     Vec2 worldPos = goldMineBtn->getParent()->convertToWorldSpace(goldMineBtn->getPosition());
                     Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
                     goldMinePreview->setMinePosition(localPos);
-
                     // 添加到背景精灵，并保存到按钮的UserData
                     background_sprite_->addChild(goldMinePreview, 10);
                     goldMineBtn->setUserData(goldMinePreview);
@@ -165,8 +164,8 @@ bool SecondScene::init()
 
                     // 计算预览初始位置（和原来的逻辑一致）
                     Vec2 worldPos = elixirCollectorBtn->getParent()->convertToWorldSpace(elixirCollectorBtn->getPosition());
-                    Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    elixirCollectorPreview->setMinePosition(localPos);
+                    //Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
+                    elixirCollectorPreview->setMinePosition(worldPos);
 
                     // 添加到背景精灵，并保存到按钮的UserData
                     background_sprite_->addChild(elixirCollectorPreview, 10);

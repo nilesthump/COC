@@ -80,9 +80,6 @@ private:
 	bool isDragging; // 是否正在拖拽
     
     // 建筑移动相关成员变量
-    //std::vector<cocos2d::Sprite*> placedBuildings; // 已放置的建筑列表
-
-    //cocos2d::Sprite* movingBuilding; // 当前正在移动的建筑
 	GoldMine* movingGoldMine;
 	ElixirCollector* movingElixirCollector;
     bool isMovingBuilding; // 是否正在移动建筑

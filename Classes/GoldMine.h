@@ -22,6 +22,9 @@ public:
     virtual bool init(const std::string& textureName, int hp, float goldSpeed);
 
     // --- 对外接口 ---
+    
+   
+    
     // 设置/获取位置（复用Node的position，锚点内部管理）
     void setMinePosition(const cocos2d::Vec2& pos) { this->setPosition(pos); }
     cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }
