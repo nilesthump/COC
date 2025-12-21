@@ -32,7 +32,7 @@ bool ZoomScrollManager::init(Sprite* targetSprite, float minScale, float maxScal
     is_scaling_ = false;
     previous_distance_ = 0.0f;
     scale_center_ = Vec2::ZERO;
-
+#if 0
     // Ìí¼Óµ¥µã´¥Ãþ¼àÌýÆ÷£¨ÍÏ×§£©
     auto touch_listener = EventListenerTouchOneByOne::create();
     touch_listener->setSwallowTouches(true);
@@ -54,7 +54,7 @@ bool ZoomScrollManager::init(Sprite* targetSprite, float minScale, float maxScal
     multi_touch_listener->onTouchesEnded = CC_CALLBACK_2(ZoomScrollManager::onTouchesEnded, this);
     multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(ZoomScrollManager::onTouchesCancelled, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
-
+#endif
     return true;
 }
 

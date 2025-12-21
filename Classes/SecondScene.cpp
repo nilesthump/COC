@@ -4,7 +4,7 @@
 #include "cocos2d.h"
 #include <cmath>
 
-// ³õÊ¼»¯È«¾Ö±äÁ¿
+// åˆå§‹åŒ–å…¨å±€å˜é‡
 int g_elixirCount = 0;
 int g_goldCount = 0;
 
@@ -103,7 +103,7 @@ bool SecondScene::init()
     }
 
 
-    // ´´½¨·¿×Ó°´Å¥
+    // åˆ›å»ºæˆ¿å­æŒ‰é’®
     houseBtn = MenuItemImage::create(
         "ArcherTowerLv10.png",
         "ArcherTowerLv10.png",
@@ -114,12 +114,12 @@ bool SecondScene::init()
                 draggingItem = houseBtn;
                 dragStartPosition = houseBtn->getPosition();
                 
-                // ´´½¨ÍÏ×§¸±±¾
+                // åˆ›å»ºæ‹–æ‹½å‰¯æœ¬
                 auto dragSprite = Sprite::create("ArcherTowerLv10.png");
                 if (dragSprite) {
-                    // »ñÈ¡°´Å¥ÔÚÆÁÄ»ÉÏµÄÎ»ÖÃ
+                    // è·å–æŒ‰é’®åœ¨å±å¹•ä¸Šçš„ä½ç½®
                     Vec2 worldPos = houseBtn->getParent()->convertToWorldSpace(houseBtn->getPosition());
-                    // ×ª»»Îª±³¾°¾«ÁéµÄ±¾µØ×ø±ê
+                    // è½¬æ¢ä¸ºèƒŒæ™¯ç²¾çµçš„æœ¬åœ°åæ ‡
                     Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
                     dragSprite->setScale(1.0f);
                     dragSprite->setPosition(localPos);
@@ -127,7 +127,7 @@ bool SecondScene::init()
                     houseBtn->setUserData(dragSprite);
                 }
                 
-                // ÒÆ³ıÒş²Ø°´Å¥µÄ´úÂë£¬ÕâÑùÔÚÍÏ×§Ê±Ô­Ê¼°´Å¥ÈÔÈ»¿É¼û
+                // ç§»é™¤éšè—æŒ‰é’®çš„ä»£ç ï¼Œè¿™æ ·åœ¨æ‹–æ‹½æ—¶åŸå§‹æŒ‰é’®ä»ç„¶å¯è§
                 // houseBtn->setVisible(false);
             }
         }
@@ -138,7 +138,7 @@ bool SecondScene::init()
     houseBtn->setScale(0.5f);
 
 
-    // ´´½¨²Ö¿â°´Å¥
+    // åˆ›å»ºä»“åº“æŒ‰é’®
     storageBtn = MenuItemImage::create(
         "CannonLv10.png",
         "CannonLv10.png",
@@ -149,12 +149,12 @@ bool SecondScene::init()
                 draggingItem = storageBtn;
                 dragStartPosition = storageBtn->getPosition();
                 
-                // ´´½¨ÍÏ×§¸±±¾
+                // åˆ›å»ºæ‹–æ‹½å‰¯æœ¬
                 auto dragSprite = Sprite::create("CannonLv10.png");
                 if (dragSprite) {
-                    // »ñÈ¡°´Å¥ÔÚÆÁÄ»ÉÏµÄÎ»ÖÃ
+                    // è·å–æŒ‰é’®åœ¨å±å¹•ä¸Šçš„ä½ç½®
                     Vec2 worldPos = storageBtn->getParent()->convertToWorldSpace(storageBtn->getPosition());
-                    // ×ª»»Îª±³¾°¾«ÁéµÄ±¾µØ×ø±ê
+                    // è½¬æ¢ä¸ºèƒŒæ™¯ç²¾çµçš„æœ¬åœ°åæ ‡
                     Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
                     dragSprite->setScale(1.0f);
                     dragSprite->setPosition(localPos);
@@ -162,7 +162,7 @@ bool SecondScene::init()
                     storageBtn->setUserData(dragSprite);
                 }
                 
-                // ÒÆ³ıÒş²Ø°´Å¥µÄ´úÂë£¬ÕâÑùÔÚÍÏ×§Ê±Ô­Ê¼°´Å¥ÈÔÈ»¿É¼û
+                // ç§»é™¤éšè—æŒ‰é’®çš„ä»£ç ï¼Œè¿™æ ·åœ¨æ‹–æ‹½æ—¶åŸå§‹æŒ‰é’®ä»ç„¶å¯è§
                 // storageBtn->setVisible(false);
             }
         }
@@ -177,11 +177,11 @@ bool SecondScene::init()
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
 
-    // ³õÊ¼»¯ÍÏ×§×´Ì¬
+    // åˆå§‹åŒ–æ‹–æ‹½çŠ¶æ€
     isDragging = false;
     draggingItem = nullptr;
     
-    // ³õÊ¼»¯½¨ÖşÒÆ¶¯Ïà¹Ø±äÁ¿
+    // åˆå§‹åŒ–å»ºç­‘ç§»åŠ¨ç›¸å…³å˜é‡
     isMovingBuilding = false;
     movingBuilding = nullptr;
 
@@ -213,92 +213,92 @@ bool SecondScene::init()
         this->addChild(background_sprite_, 0);
     }
 
-    // ´´½¨Ëõ·Å¹ÜÀíÆ÷
+    // åˆ›å»ºç¼©æ”¾ç®¡ç†å™¨
     zoom_manager_ = ZoomScrollManager::create(background_sprite_, 0.5f, 2.0f);
     this->addChild(zoom_manager_);
 
-    // ³õÊ¼»¯ÁâĞÎÎ»ÖÃĞÅÏ¢£¨¸ù¾İÔ­ÓĞ²âÁ¿Êı¾İ£©
-    int left_x = 667;          // ×ó¶¥µãx×ø±ê£¨¾à×ó±ß½ç£©
-    int right_x = 3705 - 556;  // ÓÒ¶¥µãx×ø±ê£¨Í¼Ïñ¿í¶È - ¾àÓÒ±ß½ç¾àÀë£©
-    int top_y = 264;           // ÉÏ¶¥µãy×ø±ê£¨¾àÉÏ±ß½ç£©
-    int bottom_y = 2545 - 471; // ÏÂ¶¥µãy×ø±ê£¨Í¼Ïñ¸ß¶È - ¾àÏÂ±ß½ç¾àÀë£©
+    // åˆå§‹åŒ–è±å½¢ä½ç½®ä¿¡æ¯ï¼ˆæ ¹æ®åŸæœ‰æµ‹é‡æ•°æ®ï¼‰
+    int left_x = 667;          // å·¦é¡¶ç‚¹xåæ ‡ï¼ˆè·å·¦è¾¹ç•Œï¼‰
+    int right_x = 3705 - 556;  // å³é¡¶ç‚¹xåæ ‡ï¼ˆå›¾åƒå®½åº¦ - è·å³è¾¹ç•Œè·ç¦»ï¼‰
+    int top_y = 264;           // ä¸Šé¡¶ç‚¹yåæ ‡ï¼ˆè·ä¸Šè¾¹ç•Œï¼‰
+    int bottom_y = 2545 - 471; // ä¸‹é¡¶ç‚¹yåæ ‡ï¼ˆå›¾åƒé«˜åº¦ - è·ä¸‹è¾¹ç•Œè·ç¦»ï¼‰
 
-    float diamond_width = right_x - left_x;       // ÁâĞÎ¿í¶È: 3149 - 667 = 2482
-    float diamond_height = bottom_y - top_y;      // ÁâĞÎ¸ß¶È: 2074 - 264 = 1810
+    float diamond_width = right_x - left_x;       // è±å½¢å®½åº¦: 3149 - 667 = 2482
+    float diamond_height = bottom_y - top_y;      // è±å½¢é«˜åº¦: 2074 - 264 = 1810
 
-    // ¼ÆËãÁâĞÎÖĞĞÄÏà¶ÔÓÚ±³¾°¾«ÁéÖĞĞÄµÄÎ»ÖÃ
+    // è®¡ç®—è±å½¢ä¸­å¿ƒç›¸å¯¹äºèƒŒæ™¯ç²¾çµä¸­å¿ƒçš„ä½ç½®
     Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
     Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2);
 
-    // ´´½¨ÁâĞÎÍø¸ñ¹ÜÀíÆ÷
+    // åˆ›å»ºè±å½¢ç½‘æ ¼ç®¡ç†å™¨
     grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 44);
     this->addChild(grid_manager_);
 
-    // »æÖÆÁâĞÎÍø¸ñ
+    // ç»˜åˆ¶è±å½¢ç½‘æ ¼
     grids_ = grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
 
-    // ´´½¨×ø±êÏÔÊ¾±êÇ©
-    coordinate_label_ = Label::createWithTTF("×ø±ê: ", "fonts/STZhongSong_Bold.ttf", 20);
+    // åˆ›å»ºåæ ‡æ˜¾ç¤ºæ ‡ç­¾
+    coordinate_label_ = Label::createWithTTF("åæ ‡: ", "fonts/STZhongSong_Bold.ttf", 20);
     coordinate_label_->setColor(Color3B::YELLOW);
     coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
     this->addChild(coordinate_label_, 2);
   
-    // ´´½¨Ê¥Ë®Í¼±êºÍ±êÇ©
-    // ³¢ÊÔ¼ÓÔØÊ¥Ë®Í¼±ê£¬Èç¹ûÊ§°ÜÔòÊ¹ÓÃHelloWorld.png×÷ÎªÌæ´ú
-    elixirIcon = Sprite::create("btn_normal.png"); // Êµ¼ÊÏîÄ¿ÖĞÓ¦¸ÃÌæ»»ÎªÕıÈ·µÄÊ¥Ë®Í¼±ê×ÊÔ´Ãû
+    // åˆ›å»ºåœ£æ°´å›¾æ ‡å’Œæ ‡ç­¾
+    // å°è¯•åŠ è½½åœ£æ°´å›¾æ ‡ï¼Œå¦‚æœå¤±è´¥åˆ™ä½¿ç”¨HelloWorld.pngä½œä¸ºæ›¿ä»£
+    elixirIcon = Sprite::create("btn_normal.png"); // å®é™…é¡¹ç›®ä¸­åº”è¯¥æ›¿æ¢ä¸ºæ­£ç¡®çš„åœ£æ°´å›¾æ ‡èµ„æºå
     if (elixirIcon == nullptr)
     {
-        problemLoading("'btn_normal.png' (×÷ÎªÊ¥Ë®Í¼±êµÄÌæ´ú)");
+        problemLoading("'btn_normal.png' (ä½œä¸ºåœ£æ°´å›¾æ ‡çš„æ›¿ä»£)");
     }
     else
     {
-        // ÉèÖÃÍ¼±êÎ»ÖÃºÍ´óĞ¡
+        // è®¾ç½®å›¾æ ‡ä½ç½®å’Œå¤§å°
         elixirIcon->setPosition(Vec2(origin.x + visibleSize.width - elixirIcon->getContentSize().width / 4, origin.y + visibleSize.height - elixirIcon->getContentSize().height / 4));
         elixirIcon->setScale(0.5f);
         this->addChild(elixirIcon, 2);
 
-        // ´´½¨"Ê¥Ë®"ÎÄ×Ö±êÇ©
-        elixirNameLabel = Label::createWithTTF("Ê¥Ë®", "fonts/STZhongSong_Bold.ttf", 20);
+        // åˆ›å»º"åœ£æ°´"æ–‡å­—æ ‡ç­¾
+        elixirNameLabel = Label::createWithTTF("åœ£æ°´", "fonts/STZhongSong_Bold.ttf", 20);
         elixirNameLabel->setColor(Color3B::BLUE);
         elixirNameLabel->setPosition(Vec2(elixirIcon->getPositionX() - elixirNameLabel->getContentSize().width / 2, elixirIcon->getPositionY()));
         this->addChild(elixirNameLabel, 2);
 
-        // ´´½¨Ê¥Ë®ÊıÁ¿±êÇ©
+        // åˆ›å»ºåœ£æ°´æ•°é‡æ ‡ç­¾
         elixirLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
         elixirLabel->setColor(Color3B::BLUE);
         elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 40, elixirIcon->getPositionY()));
         this->addChild(elixirLabel, 2);
     }
 
-    // ´´½¨½ğ±ÒÍ¼±êºÍ±êÇ©
-    // ³¢ÊÔ¼ÓÔØ½ğ±ÒÍ¼±ê£¬Èç¹ûÊ§°ÜÔòÊ¹ÓÃbtn_pressed.png×÷ÎªÌæ´ú
-    goldIcon = Sprite::create("btn_pressed.png"); // Êµ¼ÊÏîÄ¿ÖĞÓ¦¸ÃÌæ»»ÎªÕıÈ·µÄ½ğ±ÒÍ¼±ê×ÊÔ´Ãû
+    // åˆ›å»ºé‡‘å¸å›¾æ ‡å’Œæ ‡ç­¾
+    // å°è¯•åŠ è½½é‡‘å¸å›¾æ ‡ï¼Œå¦‚æœå¤±è´¥åˆ™ä½¿ç”¨btn_pressed.pngä½œä¸ºæ›¿ä»£
+    goldIcon = Sprite::create("btn_pressed.png"); // å®é™…é¡¹ç›®ä¸­åº”è¯¥æ›¿æ¢ä¸ºæ­£ç¡®çš„é‡‘å¸å›¾æ ‡èµ„æºå
     if (goldIcon == nullptr)
     {
-        problemLoading("'btn_pressed.png' (×÷Îª½ğ±ÒÍ¼±êµÄÌæ´ú)");
+        problemLoading("'btn_pressed.png' (ä½œä¸ºé‡‘å¸å›¾æ ‡çš„æ›¿ä»£)");
     }
     else
     {
-        // ÉèÖÃÍ¼±êÎ»ÖÃºÍ´óĞ¡£¬½ô°¤×ÅÊ¥Ë®Í¼±ê
-        float spacing = 40.0f; // ÓëÊ¥Ë®Í¼±êÖ®¼äµÄ¼ä¾à
+        // è®¾ç½®å›¾æ ‡ä½ç½®å’Œå¤§å°ï¼Œç´§æŒ¨ç€åœ£æ°´å›¾æ ‡
+        float spacing = 40.0f; // ä¸åœ£æ°´å›¾æ ‡ä¹‹é—´çš„é—´è·
         goldIcon->setPosition(Vec2(elixirIcon->getPositionX(), elixirIcon->getPositionY()-spacing));
         goldIcon->setScale(0.5f);
         this->addChild(goldIcon, 2);
 
-        // ´´½¨"½ğ±Ò"ÎÄ×Ö±êÇ©
-        goldNameLabel = Label::createWithTTF("½ğ±Ò", "fonts/STZhongSong_Bold.ttf", 20);
+        // åˆ›å»º"é‡‘å¸"æ–‡å­—æ ‡ç­¾
+        goldNameLabel = Label::createWithTTF("é‡‘å¸", "fonts/STZhongSong_Bold.ttf", 20);
         goldNameLabel->setColor(Color3B::YELLOW);
         goldNameLabel->setPosition(Vec2(goldIcon->getPositionX() - goldNameLabel->getContentSize().width / 2, goldIcon->getPositionY()));
         this->addChild(goldNameLabel, 2);
 
-        // ´´½¨½ğ±ÒÊıÁ¿±êÇ©
+        // åˆ›å»ºé‡‘å¸æ•°é‡æ ‡ç­¾
         goldLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
         goldLabel->setColor(Color3B::YELLOW);
         goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 40, goldIcon->getPositionY()));
         this->addChild(goldLabel, 2);
     }
 
-    // ÉèÖÃÊÂ¼ş¼àÌıÆ÷£¨Ê¹ÓÃĞÂÀàµÄ³ÉÔ±º¯Êı£©
+    // è®¾ç½®äº‹ä»¶ç›‘å¬å™¨ï¼ˆä½¿ç”¨æ–°ç±»çš„æˆå‘˜å‡½æ•°ï¼‰
 
     auto touch_listener = EventListenerTouchOneByOne::create();
     touch_listener->setSwallowTouches(true);
@@ -320,7 +320,7 @@ bool SecondScene::init()
     multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(SecondScene::onTouchesCancelled, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
 
-    // Æô¶¯¶¨Ê±Æ÷£¬Ã¿Ãë¸üĞÂÒ»´Î
+    // å¯åŠ¨å®šæ—¶å™¨ï¼Œæ¯ç§’æ›´æ–°ä¸€æ¬¡
     this->scheduleUpdate();
 
     return true;
@@ -328,32 +328,32 @@ bool SecondScene::init()
 
 void SecondScene::update(float delta)
 {
-    // ÀÛ¼ÆÊ±¼ä²¢Ã¿ÃëÔö¼ÓÊ¥Ë®ÊıÁ¿
+    // ç´¯è®¡æ—¶é—´å¹¶æ¯ç§’å¢åŠ åœ£æ°´æ•°é‡
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
 
-    // µ±¾­¹ı1ÃëÊ±
+    // å½“ç»è¿‡1ç§’æ—¶
     if (elapsedTime >= 1.0f)
     {
-        // Ôö¼ÓÊ¥Ë®ÊıÁ¿
+        // å¢åŠ åœ£æ°´æ•°é‡
         g_elixirCount++;
         
-        // Ôö¼Ó½ğ±ÒÊıÁ¿
+        // å¢åŠ é‡‘å¸æ•°é‡
         g_goldCount++;
 
-        // ¸üĞÂ±êÇ©ÏÔÊ¾
+        // æ›´æ–°æ ‡ç­¾æ˜¾ç¤º
         if (elixirLabel)
         {
             elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
         }
         
-        // ¸üĞÂ½ğ±Ò±êÇ©ÏÔÊ¾
+        // æ›´æ–°é‡‘å¸æ ‡ç­¾æ˜¾ç¤º
         if (goldLabel)
         {
             goldLabel->setString(StringUtils::format("%d", g_goldCount));
         }
 
-        // ÖØÖÃ¼ÆÊ±Æ÷
+        // é‡ç½®è®¡æ—¶å™¨
         elapsedTime = 0.0f;
     }
 }
@@ -371,20 +371,20 @@ void SecondScene::menuBuildCallback(Ref* pSender)
 
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 {
-    // ²»ĞèÒª¼ì²â°´Å¥µã»÷£¬ÒòÎªÒÑ¾­ÔÚ°´Å¥»Øµ÷ÖĞ´¦ÀíÁË
-    // Ö»´¦ÀíÍÏ×§×´Ì¬ÏÂµÄÂß¼­¡¢½¨ÖşÒÆ¶¯Âß¼­ºÍËõ·Å¹ÜÀíÆ÷µÄÂß¼­
+    // ä¸éœ€è¦æ£€æµ‹æŒ‰é’®ç‚¹å‡»ï¼Œå› ä¸ºå·²ç»åœ¨æŒ‰é’®å›è°ƒä¸­å¤„ç†äº†
+    // åªå¤„ç†æ‹–æ‹½çŠ¶æ€ä¸‹çš„é€»è¾‘ã€å»ºç­‘ç§»åŠ¨é€»è¾‘å’Œç¼©æ”¾ç®¡ç†å™¨çš„é€»è¾‘
     
     if (isDragging) {
-        return true; // ÕıÔÚÍÏ×§Ê±·µ»Øtrue£¬±£³ÖÊÂ¼ş±»²¶»ñ
+        return true; // æ­£åœ¨æ‹–æ‹½æ—¶è¿”å›trueï¼Œä¿æŒäº‹ä»¶è¢«æ•è·
     }
     
-    // ¼ì²éÊÇ·ñµã»÷ÁËÒÑ·ÅÖÃµÄ½¨Öş
+    // æ£€æŸ¥æ˜¯å¦ç‚¹å‡»äº†å·²æ”¾ç½®çš„å»ºç­‘
     Vec2 touchPos = touch->getLocation();
     for (auto& building : placedBuildings) {
-        // ½«½¨ÖşÎ»ÖÃ×ª»»ÎªÆÁÄ»×ø±ê
+        // å°†å»ºç­‘ä½ç½®è½¬æ¢ä¸ºå±å¹•åæ ‡
         Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
         
-        // ¼ÆËã½¨ÖşµÄ±ß½ç¿ò
+        // è®¡ç®—å»ºç­‘çš„è¾¹ç•Œæ¡†
         Size buildingSize = building->getContentSize();
         float scale = building->getScale();
         Rect buildingRect(buildingScreenPos.x - buildingSize.width * scale / 2,
@@ -392,60 +392,60 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
                           buildingSize.width * scale,
                           buildingSize.height * scale);
         
-        // ¼ì²éµã»÷ÊÇ·ñÔÚ½¨Öş·¶Î§ÄÚ
+        // æ£€æŸ¥ç‚¹å‡»æ˜¯å¦åœ¨å»ºç­‘èŒƒå›´å†…
         if (buildingRect.containsPoint(touchPos)) {
-            // ÕÒµ½±»µã»÷µÄ½¨Öş
+            // æ‰¾åˆ°è¢«ç‚¹å‡»çš„å»ºç­‘
             isMovingBuilding = true;
             movingBuilding = building;
             
-            // ÉèÖÃ½¨ÖşÎª°ëÍ¸Ã÷×´Ì¬
-            building->setOpacity(128); // 255Îª²»Í¸Ã÷£¬128Îª°ëÍ¸Ã÷
+            // è®¾ç½®å»ºç­‘ä¸ºåŠé€æ˜çŠ¶æ€
+            building->setOpacity(128); // 255ä¸ºä¸é€æ˜ï¼Œ128ä¸ºåŠé€æ˜
             
-            // ½«½¨ÖşÒÆµ½×î¶¥²ã
+            // å°†å»ºç­‘ç§»åˆ°æœ€é¡¶å±‚
             background_sprite_->reorderChild(building, 20);
             return true;
         }
     }
     
-    // Èç¹ûÃ»ÓĞÍÏ×§ÇÒÃ»ÓĞµã»÷½¨Öş£¬ÔòÊ¹ÓÃËõ·Å¹ÜÀíÆ÷µÄ´¥Ãş´¦Àí
+    // å¦‚æœæ²¡æœ‰æ‹–æ‹½ä¸”æ²¡æœ‰ç‚¹å‡»å»ºç­‘ï¼Œåˆ™ä½¿ç”¨ç¼©æ”¾ç®¡ç†å™¨çš„è§¦æ‘¸å¤„ç†
     return zoom_manager_->onTouchBegan(touch, event);
 }
 
 void SecondScene::onTouchMoved(Touch* touch, Event* event)
 {
     if (isDragging && draggingItem) {
-        // ÒÆ¶¯ÍÏ×§µÄ¾«Áé
+        // ç§»åŠ¨æ‹–æ‹½çš„ç²¾çµ
         Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
         if (dragSprite) {
-            // ½«ÆÁÄ»×ø±ê×ª»»ÎªÏà¶ÔÓÚ±³¾°¾«ÁéµÄ±¾µØ×ø±ê
+            // å°†å±å¹•åæ ‡è½¬æ¢ä¸ºç›¸å¯¹äºèƒŒæ™¯ç²¾çµçš„æœ¬åœ°åæ ‡
             Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
             
-            // »ñÈ¡Íø¸ñµ¥Ôª¸ñ´óĞ¡
+            // è·å–ç½‘æ ¼å•å…ƒæ ¼å¤§å°
             float gridCellSizeX = grid_manager_->getGridCellSizeX();
             float gridCellSizeY = grid_manager_->getGridCellSizeY();
             
-            // ½«×ø±ê°´Íø¸ñµ¥Ôª¸ñ´óĞ¡µÄÕûÊı±¶½øĞĞÏòÉÏÈ¡Õû
+            // å°†åæ ‡æŒ‰ç½‘æ ¼å•å…ƒæ ¼å¤§å°çš„æ•´æ•°å€è¿›è¡Œå‘ä¸Šå–æ•´
             float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
             float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
             
-            // ÉèÖÃÍÏ×§¾«ÁéµÄÎ»ÖÃÎªÍø¸ñ¶ÔÆëµÄÎ»ÖÃ
+            // è®¾ç½®æ‹–æ‹½ç²¾çµçš„ä½ç½®ä¸ºç½‘æ ¼å¯¹é½çš„ä½ç½®
             dragSprite->setPosition(Vec2(snappedX, snappedY));
         }
     }
     else if (isMovingBuilding && movingBuilding) {
-        // ÒÆ¶¯ÒÑ·ÅÖÃµÄ½¨Öş
-        // ½«ÆÁÄ»×ø±ê×ª»»ÎªÏà¶ÔÓÚ±³¾°¾«ÁéµÄ±¾µØ×ø±ê
+        // ç§»åŠ¨å·²æ”¾ç½®çš„å»ºç­‘
+        // å°†å±å¹•åæ ‡è½¬æ¢ä¸ºç›¸å¯¹äºèƒŒæ™¯ç²¾çµçš„æœ¬åœ°åæ ‡
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
         
-        // »ñÈ¡Íø¸ñµ¥Ôª¸ñ´óĞ¡
+        // è·å–ç½‘æ ¼å•å…ƒæ ¼å¤§å°
         float gridCellSizeX = grid_manager_->getGridCellSizeX();
         float gridCellSizeY = grid_manager_->getGridCellSizeY();
         
-        // ½«×ø±ê°´Íø¸ñµ¥Ôª¸ñ´óĞ¡µÄÕûÊı±¶½øĞĞÏòÉÏÈ¡Õû
+        // å°†åæ ‡æŒ‰ç½‘æ ¼å•å…ƒæ ¼å¤§å°çš„æ•´æ•°å€è¿›è¡Œå‘ä¸Šå–æ•´
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         
-        // ÉèÖÃ½¨ÖşµÄÎ»ÖÃÎªÍø¸ñ¶ÔÆëµÄÎ»ÖÃ
+        // è®¾ç½®å»ºç­‘çš„ä½ç½®ä¸ºç½‘æ ¼å¯¹é½çš„ä½ç½®
         movingBuilding->setPosition(Vec2(snappedX, snappedY));
     }
     else if (zoom_manager_) {
@@ -456,69 +456,69 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
 void SecondScene::onTouchEnded(Touch* touch, Event* event)
 {
     if (isDragging && draggingItem) {
-        // »ñÈ¡ÍÏ×§½áÊøÎ»ÖÃ
+        // è·å–æ‹–æ‹½ç»“æŸä½ç½®
         Vec2 screenPos = touch->getLocation();
-        // ½«ÆÁÄ»×ø±ê×ª»»ÎªÏà¶ÔÓÚ±³¾°¾«ÁéµÄ±¾µØ×ø±ê
+        // å°†å±å¹•åæ ‡è½¬æ¢ä¸ºç›¸å¯¹äºèƒŒæ™¯ç²¾çµçš„æœ¬åœ°åæ ‡
         Vec2 localPos = background_sprite_->convertToNodeSpace(screenPos);
         
-        // »ñÈ¡Íø¸ñµ¥Ôª¸ñ´óĞ¡²¢½øĞĞÏòÉÏÈ¡Õû
+        // è·å–ç½‘æ ¼å•å…ƒæ ¼å¤§å°å¹¶è¿›è¡Œå‘ä¸Šå–æ•´
         float gridCellSizeX = grid_manager_->getGridCellSizeX();
         float gridCellSizeY = grid_manager_->getGridCellSizeY();
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         Vec2 snappedPos = Vec2(snappedX, snappedY);
         
-        // »ñÈ¡ÍÏ×§µÄ¾«Áé
+        // è·å–æ‹–æ‹½çš„ç²¾çµ
         Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
         if (dragSprite) {
-            // ÒÆ³ıÍÏ×§µÄ¾«Áé
+            // ç§»é™¤æ‹–æ‹½çš„ç²¾çµ
             dragSprite->removeFromParentAndCleanup(true);
             draggingItem->setUserData(nullptr);
         }
         
-        // ¼ì²éÊÇ·ñÔÚÓĞĞ§ÇøÓòÄÚ·ÅÖÃ
-        // Ê¹ÓÃÔ­Ê¼ÆÁÄ»×ø±ê½øĞĞÁâĞÎ×ø±ê×ª»»¼ì²é
+        // æ£€æŸ¥æ˜¯å¦åœ¨æœ‰æ•ˆåŒºåŸŸå†…æ”¾ç½®
+        // ä½¿ç”¨åŸå§‹å±å¹•åæ ‡è¿›è¡Œè±å½¢åæ ‡è½¬æ¢æ£€æŸ¥
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
         if (isInDiamond(diamondPos)) {
-            // ÔÚÓĞĞ§ÇøÓòÄÚ£¬¿ÉÒÔ·ÅÖÃ
+            // åœ¨æœ‰æ•ˆåŒºåŸŸå†…ï¼Œå¯ä»¥æ”¾ç½®
             
-            // ¸ù¾İÍÏ×§µÄ°´Å¥»ñÈ¡ÏàÓ¦µÄÎÆÀíÃû³Æ
+            // æ ¹æ®æ‹–æ‹½çš„æŒ‰é’®è·å–ç›¸åº”çš„çº¹ç†åç§°
             std::string textureName = (draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png");
             
-            // ´´½¨Ò»¸ö·ÅÖÃºóµÄ¾«Áé
+            // åˆ›å»ºä¸€ä¸ªæ”¾ç½®åçš„ç²¾çµ
             auto placedSprite = Sprite::create(textureName);
             if (placedSprite) {
-                placedSprite->setScale(1.0f); // ÓëÍÏ×§Ê±±£³ÖÒ»ÖÂµÄ´óĞ¡
-                placedSprite->setPosition(snappedPos); // Ê¹ÓÃÍø¸ñ¶ÔÆëµÄÎ»ÖÃ
-                background_sprite_->addChild(placedSprite, 15); // ÉèÖÃ¸ü¸ßµÄZÖá²ã¼¶£¬È·±£ÏÔÊ¾ÔÚÍø¸ñÖ®ÉÏ
+                placedSprite->setScale(1.0f); // ä¸æ‹–æ‹½æ—¶ä¿æŒä¸€è‡´çš„å¤§å°
+                placedSprite->setPosition(snappedPos); // ä½¿ç”¨ç½‘æ ¼å¯¹é½çš„ä½ç½®
+                background_sprite_->addChild(placedSprite, 15); // è®¾ç½®æ›´é«˜çš„Zè½´å±‚çº§ï¼Œç¡®ä¿æ˜¾ç¤ºåœ¨ç½‘æ ¼ä¹‹ä¸Š
                 
-                // Ìí¼Óµ½ÒÑ·ÅÖÃµÄ½¨ÖşÎïÁĞ±í
+                // æ·»åŠ åˆ°å·²æ”¾ç½®çš„å»ºç­‘ç‰©åˆ—è¡¨
                 placedBuildings.push_back(placedSprite);
                 
-                // Ìí¼Ó³É¹¦µÄÊÓ¾õ·´À¡£¨ÉÁË¸£©
+                // æ·»åŠ æˆåŠŸçš„è§†è§‰åé¦ˆï¼ˆé—ªçƒï¼‰
                 placedSprite->runAction(Blink::create(1.0f, 3));
             }
             
-            // ¼ÇÂ¼³É¹¦·ÅÖÃµÄÎ»ÖÃ
-            log("³É¹¦·ÅÖÃ½¨ÖşÎïÔÚÎ»ÖÃ: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
+            // è®°å½•æˆåŠŸæ”¾ç½®çš„ä½ç½®
+            log("æˆåŠŸæ”¾ç½®å»ºç­‘ç‰©åœ¨ä½ç½®: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
             
-            // Ìí¼Óµ½ÒÑ·ÅÖÃµÄ½¨ÖşÎïÁĞ±í£¨ÒÑÒÆ³ı£¬ÒòÎª¸Ã³ÉÔ±±äÁ¿Î´ÔÚÀàÖĞÉùÃ÷£©
+            // æ·»åŠ åˆ°å·²æ”¾ç½®çš„å»ºç­‘ç‰©åˆ—è¡¨ï¼ˆå·²ç§»é™¤ï¼Œå› ä¸ºè¯¥æˆå‘˜å˜é‡æœªåœ¨ç±»ä¸­å£°æ˜ï¼‰
             // placedBuildings.push_back(placedSprite);
         } else {
-            // ²»ÔÚÓĞĞ§ÇøÓòÄÚ£¬²»ÄÜ·ÅÖÃ
+            // ä¸åœ¨æœ‰æ•ˆåŒºåŸŸå†…ï¼Œä¸èƒ½æ”¾ç½®
             
-            // ¸ù¾İÍÏ×§µÄ°´Å¥»ñÈ¡ÏàÓ¦µÄÎÆÀíÃû³Æ
+            // æ ¹æ®æ‹–æ‹½çš„æŒ‰é’®è·å–ç›¸åº”çš„çº¹ç†åç§°
             std::string textureName = (draggingItem == houseBtn ? "ArcherTowerLv10.png" : "CannonLv10.png");
             
-            // ´´½¨Ò»¸öÊ§°Ü·ÅÖÃµÄ¾«Áé
+            // åˆ›å»ºä¸€ä¸ªå¤±è´¥æ”¾ç½®çš„ç²¾çµ
             auto failSprite = Sprite::create(textureName);
             if (failSprite) {
-                failSprite->setScale(1.0f); // ÓëÍÏ×§Ê±±£³ÖÒ»ÖÂµÄ´óĞ¡
-                failSprite->setPosition(snappedPos); // Ê¹ÓÃÍø¸ñ¶ÔÆëµÄÎ»ÖÃ
-                failSprite->setColor(Color3B::RED); // ÉèÖÃÎªºìÉ«
-                background_sprite_->addChild(failSprite, 15); // ÉèÖÃ¸ü¸ßµÄZÖá²ã¼¶£¬È·±£ÏÔÊ¾ÔÚÍø¸ñÖ®ÉÏ
+                failSprite->setScale(1.0f); // ä¸æ‹–æ‹½æ—¶ä¿æŒä¸€è‡´çš„å¤§å°
+                failSprite->setPosition(snappedPos); // ä½¿ç”¨ç½‘æ ¼å¯¹é½çš„ä½ç½®
+                failSprite->setColor(Color3B::RED); // è®¾ç½®ä¸ºçº¢è‰²
+                background_sprite_->addChild(failSprite, 15); // è®¾ç½®æ›´é«˜çš„Zè½´å±‚çº§ï¼Œç¡®ä¿æ˜¾ç¤ºåœ¨ç½‘æ ¼ä¹‹ä¸Š
                 
-                // Ìí¼ÓºìÉ«ÉÁË¸Ğ§¹û×÷ÎªÊ§°ÜµÄÊÓ¾õ·´À¡
+                // æ·»åŠ çº¢è‰²é—ªçƒæ•ˆæœä½œä¸ºå¤±è´¥çš„è§†è§‰åé¦ˆ
                 failSprite->runAction(Sequence::create(
                     Blink::create(0.5f, 3),
                     RemoveSelf::create(),
@@ -526,26 +526,26 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 ));
             }
             
-            // ¼ÇÂ¼Ê§°Ü·ÅÖÃµÄÎ»ÖÃ
-            log("³¢ÊÔÔÚÎŞĞ§Î»ÖÃ·ÅÖÃ½¨ÖşÎï: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
+            // è®°å½•å¤±è´¥æ”¾ç½®çš„ä½ç½®
+            log("å°è¯•åœ¨æ— æ•ˆä½ç½®æ”¾ç½®å»ºç­‘ç‰©: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
         }
         
-        // ÖØÖÃÍÏ×§×´Ì¬
+        // é‡ç½®æ‹–æ‹½çŠ¶æ€
         isDragging = false;
         draggingItem = nullptr;
     }
     else if (isMovingBuilding && movingBuilding) {
-        // ´¦Àí½¨ÖşÒÆ¶¯½áÊø
-        // ¼ÇÂ¼ÒÆ¶¯ºóµÄÎ»ÖÃ
-        log("½¨ÖşÒÆ¶¯µ½ĞÂÎ»ÖÃ: (%.2f, %.2f)", movingBuilding->getPosition().x, movingBuilding->getPosition().y);
+        // å¤„ç†å»ºç­‘ç§»åŠ¨ç»“æŸ
+        // è®°å½•ç§»åŠ¨åçš„ä½ç½®
+        log("å»ºç­‘ç§»åŠ¨åˆ°æ–°ä½ç½®: (%.2f, %.2f)", movingBuilding->getPosition().x, movingBuilding->getPosition().y);
         
-        // ½«½¨ÖşÍ¸Ã÷¶È»Ö¸´ÎªÍêÈ«²»Í¸Ã÷
+        // å°†å»ºç­‘é€æ˜åº¦æ¢å¤ä¸ºå®Œå…¨ä¸é€æ˜
         movingBuilding->setOpacity(255);
         
-        // ½«½¨ÖşZÖá²ã¼¶»Ö¸´ÎªÕı³£
+        // å°†å»ºç­‘Zè½´å±‚çº§æ¢å¤ä¸ºæ­£å¸¸
         background_sprite_->reorderChild(movingBuilding, 15);
         
-        // ÖØÖÃÒÆ¶¯×´Ì¬
+        // é‡ç½®ç§»åŠ¨çŠ¶æ€
         isMovingBuilding = false;
         movingBuilding = nullptr;
     } else if (zoom_manager_) {
@@ -556,25 +556,25 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
 void SecondScene::onTouchCancelled(Touch* touch, Event* event)
 {
     if (isDragging && draggingItem) {
-        // »ñÈ¡ÍÏ×§µÄ¾«Áé²¢ÒÆ³ı
+        // è·å–æ‹–æ‹½çš„ç²¾çµå¹¶ç§»é™¤
         Sprite* dragSprite = static_cast<Sprite*>(draggingItem->getUserData());
         if (dragSprite) {
             dragSprite->removeFromParentAndCleanup(true);
             draggingItem->setUserData(nullptr);
         }
         
-        // ÖØÖÃÍÏ×§×´Ì¬
+        // é‡ç½®æ‹–æ‹½çŠ¶æ€
         isDragging = false;
         draggingItem = nullptr;
     }
     else if (isMovingBuilding && movingBuilding) {
-        // ½«½¨ÖşÍ¸Ã÷¶È»Ö¸´ÎªÍêÈ«²»Í¸Ã÷
+        // å°†å»ºç­‘é€æ˜åº¦æ¢å¤ä¸ºå®Œå…¨ä¸é€æ˜
         movingBuilding->setOpacity(255);
         
-        // »Ö¸´½¨ÖşZÖá²ã¼¶
+        // æ¢å¤å»ºç­‘Zè½´å±‚çº§
         background_sprite_->reorderChild(movingBuilding, 15);
         
-        // ÖØÖÃÒÆ¶¯×´Ì¬
+        // é‡ç½®ç§»åŠ¨çŠ¶æ€
         isMovingBuilding = false;
         movingBuilding = nullptr;
     } else if (zoom_manager_) {
@@ -594,7 +594,7 @@ void SecondScene::onMouseScroll(EventMouse* event)
 
 void SecondScene::onTouchesBegan(const std::vector<Touch*>& touches, Event* event)
 {
-    // Èç¹ûÕıÔÚÍÏ×§£¬²»Ö´ĞĞËõ·Å¹¦ÄÜ
+    // å¦‚æœæ­£åœ¨æ‹–æ‹½ï¼Œä¸æ‰§è¡Œç¼©æ”¾åŠŸèƒ½
     if (isDragging) {
         return;
     }
@@ -606,7 +606,7 @@ void SecondScene::onTouchesBegan(const std::vector<Touch*>& touches, Event* even
 
 void SecondScene::onTouchesMoved(const std::vector<Touch*>& touches, Event* event)
 {
-    // Èç¹ûÕıÔÚÍÏ×§£¬²»Ö´ĞĞËõ·Å¹¦ÄÜ
+    // å¦‚æœæ­£åœ¨æ‹–æ‹½ï¼Œä¸æ‰§è¡Œç¼©æ”¾åŠŸèƒ½
     if (isDragging) {
         return;
     }
@@ -618,7 +618,7 @@ void SecondScene::onTouchesMoved(const std::vector<Touch*>& touches, Event* even
 
 void SecondScene::onTouchesEnded(const std::vector<Touch*>& touches, Event* event)
 {
-    // Èç¹ûÕıÔÚÍÏ×§£¬²»Ö´ĞĞËõ·Å¹¦ÄÜ
+    // å¦‚æœæ­£åœ¨æ‹–æ‹½ï¼Œä¸æ‰§è¡Œç¼©æ”¾åŠŸèƒ½
     if (isDragging) {
         return;
     }
@@ -630,7 +630,7 @@ void SecondScene::onTouchesEnded(const std::vector<Touch*>& touches, Event* even
 
 void SecondScene::onTouchesCancelled(const std::vector<Touch*>& touches, Event* event)
 {
-    // Èç¹ûÕıÔÚÍÏ×§£¬²»Ö´ĞĞËõ·Å¹¦ÄÜ
+    // å¦‚æœæ­£åœ¨æ‹–æ‹½ï¼Œä¸æ‰§è¡Œç¼©æ”¾åŠŸèƒ½
     if (isDragging) {
         return;
     }
@@ -673,7 +673,7 @@ cocos2d::Vec2 SecondScene::convertScreenToDiamond(const cocos2d::Vec2& screenPos
 // Check if position is inside diamond
 bool SecondScene::isInDiamond(const Vec2& diamondPos)
 {
-    // ÏÖÔÚÓÉDiamondGridManager´¦Àí
+    // ç°åœ¨ç”±DiamondGridManagerå¤„ç†
     if (grid_manager_)
     {
         return grid_manager_->isInDiamond(diamondPos);
