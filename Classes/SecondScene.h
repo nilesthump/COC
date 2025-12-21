@@ -2,6 +2,7 @@
 #define _Login_H_
 
 #include "cocos2d.h"
+#include "GoldMine.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
 
@@ -67,19 +68,25 @@ private:
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
 
+	//std::vector<std::vector<cocos2d::Vec2>>* grids_;
 	std::vector<std::vector<cocos2d::Vec2>>* grids_;
 
 	// 拖拽相关成员变量
-	cocos2d::MenuItemImage* houseBtn;
+	cocos2d::MenuItemImage* goldMineBtn;
 	cocos2d::MenuItemImage* storageBtn;
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
 	bool isDragging; // 是否正在拖拽
     
     // 建筑移动相关成员变量
-    std::vector<cocos2d::Sprite*> placedBuildings; // 已放置的建筑列表
-    cocos2d::Sprite* movingBuilding; // 当前正在移动的建筑
+    //std::vector<cocos2d::Sprite*> placedBuildings; // 已放置的建筑列表
+
+    //cocos2d::Sprite* movingBuilding; // 当前正在移动的建筑
+	GoldMine* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
+
+	std::vector<GoldMine*> placedGoldMines; // 存储已放置的金矿
+	int baseGoldRate; // 基础产金速率
 };
 
 //圣水

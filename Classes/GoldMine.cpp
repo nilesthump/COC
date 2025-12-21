@@ -1,5 +1,6 @@
 #include "GoldMine.h"
-#include "cocos2d.h"
+
+using namespace cocos2d;
 
 static void problemLoading(const char* filename)
 {
@@ -7,9 +8,11 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-GoldMine* GoldMine::create(int gridX, int gridY, int initHp, int initLevel, float initGoldSpeed, const std::string& texturePath) {
+GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpeed)
+{
     GoldMine* mine = new (std::nothrow) GoldMine();
-    if (mine && mine->init(gridX, gridY, initHp, initLevel, initGoldSpeed, texturePath)) {
+    if (mine && mine->init(textureName, hp, goldSpeed))
+    {
         mine->autorelease();
         return mine;
     }
@@ -17,48 +20,54 @@ GoldMine* GoldMine::create(int gridX, int gridY, int initHp, int initLevel, floa
     return nullptr;
 }
 
-bool GoldMine::init(int gridX, int gridY, int initHp, int initLevel, float initGoldSpeed, const std::string& texturePath) {
-    if (!Node::init()) {
+bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed)
+{
+    if (!Node::init())
+    {
         return false;
     }
 
-    // 初始化你的private成员
-    X = gridX;
-    Y = gridY;
-    Hp = initHp;
-    level = initLevel;
-    goldGenerateSpeed = initGoldSpeed;
-    // Node的position可以和网格坐标关联（比如网格转世界坐标）
-    _position = cocos2d::Vec2(X * 64, Y * 64);  // 假设每个网格64像素
-    this->setPosition(_position);  // 用Node自带的position管理显示坐标
+    // 初始化核心属性
+    _hp = hp;
+    _goldGenerateSpeed = goldSpeed;
+    _textureName = textureName;
 
-    // 初始化图像
-    if (!initSprite(texturePath)) {
+    // 初始化精灵（关键：类内管理图像）
+    if (!initSprite(textureName))
+    {
         return false;
     }
+
+    // 设置锚点（这里设为中心，你可以根据需求改，比如(0,0)对齐网格）
+    this->setAnchorPoint(Vec2(0.0f, 0.0f));
+    _sprite->setAnchorPoint(Vec2(0.0f, 0.0f));
 
     return true;
 }
 
-bool GoldMine::initSprite(const std::string& texturePath) {
-    _mineSprite = cocos2d::Sprite::create(texturePath);
-    if (!_mineSprite) {
-        problemLoading("'btn_pressed.png' (作为金币图标的替代)");
+bool GoldMine::initSprite(const std::string& textureName)
+{
+    _sprite = Sprite::create(textureName);
+    if (!_sprite)
+    {
+        problemLoading("'goldMineLv1.png'");
         return false;
     }
-    this->addChild(_mineSprite);  // 精灵作为子节点挂载
-    _mineSprite->setAnchorPoint(cocos2d::Vec2(0.5, 0.5));  // 居中显示
+
+    // 精灵作为子节点挂载到金矿节点
+    this->addChild(_sprite);
+    // 精灵缩放（根据你的需求调整，这里设为1.0f）
+    _sprite->setScale(1.0f);
+
     return true;
 }
 
-void GoldMine::takeDamage(int damage) {
-    Hp = std::max(0, Hp - damage);
-    if (Hp <= 0) {
-        this->setVisible(false);  // 血量为0时隐藏金矿
-    }
-}
-
-void GoldMine::upgradeLevel() {
-    level++;
-    goldGenerateSpeed *= 1.5f;  // 升级后产金速度提升50%
+void GoldMine::playFailBlinkAndRemove()
+{
+    _sprite->setColor(Color3B::RED); // 设为红色
+    this->runAction(Sequence::create(
+        Blink::create(0.5f, 3),    // 闪烁3次
+        RemoveSelf::create(true),  // 销毁自身
+        nullptr
+    ));
 }
