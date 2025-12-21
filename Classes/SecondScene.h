@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "GoldMine.h"
+#include "ElixirCollector.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
 
@@ -73,7 +74,7 @@ private:
 
 	// 拖拽相关成员变量
 	cocos2d::MenuItemImage* goldMineBtn;
-	cocos2d::MenuItemImage* storageBtn;
+	cocos2d::MenuItemImage* elixirCollectorBtn;
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
 	bool isDragging; // 是否正在拖拽
@@ -82,11 +83,14 @@ private:
     //std::vector<cocos2d::Sprite*> placedBuildings; // 已放置的建筑列表
 
     //cocos2d::Sprite* movingBuilding; // 当前正在移动的建筑
-	GoldMine* movingBuilding;
+	GoldMine* movingGoldMine;
+	ElixirCollector* movingElixirCollector;
     bool isMovingBuilding; // 是否正在移动建筑
 
 	std::vector<GoldMine*> placedGoldMines; // 存储已放置的金矿
+	std::vector<ElixirCollector*> placedElixirCollectors;
 	int baseGoldRate; // 基础产金速率
+	int baseElixirRate;
 };
 
 //圣水

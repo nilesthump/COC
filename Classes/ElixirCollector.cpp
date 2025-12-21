@@ -1,4 +1,4 @@
-#include "GoldMine.h"
+#include "ElixirCollector.h"
 
 using namespace cocos2d;
 
@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpeed)
+ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, float elixirSpeed)
 {
-    GoldMine* mine = new (std::nothrow) GoldMine();
-    if (mine && mine->init(textureName, hp, goldSpeed))
+    ElixirCollector* mine = new (std::nothrow) ElixirCollector();
+    if (mine && mine->init(textureName, hp, elixirSpeed))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpe
     return nullptr;
 }
 
-bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed)
+bool ElixirCollector::init(const std::string& textureName, int hp, float elixirSpeed)
 {
     if (!Node::init())
     {
@@ -29,7 +29,7 @@ bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed)
 
     // 初始化核心属性
     _hp = hp;
-    _goldGenerateSpeed = goldSpeed;
+    _elixirGenerateSpeed = elixirSpeed;
     _textureName = textureName;
 
     // 初始化精灵（关键：类内管理图像）
@@ -45,12 +45,12 @@ bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed)
     return true;
 }
 
-bool GoldMine::initSprite(const std::string& textureName)
+bool ElixirCollector::initSprite(const std::string& textureName)
 {
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'goldMineLv1.png'");
+        problemLoading("'ElixirCollectorLv1.png'");
         return false;
     }
 
@@ -62,7 +62,7 @@ bool GoldMine::initSprite(const std::string& textureName)
     return true;
 }
 
-void GoldMine::playFailBlinkAndRemove()
+void ElixirCollector::playFailBlinkAndRemove()
 {
     _sprite->setColor(Color3B::RED); // 设为红色
     this->runAction(Sequence::create(
