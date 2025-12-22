@@ -24,7 +24,6 @@ private:
 	cocos2d::Label* coordinates_label_ = nullptr;		// 显示所有单位坐标的标签
 	std::vector<std::pair<int, cocos2d::Vec2>> barbarian_positions_;		// 存储每个Barbarian的ID和网格坐标
 	int next_barbarian_id_ = 1;			
-	// ===== 输入状态 =====
 
 	// 双击检测
 	double last_click_time_ = 0;
