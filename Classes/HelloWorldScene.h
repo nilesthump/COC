@@ -21,6 +21,8 @@ public:
     void menuLogoutCallback(cocos2d::Ref* pSender);
     void menuConfirmLogoutCallback(cocos2d::Ref* pSender);
     void menuCancelLogoutCallback(cocos2d::Ref* pSender);
+    void menuRegisterCallback(cocos2d::Ref* pSender);
+    void menuRegisterConfirmCallback(cocos2d::Ref* pSender);
 
     // EditBox delegate functions
     virtual void editBoxEditingDidBegin(cocos2d::ui::EditBox* editBox) override;
@@ -35,20 +37,27 @@ private:
     cocos2d::MenuItemImage* secondSceneItem;
     cocos2d::MenuItemImage* battleTestItem;
     cocos2d::MenuItemImage* loginItem;
+    cocos2d::MenuItemImage* registerItem;
     cocos2d::MenuItemImage* confirmItem;
+    cocos2d::MenuItemImage* registerConfirmItem;
 
     cocos2d::MenuItemImage* confirmLogoutItem;
     cocos2d::MenuItemImage* cancelLogoutItem;
 
     cocos2d::ui::EditBox* usernameEditBox;
     cocos2d::ui::EditBox* passwordEditBox;
+    cocos2d::ui::EditBox* confirmPasswordEditBox;
 
     cocos2d::LayerColor* loginLayer;
+    cocos2d::LayerColor* registerLayer;
     cocos2d::LayerColor* logoutConfirmLayer;
 
     cocos2d::Label* usernameLabel;
     cocos2d::Label* passwordLabel;
+    cocos2d::Label* confirmPasswordLabel;
     cocos2d::Label* loginLabel;
+    cocos2d::Label* registerLabel;
+    cocos2d::Label* registerResultLabel;
 
     static bool isLoggedIn;
 };

@@ -119,7 +119,7 @@ bool HelloWorld::init()
     }
     else
     {
-        double x = origin.x + visibleSize.width / 2;
+        double x = origin.x + visibleSize.width / 2 - 150; // Move more to the left for better display
         double y = origin.y + visibleSize.height / 4;
         loginItem->setPosition(Vec2(x, y));
 
@@ -130,18 +130,50 @@ bool HelloWorld::init()
         loginItem->addChild(loginLabel);
     }
 
-    auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem, loginItem, NULL);
+    // Create register button
+    registerItem = MenuItemImage::create(
+        "btn_normal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(HelloWorld::menuRegisterCallback, this));
+
+    if (registerItem == nullptr ||
+        registerItem->getContentSize().width <= 0 ||
+        registerItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        double registerX = origin.x + visibleSize.width / 2 + 150; // Move more to the right to maintain symmetry
+        double y = origin.y + visibleSize.height / 4; // Same height as login button
+        registerItem->setPosition(Vec2(registerX, y));
+
+        registerLabel = Label::createWithSystemFont("REGISTER", "fonts/Marker Felt.ttf", 24);
+        registerLabel->setColor(Color3B::WHITE);
+        registerLabel->setPosition(Vec2(registerItem->getContentSize().width / 2,
+            registerItem->getContentSize().height / 2));
+        registerItem->addChild(registerLabel);
+    }
+
+    auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem, loginItem, registerItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
     // Initialize login UI components
     loginLayer = nullptr;
+    registerLayer = nullptr;
     logoutConfirmLayer = nullptr;
     usernameEditBox = nullptr;
     passwordEditBox = nullptr;
+    confirmPasswordEditBox = nullptr;
     confirmItem = nullptr;
+    registerConfirmItem = nullptr;
     confirmLogoutItem = nullptr;
     cancelLogoutItem = nullptr;
+    usernameLabel = nullptr;
+    passwordLabel = nullptr;
+    confirmPasswordLabel = nullptr;
+    registerResultLabel = nullptr;
 
     // Initially hide and disable secondSceneItem and battleTestItem
     if (isLoggedIn)
@@ -380,6 +412,128 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
     }
 }
 
+void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // Create a semi-transparent background layer
+    if (registerLayer == nullptr)
+    {
+        registerLayer = LayerColor::create(Color4B(0, 0, 0, 180));
+        this->addChild(registerLayer, 10);
+
+        // Create username label
+        usernameLabel = Label::createWithSystemFont("Account:", "fonts/Marker Felt.ttf", 20);
+        usernameLabel->setColor(Color3B::WHITE);
+        usernameLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+            origin.y + visibleSize.height / 2 + 80));
+        registerLayer->addChild(usernameLabel);
+
+        // Create username edit box
+        usernameEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        usernameEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 + 80));
+        usernameEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        usernameEditBox->setPlaceholderFontSize(20);
+        usernameEditBox->setPlaceHolder("Enter your account name");
+        usernameEditBox->setFontName("fonts/Marker Felt.ttf");
+        usernameEditBox->setFontSize(20);
+        usernameEditBox->setFontColor(Color3B::WHITE);
+        usernameEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        usernameEditBox->setDelegate(this);
+        registerLayer->addChild(usernameEditBox);
+
+        // Create password label
+        passwordLabel = Label::createWithSystemFont("Password:", "fonts/Marker Felt.ttf", 20);
+        passwordLabel->setColor(Color3B::WHITE);
+        passwordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+            origin.y + visibleSize.height / 2 + 10));
+        registerLayer->addChild(passwordLabel);
+
+        // Create password edit box
+        passwordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        passwordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 + 10));
+        passwordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        passwordEditBox->setPlaceholderFontSize(20);
+        passwordEditBox->setPlaceHolder("Enter your password");
+        passwordEditBox->setFontName("fonts/Marker Felt.ttf");
+        passwordEditBox->setFontSize(20);
+        passwordEditBox->setFontColor(Color3B::WHITE);
+        passwordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        passwordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        passwordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        passwordEditBox->setDelegate(this);
+        registerLayer->addChild(passwordEditBox);
+
+        // Create confirm password label
+        confirmPasswordLabel = Label::createWithSystemFont("Confirm Password:", "fonts/Marker Felt.ttf", 20);
+        confirmPasswordLabel->setColor(Color3B::WHITE);
+        confirmPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+            origin.y + visibleSize.height / 2 - 60));
+        registerLayer->addChild(confirmPasswordLabel);
+
+        // Create confirm password edit box
+        confirmPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        confirmPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 - 60));
+        confirmPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        confirmPasswordEditBox->setPlaceholderFontSize(20);
+        confirmPasswordEditBox->setPlaceHolder("Confirm your password");
+        confirmPasswordEditBox->setFontName("fonts/Marker Felt.ttf");
+        confirmPasswordEditBox->setFontSize(20);
+        confirmPasswordEditBox->setFontColor(Color3B::WHITE);
+        confirmPasswordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        confirmPasswordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        confirmPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::DONE);
+        confirmPasswordEditBox->setDelegate(this);
+        registerLayer->addChild(confirmPasswordEditBox);
+
+        // Create register confirm button
+        registerConfirmItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuRegisterConfirmCallback, this));
+
+        if (registerConfirmItem != nullptr &&
+            registerConfirmItem->getContentSize().width > 0 &&
+            registerConfirmItem->getContentSize().height > 0)
+        {
+            double x = origin.x + visibleSize.width / 2;
+            double y = origin.y + visibleSize.height / 2 - 130;
+            registerConfirmItem->setPosition(Vec2(x, y));
+
+            auto confirmLabel = Label::createWithSystemFont("Register", "fonts/Marker Felt.ttf", 24);
+            confirmLabel->setColor(Color3B::WHITE);
+            confirmLabel->setPosition(Vec2(registerConfirmItem->getContentSize().width / 2,
+                registerConfirmItem->getContentSize().height / 2));
+            registerConfirmItem->addChild(confirmLabel);
+
+            auto confirmMenu = Menu::create(registerConfirmItem, NULL);
+            confirmMenu->setPosition(Vec2::ZERO);
+            registerLayer->addChild(confirmMenu);
+        }
+
+        // Create register result label
+        registerResultLabel = Label::createWithSystemFont("", "fonts/Marker Felt.ttf", 20);
+        registerResultLabel->setColor(Color3B::WHITE);
+        registerResultLabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 - 180));
+        registerLayer->addChild(registerResultLabel);
+    }
+    else
+    {
+        // Show the existing register layer if it was already created
+        // Clear previous result message
+        if (registerResultLabel != nullptr)
+        {
+            registerResultLabel->setString("");
+        }
+        registerLayer->setVisible(true);
+    }
+}
+
 void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
 {
     // Hide login layer
@@ -531,4 +685,42 @@ void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
     {
         logoutConfirmLayer->setVisible(false);
     }
+}
+
+void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
+{
+    // Check if password and confirm password match
+    std::string password = passwordEditBox->getText();
+    std::string confirmPassword = confirmPasswordEditBox->getText();
+
+    // Update registration result message
+    if (registerResultLabel != nullptr)
+    {
+        if (password == confirmPassword)
+        {
+            registerResultLabel->setString("Registration Success");
+            registerResultLabel->setColor(Color3B::GREEN);
+
+            // Add a 1-second delay before hiding the register layer
+            if (registerLayer != nullptr)
+            {
+                auto delay = DelayTime::create(1.0f);
+                auto hideLayer = CallFunc::create([this]() {
+                    if (registerLayer != nullptr)
+                    {
+                        registerLayer->setVisible(false);
+                    }
+                    });
+                auto sequence = Sequence::create(delay, hideLayer, nullptr);
+                registerLayer->runAction(sequence);
+            }
+        }
+        else
+        {
+            registerResultLabel->setString("Registration Failed");
+            registerResultLabel->setColor(Color3B::RED);
+            // Keep the register layer visible when registration fails
+        }
+    }
+
 }
