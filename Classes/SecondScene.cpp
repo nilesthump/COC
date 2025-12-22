@@ -978,5 +978,64 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
     // 无碰撞
     return false;
 }
+/*bool SecondScene::isPointInBuilding(const Vec2& point, Node* checkBuilding, Node* movingBuilding) {
+    // 1. 校验输入（无默认size，强制从建筑获取）
+    if (!checkBuilding || !movingBuilding) return false;
+    GoldMine* checkGold = dynamic_cast<GoldMine*>(checkBuilding);
+    ElixirCollector* checkElixir = dynamic_cast<ElixirCollector*>(checkBuilding);
+    GoldMine* moveGold = dynamic_cast<GoldMine*>(movingBuilding);
+    ElixirCollector* moveElixir = dynamic_cast<ElixirCollector*>(movingBuilding);
+
+    // 2. 强制获取两个建筑的size（无默认值，确保必须实现size接口）
+    float checkSize = 0.0f;
+    float moveSize = 0.0f;
+    if (checkGold) checkSize = checkGold->getSize();
+    else if (checkElixir) checkSize = checkElixir->getSize();
+    else return false; // 非目标建筑类型，直接返回无碰撞
+
+    if (moveGold) moveSize = moveGold->getSize();
+    else if (moveElixir) moveSize = moveElixir->getSize();
+    else return false;
+
+    // 3. 核心参数：小菱形尺寸固定（水平半对角线28f，竖直21f）
+    const float fixedHalfHoriz = 28.0f;
+    const float fixedHalfVert = 21.0f;
+
+    // 4. 计算碰撞检测的菱形范围（基于两个建筑的size之和）
+    // 检测半径 = (checkSize + moveSize) / 2 → 覆盖两个建筑的所有菱形区域
+    int detectRadius = static_cast<int>(ceil((checkSize + moveSize) / 2.0f));
+
+    // 5. 获取待检测建筑的中心（背景本地坐标，与point同空间）
+    Vec2 checkWorldCenter = checkBuilding->convertToWorldSpaceAR(Vec2::ZERO);
+    Vec2 checkLocalCenter = background_sprite_->convertToNodeSpace(checkWorldCenter);
+
+    // 6. 单个菱形碰撞判断（固定尺寸）
+    auto isInSingleDiamond = [&](int offsetX, int offsetY) -> bool {
+        // 计算当前偏移对应的菱形中心
+        Vec2 diamondCenter(
+            checkLocalCenter.x + (offsetX * fixedHalfHoriz),
+            checkLocalCenter.y + (offsetY * fixedHalfVert)
+        );
+        // 菱形核心公式（固定尺寸）
+        float dx = abs(point.x - diamondCenter.x);
+        float dy = abs(point.y - diamondCenter.y);
+        return (dx / fixedHalfHoriz) + (dy / fixedHalfVert) <= 1.0f + 0.001f;
+        };
+
+    // 7. 遍历需要检测的菱形区域（按detectRadius动态生成）
+    for (int x = -detectRadius; x <= detectRadius; ++x) {
+        for (int y = -detectRadius; y <= detectRadius; ++y) {
+            // 仅检测菱形分布的区域（过滤矩形冗余点，贴合菱形排列）
+            if (abs(x) + abs(y) <= detectRadius) {
+                if (isInSingleDiamond(x, y)) {
+                    return true; // 命中任意菱形即判定碰撞
+                }
+            }
+        }
+    }
+
+    // 无碰撞
+    return false;
+}*/
 
 #endif

@@ -47,6 +47,7 @@ public:
 private:
 	//Åö×²ÅÐ¶Ï
 	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
+	//bool isPointInBuilding(const Vec2& point, Node* checkBuilding, Node* movingBuilding);
 
 	Node* buildPanel;
 
