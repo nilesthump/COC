@@ -7,6 +7,7 @@ class Building : public cocos2d::Node {
 protected:
     // 核心属性
     int _hp;                  // 血量
+    int level;
     float _generateSpeed;     // 生产速度
     std::string _textureName; // 纹理名称（用于区分不同等级圣水收集器）
     cocos2d::Sprite* _sprite; // 图像精灵
@@ -17,7 +18,7 @@ protected:
 public:
     
     // 初始化函数
-    virtual bool init(const std::string& textureName, int hp, float generateSpeed, float x0, float y0)=0;
+    virtual bool init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0)=0;
 
     // --- 对外接口 ---
     void changeX(float t) {
@@ -35,6 +36,10 @@ public:
     float getSize() {
         return size;
     }
+    int getLv() {
+        return level;
+    }
+
     void updatePosition(const cocos2d::Vec2& newPos) {
         this->setPosition(newPos);
         x = newPos.x;

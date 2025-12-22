@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, float elixirSpeed, float x0, float y0)
+ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, int lv, float elixirSpeed, float x0, float y0)
 {
     ElixirCollector* mine = new (std::nothrow) ElixirCollector();
-    if (mine && mine->init(textureName, hp, elixirSpeed, x0, y0))
+    if (mine && mine->init(textureName, hp, lv,elixirSpeed, x0, y0))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp,
     return nullptr;
 }
 
-bool ElixirCollector::init(const std::string& textureName, int hp, float generateSpeed, float x0, float y0)
+bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float generateSpeed, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -33,6 +33,7 @@ bool ElixirCollector::init(const std::string& textureName, int hp, float generat
     _textureName = textureName;
     x = x0;
     y = y0;
+    level = lv;
     this->setPosition(Vec2(x0, y0));
 
     // 初始化精灵（关键：类内管理图像）
