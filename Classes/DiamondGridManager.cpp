@@ -104,12 +104,13 @@ Vec2 DiamondGridManager::convertMapToDisplay(const Vec2& diamondPos, Sprite* bac
 
 bool DiamondGridManager::isInDiamond(const Vec2& diamondPos)
 {
+
     // 将菱形坐标转换为网格坐标，使用适当的四舍五入
     int grid_x = static_cast<int>(floor(diamondPos.x / grid_cell_size_x_ + 0.5f));
     int grid_y = static_cast<int>(floor(diamondPos.y / grid_cell_size_y_ + 0.5f));
 
     // 检查网格坐标的绝对值和是否在22以内
-    return (fabs(grid_x) + fabs(grid_y) <= 22);
+    return (fabs(grid_x) + fabs(grid_y) <= 21);
 }
 
 std::vector<std::vector<cocos2d::Vec2>>* DiamondGridManager::drawDiamondGrid(Sprite* backgroundSprite, float cellSize)
