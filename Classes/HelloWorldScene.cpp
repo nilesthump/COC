@@ -408,7 +408,7 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
         // Create username label
         usernameLabel = Label::createWithSystemFont("Account:", "fonts/Marker Felt.ttf", 20);
         usernameLabel->setColor(Color3B::WHITE);
-        usernameLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+        usernameLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
             origin.y + visibleSize.height / 2 + 50));
         loginLayer->addChild(usernameLabel);
 
@@ -429,7 +429,7 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
         // Create password label
         passwordLabel = Label::createWithSystemFont("Password:", "fonts/Marker Felt.ttf", 20);
         passwordLabel->setColor(Color3B::WHITE);
-        passwordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+        passwordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
             origin.y + visibleSize.height / 2 - 20));
         loginLayer->addChild(passwordLabel);
 
@@ -495,7 +495,7 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         // Create username label
         usernameLabel = Label::createWithSystemFont("Account:", "fonts/Marker Felt.ttf", 20);
         usernameLabel->setColor(Color3B::WHITE);
-        usernameLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+        usernameLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
             origin.y + visibleSize.height / 2 + 80));
         registerLayer->addChild(usernameLabel);
 
@@ -516,7 +516,7 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         // Create password label
         passwordLabel = Label::createWithSystemFont("Password:", "fonts/Marker Felt.ttf", 20);
         passwordLabel->setColor(Color3B::WHITE);
-        passwordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+        passwordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
             origin.y + visibleSize.height / 2 + 10));
         registerLayer->addChild(passwordLabel);
 
@@ -539,7 +539,7 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         // Create confirm password label
         confirmPasswordLabel = Label::createWithSystemFont("Confirm Password:", "fonts/Marker Felt.ttf", 20);
         confirmPasswordLabel->setColor(Color3B::WHITE);
-        confirmPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 150,
+        confirmPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 240,
             origin.y + visibleSize.height / 2 - 60));
         registerLayer->addChild(confirmPasswordLabel);
 
@@ -598,6 +598,19 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         if (registerResultLabel != nullptr)
         {
             registerResultLabel->setString("");
+        }
+        // Clear input fields
+        if (usernameEditBox != nullptr)
+        {
+            usernameEditBox->setText("");
+        }
+        if (passwordEditBox != nullptr)
+        {
+            passwordEditBox->setText("");
+        }
+        if (confirmPasswordEditBox != nullptr)
+        {
+            confirmPasswordEditBox->setText("");
         }
         registerLayer->setVisible(true);
     }
@@ -792,14 +805,28 @@ void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
 
 void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
 {
-    // Check if password and confirm password match
+    // Get input values
+    std::string username = usernameEditBox->getText();
     std::string password = passwordEditBox->getText();
     std::string confirmPassword = confirmPasswordEditBox->getText();
 
     // Update registration result message
     if (registerResultLabel != nullptr)
     {
-        if (password == confirmPassword)
+        // Validate username (at least 1 character)
+        if (username.empty())
+        {
+            registerResultLabel->setString("Registration Failed: Username too short");
+            registerResultLabel->setColor(Color3B::RED);
+        }
+        // Validate password length (6-16 characters)
+        else if (password.length() < 6 || password.length() > 16)
+        {
+            registerResultLabel->setString("Registration Failed: Password length 6-16 chars");
+            registerResultLabel->setColor(Color3B::RED);
+        }
+        // Check if password and confirm password match
+        else if (password == confirmPassword)
         {
             registerResultLabel->setString("Registration Success");
             registerResultLabel->setColor(Color3B::GREEN);
@@ -813,6 +840,24 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
                     {
                         registerLayer->setVisible(false);
                     }
+                    // Clear input fields after successful registration
+                    if (usernameEditBox != nullptr)
+                    {
+                        usernameEditBox->setText("");
+                    }
+                    if (passwordEditBox != nullptr)
+                    {
+                        passwordEditBox->setText("");
+                    }
+                    if (confirmPasswordEditBox != nullptr)
+                    {
+                        confirmPasswordEditBox->setText("");
+                    }
+                    // Clear registration result message
+                    if (registerResultLabel != nullptr)
+                    {
+                        registerResultLabel->setString("");
+                    }
                     });
                 auto sequence = Sequence::create(delay, hideLayer, nullptr);
                 registerLayer->runAction(sequence);
@@ -820,7 +865,7 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
         }
         else
         {
-            registerResultLabel->setString("Registration Failed");
+            registerResultLabel->setString("Registration Failed: Passwords do not match");
             registerResultLabel->setColor(Color3B::RED);
             // Keep the register layer visible when registration fails
         }
