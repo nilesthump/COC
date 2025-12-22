@@ -104,6 +104,30 @@ bool HelloWorld::init()
         battleTestItem->addChild(testLabel);
     }
 
+    // Create guest login button
+    guestLoginItem = MenuItemImage::create(
+        "btn_normal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(HelloWorld::menuGuestLoginCallback, this));
+
+    if (guestLoginItem == nullptr ||
+        guestLoginItem->getContentSize().width <= 0 ||
+        guestLoginItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        double guestLoginX = origin.x + visibleSize.width / 2 - 200; // Leftmost position
+        double y = origin.y + visibleSize.height / 4;
+        guestLoginItem->setPosition(Vec2(guestLoginX, y));
+
+        guestLoginLabel = Label::createWithSystemFont("GUEST LOGIN", "fonts/Marker Felt.ttf", 24);
+        guestLoginLabel->setColor(Color3B::WHITE);
+        guestLoginLabel->setPosition(Vec2(guestLoginItem->getContentSize().width / 2,
+            guestLoginItem->getContentSize().height / 2));
+        guestLoginItem->addChild(guestLoginLabel);
+    }
 
     // Create login button
     loginItem = MenuItemImage::create(
@@ -119,9 +143,9 @@ bool HelloWorld::init()
     }
     else
     {
-        double x = origin.x + visibleSize.width / 2 - 150; // Move more to the left for better display
+        double loginX = origin.x + visibleSize.width / 2; // Center position
         double y = origin.y + visibleSize.height / 4;
-        loginItem->setPosition(Vec2(x, y));
+        loginItem->setPosition(Vec2(loginX, y));
 
         loginLabel = Label::createWithSystemFont("LOGIN", "fonts/Marker Felt.ttf", 24);
         loginLabel->setColor(Color3B::WHITE);
@@ -144,7 +168,7 @@ bool HelloWorld::init()
     }
     else
     {
-        double registerX = origin.x + visibleSize.width / 2 + 150; // Move more to the right to maintain symmetry
+        double registerX = origin.x + visibleSize.width / 2 + 200; // Rightmost position, symmetric to guest login button
         double y = origin.y + visibleSize.height / 4; // Same height as login button
         registerItem->setPosition(Vec2(registerX, y));
 
@@ -155,7 +179,8 @@ bool HelloWorld::init()
         registerItem->addChild(registerLabel);
     }
 
-    auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem, loginItem, registerItem, NULL);
+    auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem,
+        guestLoginItem, loginItem, registerItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -191,6 +216,28 @@ bool HelloWorld::init()
             battleTestItem->setEnabled(true);
         }
 
+        // Hide guest login and register buttons
+        if (guestLoginItem != nullptr)
+        {
+            guestLoginItem->setVisible(false);
+            guestLoginItem->setEnabled(false);
+            // Also hide the label to be extra thorough
+            if (guestLoginLabel != nullptr)
+            {
+                guestLoginLabel->setVisible(false);
+            }
+        }
+        if (registerItem != nullptr)
+        {
+            registerItem->setVisible(false);
+            registerItem->setEnabled(false);
+            // Also hide the label to be extra thorough
+            if (registerLabel != nullptr)
+            {
+                registerLabel->setVisible(false);
+            }
+        }
+
         // Change login button to logout button
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
         loginLabel->setString("LOGOUT");
@@ -208,6 +255,28 @@ bool HelloWorld::init()
         {
             battleTestItem->setVisible(false);
             battleTestItem->setEnabled(false);
+        }
+
+        // Show guest login and register buttons
+        if (guestLoginItem != nullptr)
+        {
+            guestLoginItem->setVisible(true);
+            guestLoginItem->setEnabled(true);
+            // Also show the label to be extra thorough
+            if (guestLoginLabel != nullptr)
+            {
+                guestLoginLabel->setVisible(true);
+            }
+        }
+        if (registerItem != nullptr)
+        {
+            registerItem->setVisible(true);
+            registerItem->setEnabled(true);
+            // Also show the label to be extra thorough
+            if (registerLabel != nullptr)
+            {
+                registerLabel->setVisible(true);
+            }
         }
 
         // Ensure login button is in login state
@@ -555,6 +624,18 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
         battleTestItem->setEnabled(true);
     }
 
+    // Hide guest login and register buttons
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(false);
+        guestLoginItem->setEnabled(false);
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(false);
+        registerItem->setEnabled(false);
+    }
+
     // Update login status
     isLoggedIn = true;
 
@@ -674,6 +755,28 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
         battleTestItem->setEnabled(false);
     }
 
+    // Show guest login and register buttons
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(true);
+        guestLoginItem->setEnabled(true);
+        // Also show the label to be extra thorough
+        if (guestLoginLabel != nullptr)
+        {
+            guestLoginLabel->setVisible(true);
+        }
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(true);
+        registerItem->setEnabled(true);
+        // Also show the label to be extra thorough
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(true);
+        }
+    }
+
     // Update login status
     isLoggedIn = false;
 }
@@ -722,5 +825,49 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
             // Keep the register layer visible when registration fails
         }
     }
+}
 
+void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
+{
+    // Directly login as guest, same as successful login
+    // Show secondSceneItem and battleTestItem
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(true);
+        secondSceneItem->setEnabled(true);
+    }
+
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(true);
+        battleTestItem->setEnabled(true);
+    }
+
+    // Hide guest login and register buttons - ensure both are hidden
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(false);
+        guestLoginItem->setEnabled(false);
+        // Also hide the label to be extra thorough
+        if (guestLoginLabel != nullptr)
+        {
+            guestLoginLabel->setVisible(false);
+        }
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(false);
+        registerItem->setEnabled(false);
+        // Also hide the label to be extra thorough
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(false);
+        }
+    }
+    // Update login status
+    isLoggedIn = true;
+
+    // Change login button to logout button
+    loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
+    loginLabel->setString("LOGOUT");
 }

@@ -23,6 +23,7 @@ public:
     void menuCancelLogoutCallback(cocos2d::Ref* pSender);
     void menuRegisterCallback(cocos2d::Ref* pSender);
     void menuRegisterConfirmCallback(cocos2d::Ref* pSender);
+    void menuGuestLoginCallback(cocos2d::Ref* pSender);
 
     // EditBox delegate functions
     virtual void editBoxEditingDidBegin(cocos2d::ui::EditBox* editBox) override;
@@ -36,6 +37,7 @@ public:
 private:
     cocos2d::MenuItemImage* secondSceneItem;
     cocos2d::MenuItemImage* battleTestItem;
+    cocos2d::MenuItemImage* guestLoginItem;
     cocos2d::MenuItemImage* loginItem;
     cocos2d::MenuItemImage* registerItem;
     cocos2d::MenuItemImage* confirmItem;
@@ -55,6 +57,7 @@ private:
     cocos2d::Label* usernameLabel;
     cocos2d::Label* passwordLabel;
     cocos2d::Label* confirmPasswordLabel;
+    cocos2d::Label* guestLoginLabel;
     cocos2d::Label* loginLabel;
     cocos2d::Label* registerLabel;
     cocos2d::Label* registerResultLabel;
