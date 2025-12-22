@@ -322,18 +322,25 @@ void BattleTestLayer::placeBarbarian()
 //固定放置（直接放逻辑位置）加农炮
 void BattleTestLayer::placeCannon()
 {
-    BattleUnit* cannon_unit = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
-    if (cannon_unit)
+    BattleUnit* cannon_unit1 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    if (cannon_unit1)
     {
-        cannon_unit->SetPosition(10, 10);
-        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit), false);
+        cannon_unit1->SetPosition(10, 10);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit1), false);
     }
 
-    BattleUnit* cannon_unit = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
-    if (cannon_unit)
+    BattleUnit* cannon_unit2 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    if (cannon_unit2)
     {
-        cannon_unit->SetPosition(24, 33);
-        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit), false);
+        cannon_unit2->SetPosition(24, 33);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit2), false);
+    }
+
+    BattleUnit* cannon_unit3 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    if (cannon_unit3)
+    {
+        cannon_unit3->SetPosition(24, 33);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit3), false);
     }
 
 }
