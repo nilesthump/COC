@@ -163,9 +163,9 @@ bool SecondScene::init()
                     // goldMinePreview->setScale(0.5f); // 如需缩放可加
 
                     // 计算预览初始位置（和原来的逻辑一致）
-                    Vec2 worldPos = elixirCollectorBtn->getParent()->convertToWorldSpace(elixirCollectorBtn->getPosition());
-                    //Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    elixirCollectorPreview->setMinePosition(worldPos);
+                    //Vec2 worldPos = elixirCollectorBtn->getParent()->convertToWorldSpace(elixirCollectorBtn->getPosition());
+                    //Vec2 localPos = background_sprite_->convertToNodeSpace();
+                    elixirCollectorPreview->setMinePosition(Vec2(elixirCollectorPreview->getX(), elixirCollectorPreview->getY()));
 
                     // 添加到背景精灵，并保存到按钮的UserData
                     background_sprite_->addChild(elixirCollectorPreview, 10);
@@ -240,7 +240,7 @@ bool SecondScene::init()
 
     // 计算菱形中心相对于背景精灵中心的位置
     Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
-    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2 - 42.0 * 3.5);
+    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2+28.0, background_sprite_->getContentSize().height / 2 - 42.0 * 4);
 
     // 创建菱形网格管理器
     grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 44);
