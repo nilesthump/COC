@@ -240,7 +240,7 @@ bool SecondScene::init()
 
     // 计算菱形中心相对于背景精灵中心的位置
     Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
-    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2);
+    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2 - 42.0 * 3.5);
 
     // 创建菱形网格管理器
     grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 44);
