@@ -514,6 +514,35 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
             passwordEditBox->setText("");
         }
     }
+
+    // Hide login, register, and guest login buttons
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(false);
+        loginItem->setEnabled(false);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(false);
+        }
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(false);
+        registerItem->setEnabled(false);
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(false);
+        }
+    }
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(false);
+        guestLoginItem->setEnabled(false);
+        if (guestLoginLabel != nullptr)
+        {
+            guestLoginLabel->setVisible(false);
+        }
+    }
 }
 
 void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
@@ -669,6 +698,35 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         }
         registerLayer->setVisible(true);
     }
+
+    // Hide login, register, and guest login buttons
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(false);
+        loginItem->setEnabled(false);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(false);
+        }
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(false);
+        registerItem->setEnabled(false);
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(false);
+        }
+    }
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(false);
+        guestLoginItem->setEnabled(false);
+        if (guestLoginLabel != nullptr)
+        {
+            guestLoginLabel->setVisible(false);
+        }
+    }
 }
 
 void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
@@ -795,6 +853,35 @@ void HelloWorld::menuCancelLoginCallback(cocos2d::Ref* pSender)
             passwordEditBox->setText("");
         }
     }
+
+    // Show login, register, and guest login buttons
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(true);
+        }
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(true);
+        registerItem->setEnabled(true);
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(true);
+        }
+    }
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(true);
+        guestLoginItem->setEnabled(true);
+        if (guestLoginLabel != nullptr)
+        {
+            guestLoginLabel->setVisible(true);
+        }
+    }
 }
 
 void HelloWorld::menuCancelRegisterCallback(cocos2d::Ref* pSender)
@@ -820,6 +907,35 @@ void HelloWorld::menuCancelRegisterCallback(cocos2d::Ref* pSender)
         if (registerResultLabel != nullptr)
         {
             registerResultLabel->setString("");
+        }
+    }
+
+    // Show login, register, and guest login buttons
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(true);
+        }
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(true);
+        registerItem->setEnabled(true);
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(true);
+        }
+    }
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(true);
+        guestLoginItem->setEnabled(true);
+        if (guestLoginLabel != nullptr)
+        {
+            guestLoginLabel->setVisible(true);
         }
     }
 }
