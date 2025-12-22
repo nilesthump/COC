@@ -11,6 +11,7 @@ find_path(SQLITE3_INCLUDE_DIRS
 	NAMES
 		sqlite3.h
 	PATHS
+		${CMAKE_CURRENT_SOURCE_DIR}/../external/sqlite
 		/usr/include
 		/usr/local/include
 		/opt/local/include
@@ -24,6 +25,8 @@ find_library(SQLITE3_LIBRARIES
 		lib64
 		lib
 	PATHS
+		${CMAKE_BINARY_DIR}/lib
+		${CMAKE_CURRENT_SOURCE_DIR}/../external/sqlite
 		/usr/lib
 		/usr/local/lib
 		/opt/local/lib
@@ -35,12 +38,19 @@ find_library(SQLITE3_LIBRARIES
 if (SQLITE3_INCLUDE_DIRS AND SQLITE3_LIBRARIES)
 	set(SQLITE3_FOUND TRUE)
 	#these next two are needed by the CocosBuildHelpers cocos_find_package macro
-	set(SQLITE3_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRs})
+	set(SQLITE3_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
 	set(SQLITE3_LIBRARY ${SQLITE3_LIBRARIES})
 endif (SQLITE3_INCLUDE_DIRS AND SQLITE3_LIBRARIES)
 
 if (NOT SQLITE3_FOUND)
-	message(FATAL_ERROR "Could not find Sqlite3")
+	# Try to use our own compiled sqlite3 library
+	set(SQLITE3_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../external/sqlite)
+	# Directly use ext_sqlite3 library which will be built
+	set(SQLITE3_LIBRARIES ext_sqlite3)
+	set(SQLITE3_FOUND TRUE)
+	#these next two are needed by the CocosBuildHelpers cocos_find_package macro
+	set(SQLITE3_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
+	set(SQLITE3_LIBRARY ${SQLITE3_LIBRARIES})
 endif (NOT SQLITE3_FOUND)
 
 

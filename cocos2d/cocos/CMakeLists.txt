@@ -106,7 +106,9 @@ list(APPEND COCOS_SRC ${COCOS_HEADER})
 add_library(cocos2d ${COCOS_SRC})
 
 # use external libs
-add_subdirectory(${COCOS2DX_ROOT_PATH}/external ${ENGINE_BINARY_PATH}/external)
+if(NOT TARGET external)
+    add_subdirectory(${COCOS2DX_ROOT_PATH}/external ${ENGINE_BINARY_PATH}/external)
+endif()
 target_link_libraries(cocos2d external)
 
 # add base macro define and compile options

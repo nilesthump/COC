@@ -15,6 +15,8 @@ if(NOT DEFINED BUILD_ENGINE_DONE) # to test COC into root project
     set(CMAKE_MODULE_PATH ${COCOS2DX_ROOT_PATH}/cmake/Modules/)
 
     include(CocosBuildSet)
+    # Build external dependencies first to ensure sqlite3 is available
+    add_subdirectory(${COCOS2DX_ROOT_PATH}/external ${ENGINE_BINARY_PATH}/external)
     add_subdirectory(${COCOS2DX_ROOT_PATH}/cocos ${ENGINE_BINARY_PATH}/cocos/core)
 endif()
 
@@ -53,6 +55,7 @@ list(APPEND GAME_SOURCE
      Classes/DefenderNormalBehavior.cpp
      Classes/BattleTestLayer.cpp
      Classes/UnitState.cpp
+     Classes/SQLiteTest.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -81,6 +84,7 @@ list(APPEND GAME_HEADER
      Classes/DefenderData.h
      Classes/DefenderNormalBehavior.h
      Classes/BattleTestLayer.h
+     Classes/SQLiteTest.h
      )
 
 if(ANDROID)
@@ -148,10 +152,15 @@ else()
     target_link_libraries(${APP_NAME} -Wl,--whole-archive cpp_android_spec -Wl,--no-whole-archive)
 endif()
 
-target_link_libraries(${APP_NAME} cocos2d)
+# Add SQLite3 dependency
+find_package(SQLite3 REQUIRED)
+
+# Link SQLite3 library to the project
+target_link_libraries(${APP_NAME} cocos2d ${SQLITE3_LIBRARIES})
 target_include_directories(${APP_NAME}
         PRIVATE Classes
         PRIVATE ${COCOS2DX_ROOT_PATH}/cocos/audio/include/
+        PRIVATE ${SQLITE3_INCLUDE_DIRS}
 )
 
 # mark app resources

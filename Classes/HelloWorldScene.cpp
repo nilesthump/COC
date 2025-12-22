@@ -1,6 +1,7 @@
 #include "HelloWorldScene.h"
 #include "SecondScene.h"
 #include "BattleTestLayer.h"
+#include "SQLiteTest.h"
 
 USING_NS_CC;
 
@@ -25,17 +26,17 @@ static void problemLoading(const char* filename)
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
-   
+
     if (!Scene::init())
     {
         return false;
     }
 
-  
+
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-   
+
     auto closeItem = MenuItemImage::create(
         "CloseNormal.png",
         "CloseSelected.png",
@@ -56,8 +57,8 @@ bool HelloWorld::init()
 
 
     secondSceneItem = MenuItemImage::create(
-        "btn_normal.png",      
-        "btn_pressed.png",     
+        "btn_normal.png",
+        "btn_pressed.png",
         CC_CALLBACK_1(HelloWorld::menuSecondSceneCallback, this));
 
     if (secondSceneItem == nullptr ||
@@ -73,7 +74,7 @@ bool HelloWorld::init()
         double y = origin.y + visibleSize.height - secondSceneItem->getContentSize().height / 2;
         secondSceneItem->setPosition(Vec2(x, y));
 
-       
+
         auto secondLabel = Label::createWithSystemFont("START GAME", "fonts/Marker Felt.ttf", 24);
         secondLabel->setColor(Color3B::WHITE);
         secondLabel->setPosition(Vec2(secondSceneItem->getContentSize().width / 2,
@@ -95,7 +96,7 @@ bool HelloWorld::init()
     else
     {
 
-        double x = origin.x + visibleSize.width - battleTestItem->getContentSize().width/2;
+        double x = origin.x + visibleSize.width - battleTestItem->getContentSize().width / 2;
         double y = origin.y + visibleSize.height - secondSceneItem->getContentSize().height - battleTestItem->getContentSize().height / 2;
         battleTestItem->setPosition(Vec2(x, y));
 
@@ -288,6 +289,9 @@ bool HelloWorld::init()
     }
     /////////////////////////////
     // 3. add your codes below...
+
+    // ≤‚ ‘SQLite≈‰÷√
+    SQLiteTest sqliteTest;
 
     // add a label shows "Hello World"
     // create and initialize a label
