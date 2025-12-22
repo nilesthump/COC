@@ -45,6 +45,8 @@ public:
 	//newÅÐ¶Ï
 	CREATE_FUNC(SecondScene);
 private:
+	//Åö×²ÅÐ¶Ï
+	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
 
 	Node* buildPanel;
 

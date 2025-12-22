@@ -489,6 +489,71 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         static Vec2 lastValidMovePos;
 
         if (inDiamond) {
+            // 在移动建筑的代码块中添加
+            bool isColliding = false;
+
+            // 检查与其他建筑的碰撞
+            if (movingGoldMine) {
+                // 排除自身进行检测
+                for (auto mine : placedGoldMines) {
+                    if (mine == movingGoldMine) continue;
+                    if (isPointInBuilding(Vec2(snappedX, snappedY), mine)) {
+                        isColliding = true;
+                        break;
+                    }
+                }
+                // 检查与圣水收集器的碰撞
+                if (!isColliding) {
+                    for (auto collector : placedElixirCollectors) {
+                        if (isPointInBuilding(Vec2(snappedX, snappedY), collector)) {
+                            isColliding = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (movingElixirCollector) {
+                // 排除自身进行检测
+                for (auto collector : placedElixirCollectors) {
+                    if (collector == movingElixirCollector) continue;
+                    if (isPointInBuilding(Vec2(snappedX, snappedY), collector)) {
+                        isColliding = true;
+                        break;
+                    }
+                }
+                // 检查与金矿的碰撞
+                if (!isColliding) {
+                    for (auto mine : placedGoldMines) {
+                        if (isPointInBuilding(Vec2(snappedX, snappedY), mine)) {
+                            isColliding = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 如果碰撞，不更新位置或显示红色提示
+            if (isColliding) {
+                // 可以将建筑设为红色提示碰撞
+                if (movingGoldMine) {
+                    movingGoldMine->getSprite()->setColor(Color3B::RED);
+                }
+                else if (movingElixirCollector) {
+                    movingElixirCollector->getSprite()->setColor(Color3B::RED);
+                }
+                return; // 不更新位置
+            }
+            else {
+                // 恢复颜色
+                if (movingGoldMine) {
+                    movingGoldMine->getSprite()->setColor(Color3B::WHITE);
+                }
+                else if (movingElixirCollector) {
+                    movingElixirCollector->getSprite()->setColor(Color3B::WHITE);
+                }
+            }
+
+            // 如果没有碰撞，继续移动
             lastValidMovePos = Vec2(snappedX, snappedY);
         }
         else {
@@ -545,6 +610,52 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         // 2. 检查放置区域有效性
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
         if (isInDiamond(diamondPos)) {
+
+            // 在有效区域放置建筑的代码块中添加
+            bool isColliding = false;
+            Vec2 targetPos = snappedPos;
+
+            // 检查与已放置金矿的碰撞
+            for (auto mine : placedGoldMines) {
+                if (isPointInBuilding(targetPos, mine)) {
+                    isColliding = true;
+                    break;
+                }
+            }
+
+            // 检查与已放置圣水收集器的碰撞
+            if (!isColliding) {
+                for (auto collector : placedElixirCollectors) {
+                    if (isPointInBuilding(targetPos, collector)) {
+                        isColliding = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isColliding) {
+                // 碰撞处理：播放失败动画
+                log("放置位置与其他建筑冲突！");
+                // 这里可以添加显示提示信息的逻辑
+                if (draggingItem == goldMineBtn) {
+                    auto failGoldMine = GoldMine::create("GoldMineLv1.png");
+                    if (failGoldMine) {
+                        failGoldMine->setPosition(snappedPos);
+                        background_sprite_->addChild(failGoldMine, 15);
+                        failGoldMine->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == elixirCollectorBtn) {
+                    auto failElixir = ElixirCollector::create("ElixirCollectorLv1.png");
+                    if (failElixir) {
+                        failElixir->setPosition(snappedPos);
+                        background_sprite_->addChild(failElixir, 15);
+                        failElixir->playFailBlinkAndRemove();
+                    }
+                }
+                return; // 阻止放置
+            }
+            // 如果没有碰撞，继续执行放置逻辑           
             // 有效区域：根据按钮类型创建对应建筑
             if (draggingItem == goldMineBtn) {
                 // 创建金矿
@@ -622,6 +733,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         /*if (inDiamond && movingGoldMine) {
             movingGoldMine->setPosition(Vec2(snappedX, snappedY));
         }*/
+        // 在移动建筑结束的代码块中添加
+      
         if (inDiamond && movingGoldMine) {
             // 使用新的更新方法
             movingGoldMine->updatePosition(Vec2(snappedX, snappedY));
@@ -780,6 +893,89 @@ bool SecondScene::isInDiamond(const Vec2& diamondPos)
     {
         return grid_manager_->isInDiamond(diamondPos);
     }
+    return false;
+}
+
+//判断点是否在建筑范围内
+bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
+    if (!building) return false;
+
+    Sprite* sprite = nullptr;
+    // 判断建筑类型并获取精灵
+    if (dynamic_cast<GoldMine*>(building)) {
+        sprite = static_cast<GoldMine*>(building)->getSprite();
+    }
+    else if (dynamic_cast<ElixirCollector*>(building)) {
+        sprite = static_cast<ElixirCollector*>(building)->getSprite();
+    }
+
+    if (!sprite) return false;
+
+    // 计算建筑在背景上的世界坐标
+    Vec2 buildingPos = background_sprite_->convertToNodeSpace(building->convertToWorldSpace(Vec2::ZERO));
+    Size size = sprite->getContentSize() * sprite->getScale();
+
+    // 建筑世界坐标 → 转换为背景精灵的本地坐标（和传入的point同空间）
+    Vec2 buildingWorldPos = building->convertToWorldSpace(Vec2::ZERO);
+    Vec2 buildingLocalCenter = background_sprite_->convertToNodeSpace(buildingWorldPos);
+
+    //单个小菱形参数：水平对角线56f → 半长28f；竖直对角线42f → 半长21f
+    const float halfHoriz = 28.0f;
+    const float halfVert = 21.0f;
+    const float extendRatio = 2.5f;
+    
+    // 第一部分：原有9个核心菱形（3x3）
+    Vec2 coreOffsets[9] = {
+        Vec2(0, 0),                // 中心
+        Vec2(halfHoriz, 0),        // 右
+        Vec2(-halfHoriz, 0),       // 左
+        Vec2(0, halfVert),         // 上
+        Vec2(0, -halfVert),        // 下
+        Vec2(halfHoriz, halfVert), // 右上
+        Vec2(-halfHoriz, halfVert),// 左上
+        Vec2(halfHoriz, -halfVert),// 右下
+        Vec2(-halfHoriz, -halfVert)// 左下
+    };
+    // 第二部分：外层12个扩展半菱形（上下左右/斜向各延伸半个菱形）
+    Vec2 extendOffsets[12] = {
+        Vec2(halfHoriz * extendRatio, 0),          // 正右扩展
+        Vec2(-halfHoriz * extendRatio, 0),         // 正左扩展
+        Vec2(0, halfVert * extendRatio),           // 正上扩展
+        Vec2(0, -halfVert * extendRatio),          // 正下扩展
+        Vec2(halfHoriz * 1.25f, halfVert * 1.25f), // 右上扩展
+        Vec2(-halfHoriz * 1.25f, halfVert * 1.25f),// 左上扩展
+        Vec2(halfHoriz * 1.25f, -halfVert * 1.25f),// 右下扩展
+        Vec2(-halfHoriz * 1.25f, -halfVert * 1.25f),// 左下扩展
+        Vec2(halfHoriz * extendRatio, halfVert),   // 右中扩展（上）
+        Vec2(halfHoriz * extendRatio, -halfVert),  // 右中扩展（下）
+        Vec2(-halfHoriz * extendRatio, halfVert),  // 左中扩展（上）
+        Vec2(-halfHoriz * extendRatio, -halfVert)  // 左中扩展（下）
+    };
+
+    // 单个菱形碰撞判断（带容错）
+    auto isPointInSingleDiamond = [](const Vec2& p, const Vec2& center, float hh, float hv) -> bool {
+        float dx = abs(p.x - center.x);
+        float dy = abs(p.y - center.y);
+        return (dx / hh) + (dy / hv) <= 1.0f + 0.001f; // 浮点容错
+        };
+
+    // 第一步：检测核心9个菱形
+    for (int i = 0; i < 9; ++i) {
+        Vec2 diamondCenter = buildingLocalCenter + coreOffsets[i];
+        if (isPointInSingleDiamond(point, diamondCenter, halfHoriz, halfVert)) {
+            return true;
+        }
+    }
+
+    // 第二步：检测外层12个扩展半菱形（偏移放大，菱形尺寸不变）
+    for (int i = 0; i < 12; ++i) {
+        Vec2 diamondCenter = buildingLocalCenter + extendOffsets[i];
+        if (isPointInSingleDiamond(point, diamondCenter, halfHoriz, halfVert)) {
+            return true;
+        }
+    }
+
+    // 无碰撞
     return false;
 }
 

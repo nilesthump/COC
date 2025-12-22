@@ -12,6 +12,7 @@ private:
     std::string _textureName; // 纹理名称（用于区分不同等级金矿）
     cocos2d::Sprite* _sprite; // 图像精灵
     float x, y;
+    float size = 3.0f;
     // 初始化精灵（内部调用）
     bool initSprite(const std::string& textureName);
 
@@ -34,7 +35,9 @@ public:
     float getY() {
         return y;
     }
-
+    float getSize() {
+        return size;
+    }
     void updatePosition(const cocos2d::Vec2& newPos) {
         this->setPosition(newPos);
         x = newPos.x;
