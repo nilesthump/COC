@@ -11,18 +11,29 @@ private:
     float _goldGenerateSpeed; // 产金速度
     std::string _textureName; // 纹理名称（用于区分不同等级金矿）
     cocos2d::Sprite* _sprite; // 图像精灵
-
+    float x, y;
     // 初始化精灵（内部调用）
     bool initSprite(const std::string& textureName);
 
 public:
     // 静态创建函数（Cocos推荐方式）
-    static GoldMine* create(const std::string& textureName, int hp = 100, float goldSpeed = 1.0f);
+    static GoldMine* create(const std::string& textureName, int hp = 100, float goldSpeed = 1.0f, float x0=667.0f, float y0 = 2074.0f);
     // 初始化函数
-    virtual bool init(const std::string& textureName, int hp, float goldSpeed);
+    virtual bool init(const std::string& textureName, int hp, float goldSpeed, float x0, float y0);
 
     // --- 对外接口 ---
-    
+    void changeX(float t) {
+        x = t;
+    }
+    void changeY(float t) {
+        y = t;
+    }
+    float getX() {
+        return x;
+    }
+    float getY() {
+        return y;
+    }
    
     
     // 设置/获取位置（复用Node的position，锚点内部管理）

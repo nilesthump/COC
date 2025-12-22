@@ -42,6 +42,7 @@ public:
 
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
+	//new≈–∂œ
 	CREATE_FUNC(SecondScene);
 private:
 

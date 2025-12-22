@@ -34,10 +34,10 @@ bool SecondScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 初始化产金相关变量
-    baseGoldRate = 1; // 基础每秒1金币
-    baseElixirRate = 1;
-    g_goldCount = 0; // 确保金币计数初始化为0
-    g_elixirCount = 0;
+    baseGoldRate = 0; // 基础每秒1金币
+    baseElixirRate = 0;
+    g_goldCount = 750; // 确保金币计数初始化为0
+    g_elixirCount = 750;
 
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
@@ -127,9 +127,9 @@ bool SecondScene::init()
                     // goldMinePreview->setScale(0.5f); // 如需缩放可加
 
                     // 计算预览初始位置（和原来的逻辑一致）
-                    Vec2 worldPos = goldMineBtn->getParent()->convertToWorldSpace(goldMineBtn->getPosition());
-                    Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    goldMinePreview->setMinePosition(localPos);
+                    //Vec2 worldPos = goldMineBtn->getParent()->convertToWorldSpace(goldMineBtn->getPosition());
+                    //Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
+                    goldMinePreview->setMinePosition(Vec2(goldMinePreview->getX(), goldMinePreview->getY()));
                     // 添加到背景精灵，并保存到按钮的UserData
                     background_sprite_->addChild(goldMinePreview, 10);
                     goldMineBtn->setUserData(goldMinePreview);
@@ -455,57 +455,60 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         // 区分拖拽的是金矿预览还是圣水收集器预览
         void* userData = draggingItem->getUserData();
         if (!userData) return;
-        
+
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+
         // 金矿预览
         if (draggingItem == goldMineBtn) {
             GoldMine* dragMinePreview = static_cast<GoldMine*>(userData);
-            if (dragMinePreview) {
-                Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-                float gridCellSizeX = grid_manager_->getGridCellSizeX();
-                float gridCellSizeY = grid_manager_->getGridCellSizeY();
-                float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-                float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+            if (dragMinePreview) {            
                 dragMinePreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
         // 圣水收集器预览
         else if (draggingItem == elixirCollectorBtn) {
             ElixirCollector* dragElixirPreview = static_cast<ElixirCollector*>(userData);
-            if (dragElixirPreview) {
-                Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-                float gridCellSizeX = grid_manager_->getGridCellSizeX();
-                float gridCellSizeY = grid_manager_->getGridCellSizeY();
-                float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-                float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+            if (dragElixirPreview) {             
                 dragElixirPreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
     }
-
     else if (isMovingBuilding) {
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
+        bool inDiamond = isInDiamond(diamondPos);
+
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+        static Vec2 lastValidMovePos;
+
+        if (inDiamond) {
+            lastValidMovePos = Vec2(snappedX, snappedY);
+        }
+        else {
+            snappedX = lastValidMovePos.x;
+            snappedY = lastValidMovePos.y;
+        }
+
         // 移动金矿
         if (movingGoldMine) {
-            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-            float gridCellSizeX = grid_manager_->getGridCellSizeX();
-            float gridCellSizeY = grid_manager_->getGridCellSizeY();
-            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
             movingGoldMine->setPosition(Vec2(snappedX, snappedY));
         }
         // 移动圣水收集器
         else if (movingElixirCollector) {
-            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-            float gridCellSizeX = grid_manager_->getGridCellSizeX();
-            float gridCellSizeY = grid_manager_->getGridCellSizeY();
-            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
             movingElixirCollector->setPosition(Vec2(snappedX, snappedY));
         }
     }
     else if (zoom_manager_) {
         zoom_manager_->onTouchMoved(touch, event);
     }
-    }
+}
 
 void SecondScene::onTouchEnded(Touch* touch, Event* event)
 {
@@ -595,19 +598,25 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         draggingItem = nullptr;
     }
     else if (isMovingBuilding) {
-        // 恢复金矿状态
-        if (movingGoldMine) {
-            log("金矿移动到新位置: (%.2f, %.2f)", movingGoldMine->getPosition().x, movingGoldMine->getPosition().y);
-            movingGoldMine->setOpacity(255);
-            background_sprite_->reorderChild(movingGoldMine, 15);
-            movingGoldMine = nullptr;
+
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
+        bool inDiamond = isInDiamond(diamondPos);
+
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+
+
+
+        // 移动金矿
+        if (inDiamond && movingGoldMine) {         
+            movingGoldMine->setPosition(Vec2(snappedX, snappedY));
         }
-        // 恢复圣水收集器状态
-        else if (movingElixirCollector) {
-            log("圣水收集器移动到新位置: (%.2f, %.2f)", movingElixirCollector->getPosition().x, movingElixirCollector->getPosition().y);
-            movingElixirCollector->setOpacity(255);
-            background_sprite_->reorderChild(movingElixirCollector, 15);
-            movingElixirCollector = nullptr;
+        // 移动圣水收集器
+        else if (inDiamond && movingElixirCollector) {
+            movingElixirCollector->setPosition(Vec2(snappedX, snappedY));
         }
         isMovingBuilding = false;
     }
@@ -657,7 +666,6 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
         zoom_manager_->onTouchCancelled(touch, event);
     }
 }
-
 
 void SecondScene::onMouseScroll(EventMouse* event)
 {
