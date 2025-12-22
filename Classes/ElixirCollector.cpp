@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, float elixirSpeed, float x0 , float y0)
+ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, float elixirSpeed, float x0, float y0)
 {
     ElixirCollector* mine = new (std::nothrow) ElixirCollector();
-    if (mine && mine->init(textureName, hp, elixirSpeed,x0,y0))
+    if (mine && mine->init(textureName, hp, elixirSpeed, x0, y0))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp,
     return nullptr;
 }
 
-bool ElixirCollector::init(const std::string& textureName, int hp, float elixirSpeed, float x0 , float y0 )
+bool ElixirCollector::init(const std::string& textureName, int hp, float generateSpeed, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -29,10 +29,12 @@ bool ElixirCollector::init(const std::string& textureName, int hp, float elixirS
 
     // 初始化核心属性
     _hp = hp;
-    _elixirGenerateSpeed = elixirSpeed;
+    _generateSpeed = generateSpeed;
     _textureName = textureName;
     x = x0;
     y = y0;
+    this->setPosition(Vec2(x0, y0));
+
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))
     {
@@ -51,7 +53,7 @@ bool ElixirCollector::initSprite(const std::string& textureName)
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'ElixirCollectorLv1.png'");
+        problemLoading("'goldMineLv1.png'");
         return false;
     }
 
@@ -61,14 +63,4 @@ bool ElixirCollector::initSprite(const std::string& textureName)
     _sprite->setScale(1.0f);
 
     return true;
-}
-
-void ElixirCollector::playFailBlinkAndRemove()
-{
-    _sprite->setColor(Color3B::RED); // 设为红色
-    this->runAction(Sequence::create(
-        Blink::create(0.5f, 3),    // 闪烁3次
-        RemoveSelf::create(true),  // 销毁自身
-        nullptr
-    ));
 }

@@ -20,7 +20,7 @@ GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpe
     return nullptr;
 }
 
-bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed, float x0, float y0)
+bool GoldMine::init(const std::string& textureName, int hp, float generateSpeed, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -29,10 +29,11 @@ bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed, flo
 
     // 初始化核心属性
     _hp = hp;
-    _goldGenerateSpeed = goldSpeed;
+    _generateSpeed = generateSpeed;
     _textureName = textureName;
     x = x0;
     y = y0;
+    this->setPosition(Vec2(x0, y0));
 
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))
@@ -64,12 +65,3 @@ bool GoldMine::initSprite(const std::string& textureName)
     return true;
 }
 
-void GoldMine::playFailBlinkAndRemove()
-{
-    _sprite->setColor(Color3B::RED); // 设为红色
-    this->runAction(Sequence::create(
-        Blink::create(0.5f, 3),    // 闪烁3次
-        RemoveSelf::create(true),  // 销毁自身
-        nullptr
-    ));
-}

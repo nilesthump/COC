@@ -2,6 +2,7 @@
 #define _Login_H_
 
 #include "cocos2d.h"
+#include "Building.h"
 #include "GoldMine.h"
 #include "ElixirCollector.h"
 #include "ZoomScrollManager.h"
@@ -51,7 +52,6 @@ private:
 
 	Node* buildPanel;
 
-
 	cocos2d::Sprite* background_sprite_;
 
 
@@ -84,12 +84,14 @@ private:
 	bool isDragging; // 是否正在拖拽
     
     // 建筑移动相关成员变量
-	GoldMine* movingGoldMine;
-	ElixirCollector* movingElixirCollector;
+	//GoldMine* movingGoldMine;
+	//ElixirCollector* movingElixirCollector;
+	Building* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
 
-	std::vector<GoldMine*> placedGoldMines; // 存储已放置的金矿
-	std::vector<ElixirCollector*> placedElixirCollectors;
+	//std::vector<GoldMine*> placedGoldMines; // 存储已放置的金矿
+	//std::vector<ElixirCollector*> placedElixirCollectors;
+	std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率
 	int baseElixirRate;
 };
