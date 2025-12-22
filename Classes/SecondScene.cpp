@@ -6,8 +6,8 @@
 #include <cmath>
 
 // 初始化全局变量
-int g_elixirCount = 0;
-int g_goldCount = 0;
+int g_elixirCount = 750;
+int g_goldCount = 750;
 
 USING_NS_CC;
 
@@ -278,7 +278,7 @@ bool SecondScene::init()
         // 创建圣水数量标签
         elixirLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
         elixirLabel->setColor(Color3B::BLUE);
-        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 40, elixirIcon->getPositionY()));
+        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 20, elixirIcon->getPositionY()));
         this->addChild(elixirLabel, 2);
     }
 
@@ -306,7 +306,7 @@ bool SecondScene::init()
         // 创建金币数量标签
         goldLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
         goldLabel->setColor(Color3B::YELLOW);
-        goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 40, goldIcon->getPositionY()));
+        goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 20, goldIcon->getPositionY()));
         this->addChild(goldLabel, 2);
     }
 
@@ -549,8 +549,17 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             if (draggingItem == goldMineBtn) {
                 // 创建金矿
                 auto placedGoldMine = GoldMine::create("GoldMineLv1.png");
-                if (placedGoldMine) {
+                /*if (placedGoldMine) {
                     placedGoldMine->setPosition(snappedPos);
+                    background_sprite_->addChild(placedGoldMine, 15);
+                    placedGoldMines.push_back(placedGoldMine);
+                    placedGoldMine->playSuccessBlink();
+                    log("成功放置金矿，产金速度：%.1f，位置：(%.2f, %.2f)",
+                        placedGoldMine->getGoldSpeed(), snappedPos.x, snappedPos.y);
+                }*/
+                if (placedGoldMine) {
+                    // 使用新的更新方法
+                    placedGoldMine->updatePosition(snappedPos);
                     background_sprite_->addChild(placedGoldMine, 15);
                     placedGoldMines.push_back(placedGoldMine);
                     placedGoldMine->playSuccessBlink();
@@ -562,11 +571,12 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 // 创建圣水收集器
                 auto placedElixir = ElixirCollector::create("ElixirCollectorLv1.png"); // 替换为你的圣水收集器纹理名
                 if (placedElixir) {
-                    placedElixir->setPosition(snappedPos);
+                    // 使用新的更新方法
+                    placedElixir->updatePosition(snappedPos);
                     background_sprite_->addChild(placedElixir, 15);
                     placedElixirCollectors.push_back(placedElixir);
-                    placedElixir->playSuccessBlink(); // 确保圣水收集器有该方法
-                    log("成功放置圣水收集器，产圣水速度：%.1f，位置：(%.2f, %.2f)",
+                    placedElixir->playSuccessBlink();
+                    log("成功放置金矿，产金速度：%.1f，位置：(%.2f, %.2f)",
                         placedElixir->getElixirSpeed(), snappedPos.x, snappedPos.y);
                 }
             }
@@ -608,15 +618,23 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
 
-
-
         // 移动金矿
-        if (inDiamond && movingGoldMine) {         
+        /*if (inDiamond && movingGoldMine) {
             movingGoldMine->setPosition(Vec2(snappedX, snappedY));
+        }*/
+        if (inDiamond && movingGoldMine) {
+            // 使用新的更新方法
+            movingGoldMine->updatePosition(Vec2(snappedX, snappedY));
+            movingGoldMine->setOpacity(255);
+            background_sprite_->reorderChild(movingGoldMine, 15);
+            movingGoldMine = nullptr;
         }
         // 移动圣水收集器
         else if (inDiamond && movingElixirCollector) {
-            movingElixirCollector->setPosition(Vec2(snappedX, snappedY));
+            movingElixirCollector->updatePosition(Vec2(snappedX, snappedY));
+            movingElixirCollector->setOpacity(255);
+            background_sprite_->reorderChild(movingElixirCollector, 15);
+            movingElixirCollector = nullptr;
         }
         isMovingBuilding = false;
     }

@@ -35,6 +35,13 @@ public:
     float getY() {
         return y;
     }
+
+    void updatePosition(const cocos2d::Vec2& newPos) {
+        this->setPosition(newPos);
+        x = newPos.x;
+        y = newPos.y;
+    }
+
     // 设置/获取位置（复用Node的position，锚点内部管理）
     void setMinePosition(const cocos2d::Vec2& pos) { this->setPosition(pos); }
     cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }
