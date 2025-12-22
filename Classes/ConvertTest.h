@@ -2,7 +2,8 @@
 #define _CONVERT_TEST_
 #include "cocos2d.h"
 #include <cmath>
-
+//12/22 注意！，修改为0-49坐标转换。角色可放置位置为(-0.5---49.5)，
+//建筑边界应在(1.5--47.5)或者建筑有自己一套逻辑判断是出界，你们决定哈
 USING_NS_CC;
 
 class ConvertTest
@@ -18,12 +19,9 @@ private:
     static constexpr int TOP_Y = 264;
     static constexpr int BOTTOM_Y = 2545 - 471; // 2074
 
-    static constexpr int GRID_COUNT = 44;
+    static constexpr int GRID_COUNT = 50;
 
 public:
-
-   
-
     // ============================================
     // 核心转换：网格坐标 → game_world本地坐标
     // ============================================
@@ -32,8 +30,8 @@ public:
      * Vec2 dia = Vec2(leftCorner.x + (j + i) * horizontalSize / 2,
      *                 leftCorner.y + (j - i) * verticalSize / 2);
      *
-     * @param gridX 网格X坐标 (0-43，从左到右)
-     * @param gridY 网格Y坐标 (0-43，从下到上)
+     * @param gridX 网格X坐标 (0-49，从左到右)
+     * @param gridY 网格Y坐标 (0-49，从下到上)
      * @param backgroundSprite 背景精灵
      * @return game_world_本地坐标
      */
@@ -54,27 +52,20 @@ public:
             backgroundSprite->getContentSize().height / 2.0f
         );
 
-        // 2. 计算左角的位置（参考DiamondGridManager的逻辑）
-        // DiamondGridManager中：
-        // Vec2 leftCorner = Vec2(diamondCenterPos.x - 16 * horizontalSize,
-        //                        diamondCenterPos.y + 9 * verticalSize);
-        // 
-        // 这表示44x44网格的左角（gridX=0, gridY=43）的位置
-        // 实际上网格布局是：
-        //      (0,43)
-        //     /     \
-        // (0,22)   (21,43)
-        //   /  \   /  \
-        // (0,0)  (21,21) (43,43)
-        //        \  /   /
-        //       (21,0) (43,21)
-        //            \
-        //           (43,0)
+        // 2.计算左角位置 - 向左移动3个横向对角线长度
+        // 原始44x44的左角偏移：-21.75 * HORIZONTAL_SPACING
+        // 50x50需要额外偏移：从44到50增加了6格，每边增加3格
+        // 向左移动3格 = -3 * HORIZONTAL_SPACING
+        // 所以新的左角X偏移 = -21.75 - 3 = -24.75
+
+        // 对于Y轴，50x50比44x44高6格，所以上下各增加3格
+        // 原始Y偏移是4.68，现在需要上移3格 = +3 * VERTICAL_SPACING / 2
+        // 新的Y偏移 = 4.68 + 3 = 7.68
 
         // 根据DiamondGridManager的偏移量计算左角
-        //! 整体网格调整在这里，如果整体偏右把-21.75调小，偏左调大；如果整体偏上把4.68调小，偏下调大
+        //! 整体网格调整在这里，如果整体偏右把-24.75调小，偏左调大；如果整体偏上把7.68调小，偏下调大
         Vec2 left_corner = diamond_center + Vec2(
-            -21.75 * HORIZONTAL_SPACING, 
+            -24.75 * HORIZONTAL_SPACING, 
             4.68 * VERTICAL_SPACING       
         );
 
@@ -120,7 +111,7 @@ public:
 
         // 使用与convertGridToLocal相同的左角计算
         Vec2 left_corner = diamond_center + Vec2(
-            -21.75 * HORIZONTAL_SPACING,
+            -24.75 * HORIZONTAL_SPACING,
             4.68 * VERTICAL_SPACING
         );
 

@@ -15,8 +15,6 @@ public:
 	bool IsInAttackRange(BattleUnit* self, BattleUnit* target) override;
 	std::string GetNavigationType() const;
 	float CalculateDistance(BattleUnit* a, BattleUnit* b);
-private:
-	float CalculateManhattanDistance(BattleUnit* a, BattleUnit* b);
 	
 };
 #endif

@@ -1,5 +1,4 @@
 #include "ZoomScrollManager.h"
-
 USING_NS_CC;
 
 ZoomScrollManager* ZoomScrollManager::create(Sprite* targetSprite, float minScale, float maxScale)
@@ -32,29 +31,6 @@ bool ZoomScrollManager::init(Sprite* targetSprite, float minScale, float maxScal
     is_scaling_ = false;
     previous_distance_ = 0.0f;
     scale_center_ = Vec2::ZERO;
-#if 0
-    // Ìí¼Óµ¥µã´¥Ãþ¼àÌýÆ÷£¨ÍÏ×§£©
-    auto touch_listener = EventListenerTouchOneByOne::create();
-    touch_listener->setSwallowTouches(true);
-    touch_listener->onTouchBegan = CC_CALLBACK_2(ZoomScrollManager::onTouchBegan, this);
-    touch_listener->onTouchMoved = CC_CALLBACK_2(ZoomScrollManager::onTouchMoved, this);
-    touch_listener->onTouchEnded = CC_CALLBACK_2(ZoomScrollManager::onTouchEnded, this);
-    touch_listener->onTouchCancelled = CC_CALLBACK_2(ZoomScrollManager::onTouchCancelled, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
-
-    // Ìí¼ÓÊó±ê¹öÂÖ¼àÌýÆ÷£¨Ëõ·Å£©
-    auto mouse_listener = EventListenerMouse::create();
-    mouse_listener->onMouseScroll = CC_CALLBACK_1(ZoomScrollManager::onMouseScroll, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouse_listener, this);
-
-    // Ìí¼ÓË«Ö¸´¥Ãþ¼àÌýÆ÷£¨Ëõ·Å£©
-    auto multi_touch_listener = EventListenerTouchAllAtOnce::create();
-    multi_touch_listener->onTouchesBegan = CC_CALLBACK_2(ZoomScrollManager::onTouchesBegan, this);
-    multi_touch_listener->onTouchesMoved = CC_CALLBACK_2(ZoomScrollManager::onTouchesMoved, this);
-    multi_touch_listener->onTouchesEnded = CC_CALLBACK_2(ZoomScrollManager::onTouchesEnded, this);
-    multi_touch_listener->onTouchesCancelled = CC_CALLBACK_2(ZoomScrollManager::onTouchesCancelled, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(multi_touch_listener, this);
-#endif
     return true;
 }
 

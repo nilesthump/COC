@@ -45,8 +45,8 @@ public:
         AttackerData data = AttackerData::CreateBarbarianData(level);
         BattleUnit* unit = new BattleUnit();
         unit->Init(data);
-        unit->SetBehavior(new AttackerNormalBehavior()); //先用通用行为
-        unit->SetNavigation(new BarbarianNavigation());
+        unit->SetBehavior(std::make_unique<AttackerNormalBehavior>()); //先用通用行为
+        unit->SetNavigation(std::make_unique <BarbarianNavigation>());
         return unit;
     }
 
@@ -56,8 +56,8 @@ public:
         DefenderData data = DefenderData::CreateCannonData(level);
         BattleUnit* unit = new BattleUnit();
         unit->Init(data);
-        unit->SetBehavior(new DefenderNormalBehavior());
-        unit->SetNavigation(new CannonNavigation()); // 使用加农炮导航（固定，无移动）
+        unit->SetBehavior(std::make_unique <DefenderNormalBehavior>());
+        unit->SetNavigation(std::make_unique<CannonNavigation>()); // 使用加农炮导航（固定，无移动）
         return unit;
     }
 

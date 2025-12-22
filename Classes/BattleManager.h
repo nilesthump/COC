@@ -20,10 +20,10 @@
 #define BATTLEMANAGER_H
 #include "BattleUnit.h"
 #include "UnitFactory.h"
+#include "BattleTypes.h"
 #include <vector>
 #include <memory>
 
-//? 敌人列表的实时更新体现在哪里？比如一个对象死了之后，对方应该获取的敌人列表中会减掉它
 class BattleManager
 {
 private:
@@ -31,28 +31,61 @@ private:
     std::vector<BattleUnit*> attackers_;
     std::vector<BattleUnit*> defenders_;
     bool battle_active_;
+    int total_heroes_;
+    int heroes_placed_;
+    float battle_time_elapsed_;     //战斗已进行时间
+    const float MAX_BATTLE_TIME_ = 180.0f;
+
+    BattleResult battle_result_;
 
 public:
-    BattleManager() : battle_active_(false) {}
+    BattleManager() : battle_active_(false) ,total_heroes_(0),battle_time_elapsed_(0.0f),heroes_placed_(0),battle_result_(BattleResult::NONE){}
 
     //添加单位
     void AddUnit(std::unique_ptr<BattleUnit> unit, bool is_attacker);
 
+    //设置总英雄数量
+    void SetTotalHeroes(int count) { total_heroes_ = count; }
+    
+    //是否可以再放英雄
+    bool CanDeployAttacker() const
+    {
+        return heroes_placed_ < total_heroes_;
+    }
+
+    //获取放置了多少英雄/攻击者
+    int GetHeroesPlaced()const { return heroes_placed_; }
+
+    //获取英雄总数
+    int GetMaxHeros()const { return total_heroes_; }
+
     //获取敌人的列表
     std::vector<BattleUnit*> GetEnemiesFor(BattleUnit* unit) const;
    
-    //主更新循环
-    void Update(double deltaTime);
-
-    //检查战斗是否结束
-    //! 这里还有个时间限制检查没加进去
-    bool IsBattleOver() const;
-    
     //设置战斗是否进行进程
     void SetBattleActive(bool s);
 
+    //主更新循环
+    void Update(double deltaTime);
+
     //清理死亡单位
     void RemoveDeadUnits();
+
+    //返回战斗结果
+    BattleResult EvaluateBattleResult() ;
+    
+    //获取结果
+    BattleManager::BattleResult BattleManager::GetBattleResult() const
+    {
+        return battle_result_;
+    }
+
+    //战斗是否结束，给到外面一个接口
+    bool BattleManager::HasBattleEnded() const
+    {
+       return battle_result_ != BattleResult::NONE;
+    }
+
 };
 #endif 
 

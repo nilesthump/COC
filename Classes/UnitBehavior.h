@@ -25,7 +25,8 @@ class UnitBehavior
 {
 public:
     virtual ~UnitBehavior() = default;
-
+    virtual void OnBattleStart(BattleUnit* unit) {}
+    virtual void OnBattleEnd(BattleUnit* unit) {}
     //核心接口，需要注释
     //计算伤害
     virtual double CalculateDamage(BattleUnit* attacker, BattleUnit* defender) = 0;

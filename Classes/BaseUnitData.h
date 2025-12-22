@@ -41,8 +41,8 @@ struct BaseUnitData
     int level;                  //等级
 
     //战斗属性
-    int health;                 //生命值
-    int damage;                 //攻击力
+    float health;                 //生命值
+    float damage;                 //攻击力
     float attack_interval;     //攻击间隔（秒）
     float attack_distance;     //攻击距离（格）
 

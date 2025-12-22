@@ -7,12 +7,7 @@
  * 1. 这是战斗系统的最小可操作单元
  * 2. 每个BattleUnit代表战场上的一个独立实体（如一个野蛮人、一个箭塔）
  * 3. 采用组合模式，不继承具体功能，而是持有功能组件
- *
- * 组合关系：
- * BattleUnit = UnitState + UnitBehavior + UnitNavigation
- *      ↓            ↓             ↓             ↓
- *     实体       状态数据       行为逻辑       移动寻路
- *
+ * 
  * 生命周期：
  * 1. 创建：UnitFactory根据配置创建
  * 2. 初始化：设置初始位置、血量等状态
@@ -39,9 +34,13 @@
 class BattleUnit
 {
 private:
+	//unit本身核心组件
 	UnitState state_;
-	UnitBehavior* behavior_;
-	UnitNavigation* navigation_;
+	std::unique_ptr<UnitBehavior> behavior_;    
+	std::unique_ptr<UnitNavigation> navigation_;
+
+	//战斗状态
+	bool in_battle_ = false;
 	BattleUnit* target_;
 
 	//视觉组件
@@ -57,7 +56,11 @@ private:
 
 public:
 	BattleUnit();
-	~BattleUnit() = default;
+	~BattleUnit();
+
+	//禁止拷贝（避免浅拷贝问题）
+	BattleUnit(const BattleUnit&) = delete;
+	BattleUnit& operator=(const BattleUnit&) = delete;
 
 	//初始化
 	template<typename T>
@@ -67,8 +70,8 @@ public:
 	}
 
 	//设置组件
-	void SetBehavior(UnitBehavior* behavior);
-	void SetNavigation(UnitNavigation* navigation);
+	void SetBehavior(std::unique_ptr<UnitBehavior> behavior);
+	void SetNavigation(std::unique_ptr<UnitNavigation> navigation);
 	void SetBackgroundSprite(cocos2d::Sprite* background_sprite);
 
 	//更新函数
@@ -112,11 +115,17 @@ public:
 	void UpdateHealthBar();
 	void RemoveSprite();
 
+	// 反馈动画
+	void PlayPlacementFailAnimation();
+
 	//音效方法
 	void SetAttackSound(const std::string& sound);
 	void SetDeathSound(const std::string& sound);
 	void PlayAttackSound();
 	void PlayDeathSound();
+
+	void OnBattleStart();
+	bool IsInBattle() const { return in_battle_; }
 
 };
 

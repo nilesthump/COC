@@ -12,21 +12,44 @@ BattleUnit::BattleUnit()
 	parent_node_(nullptr)
 {}
 
-void BattleUnit::SetBehavior(UnitBehavior* behavior)
+BattleUnit::~BattleUnit()
 {
-	behavior_ = behavior;
+	//清理视觉组件
+	RemoveSprite();
+	//这里update那里如果死了就!visible了冲突吗
+	if (health_bar_bg_)
+	{
+		health_bar_bg_->removeFromParentAndCleanup(true);
+		health_bar_bg_ = nullptr;
+	}
+
+	if (health_bar_)
+	{
+		health_bar_->removeFromParentAndCleanup(true);
+		health_bar_ = nullptr;
+	}
+	target_ = nullptr;
+	background_sprite_ = nullptr;
+	parent_node_ = nullptr;
 }
 
-void BattleUnit::SetNavigation(UnitNavigation* navigation)
+void BattleUnit::SetBehavior(std::unique_ptr<UnitBehavior> behavior)
 {
-	navigation_ = navigation;
+	behavior_ = std::move(behavior);
+}
+
+void BattleUnit::SetNavigation(std::unique_ptr<UnitNavigation> navigation)
+{
+	navigation_ = std::move(navigation);  // 转移所有权
 }
 
 void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 {
+	if (!in_battle_)
+		return;
 	if (!state_.IsAlive())
 		return;
-
+	
 	//1.行为更新
 	if (behavior_)
 	{
@@ -52,6 +75,7 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	{
 		if (behavior_->CanAttack(this, target_))
 		{
+			CCLOG("i am d");
 			float damage = behavior_->CalculateDamage(this, target_);
 			target_->TakeDamage(damage, this);
 			behavior_->OnAttack(this, target_);
@@ -69,6 +93,7 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	UpdateHealthBar();
 }
 
+//这里的takedamage组合了减伤+受伤反应（暂时没用)+死亡处理，behavior需要再考虑
 void BattleUnit::TakeDamage(float damage, BattleUnit* source)
 {
 	state_.TakeDamage(damage);
@@ -167,12 +192,12 @@ BattleUnit* BattleUnit::GetTarget() const
 
 UnitNavigation* BattleUnit::GetNavigation() const
 {
-	return navigation_;
+	return navigation_.get();
 }
 
 UnitBehavior* BattleUnit::GetBehavior() const
 {
-	return behavior_;
+	return behavior_.get();
 }
 
 //视觉组件设置
@@ -180,14 +205,15 @@ void BattleUnit::SetSprite(cocos2d::Sprite* sprite, cocos2d::Node* parent)
 {
 	if (unit_sprite_ && unit_sprite_->getParent())
 	{
-		unit_sprite_->removeFromParent();
+		unit_sprite_->removeFromParentAndCleanup(true);
+		unit_sprite_ = nullptr;
 	}
 
 	unit_sprite_ = sprite;
 	parent_node_ = parent;
 	if (unit_sprite_ && parent)
 	{
-		// 检查精灵是否已经有父节点
+		// 检查精灵没经有父节点
 		if (unit_sprite_->getParent())
 		{
 			unit_sprite_->removeFromParent();
@@ -290,6 +316,39 @@ void BattleUnit::PlayDeathSound()
 	}
 }
 
+//放置失败动画
+void BattleUnit::PlayPlacementFailAnimation()
+{
+	if (!unit_sprite_)
+		return;
+
+	CCLOG("[BattleUnit] Playing placement fail animation");
+
+	// 变红色
+	unit_sprite_->setColor(Color3B::RED);
+
+	// 闪烁3次 + 淡出
+	auto blink = Blink::create(0.5f, 3);
+	auto fadeOut = FadeOut::create(0.3f);
+
+	// 动画结束后的回调
+	auto cleanup = CallFunc::create([this]()
+		{
+			CCLOG("[BattleUnit] Fail animation completed, removing unit");
+			// 从场景中移除（但不删除对象，由外部管理）
+			RemoveSprite();
+		});
+
+	auto sequence = Sequence::create(blink, fadeOut, cleanup, nullptr);
+	unit_sprite_->runAction(sequence);
+
+	// 同时隐藏血条
+	if (health_bar_bg_)
+		health_bar_bg_->setVisible(false);
+	if (health_bar_)
+		health_bar_->setVisible(false);
+}
+
 Node* BattleUnit::GetParentNode() const
 {
 	return parent_node_;
@@ -300,7 +359,7 @@ void BattleUnit::UpdateSpritePosition()
 	if (!unit_sprite_ || !background_sprite_ || !parent_node_)
 		return;
 	// 使用新的转换方法
-	// state_中存储的是网格坐标(0-43, 0-43)
+	// state_中存储的是网格坐标(0-49, 0-49)
 	Vec2 local_pos = ConvertTest::convertGridToLocal(
 		state_.GetPositionX(),
 		state_.GetPositionY(),
@@ -316,8 +375,10 @@ void BattleUnit::UpdateHealthBar()
 {
 	if (!state_.IsAlive())
 	{
-		if (health_bar_bg_) health_bar_bg_->setVisible(false);
-		if (health_bar_) health_bar_->setVisible(false);
+		if (health_bar_bg_) 
+			health_bar_bg_->setVisible(false);
+		if (health_bar_) 
+			health_bar_->setVisible(false);
 		return;
 	}
 
@@ -354,4 +415,19 @@ void BattleUnit::SetPosition(float x, float y)
 void BattleUnit::SetBackgroundSprite(cocos2d::Sprite* background_sprite)
 {
 	background_sprite_ = background_sprite;
+}
+
+void BattleUnit::OnBattleStart()
+{
+	in_battle_ = true;
+
+	// 行为系统参战
+	if (behavior_)
+		behavior_->OnBattleStart(this);
+
+	if (navigation_)
+		navigation_->OnBattleStart(this);
+
+	// 清空旧目标（避免出生时锁死）
+	target_ = nullptr;
 }

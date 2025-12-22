@@ -83,6 +83,9 @@ class UnitNavigation
 
 public:
 	virtual ~UnitNavigation() = default;
+	virtual void OnBattleStart(BattleUnit* unit) {}
+	virtual void OnBattleEnd(BattleUnit* unit) {}
+	virtual void ResetPath() {}
 
 	//я╟урд©╠Й
 	virtual BattleUnit* FindTarget(BattleUnit* self,
