@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpeed)
+GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpeed, float x0, float y0)
 {
     GoldMine* mine = new (std::nothrow) GoldMine();
-    if (mine && mine->init(textureName, hp, goldSpeed))
+    if (mine && mine->init(textureName, hp, goldSpeed, x0, y0))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ GoldMine* GoldMine::create(const std::string& textureName, int hp, float goldSpe
     return nullptr;
 }
 
-bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed)
+bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -31,6 +31,8 @@ bool GoldMine::init(const std::string& textureName, int hp, float goldSpeed)
     _hp = hp;
     _goldGenerateSpeed = goldSpeed;
     _textureName = textureName;
+    x = x0;
+    y = y0;
 
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))

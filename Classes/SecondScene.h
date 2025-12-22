@@ -42,8 +42,12 @@ public:
 
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
+	//newÅÐ¶Ï
 	CREATE_FUNC(SecondScene);
 private:
+	//Åö×²ÅÐ¶Ï
+	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
+	//bool isPointInBuilding(const Vec2& point, Node* checkBuilding, Node* movingBuilding);
 
 	Node* buildPanel;
 

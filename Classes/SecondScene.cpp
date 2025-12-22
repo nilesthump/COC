@@ -6,8 +6,8 @@
 #include <cmath>
 
 // 初始化全局变量
-int g_elixirCount = 0;
-int g_goldCount = 0;
+int g_elixirCount = 750;
+int g_goldCount = 750;
 
 USING_NS_CC;
 
@@ -34,10 +34,10 @@ bool SecondScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     // 初始化产金相关变量
-    baseGoldRate = 1; // 基础每秒1金币
-    baseElixirRate = 1;
-    g_goldCount = 0; // 确保金币计数初始化为0
-    g_elixirCount = 0;
+    baseGoldRate = 0; // 基础每秒1金币
+    baseElixirRate = 0;
+    g_goldCount = 750; // 确保金币计数初始化为0
+    g_elixirCount = 750;
 
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
@@ -127,9 +127,9 @@ bool SecondScene::init()
                     // goldMinePreview->setScale(0.5f); // 如需缩放可加
 
                     // 计算预览初始位置（和原来的逻辑一致）
-                    Vec2 worldPos = goldMineBtn->getParent()->convertToWorldSpace(goldMineBtn->getPosition());
-                    Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    goldMinePreview->setMinePosition(localPos);
+                    //Vec2 worldPos = goldMineBtn->getParent()->convertToWorldSpace(goldMineBtn->getPosition());
+                    //Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
+                    goldMinePreview->setMinePosition(Vec2(goldMinePreview->getX(), goldMinePreview->getY()));
                     // 添加到背景精灵，并保存到按钮的UserData
                     background_sprite_->addChild(goldMinePreview, 10);
                     goldMineBtn->setUserData(goldMinePreview);
@@ -163,9 +163,9 @@ bool SecondScene::init()
                     // goldMinePreview->setScale(0.5f); // 如需缩放可加
 
                     // 计算预览初始位置（和原来的逻辑一致）
-                    Vec2 worldPos = elixirCollectorBtn->getParent()->convertToWorldSpace(elixirCollectorBtn->getPosition());
-                    //Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    elixirCollectorPreview->setMinePosition(worldPos);
+                    //Vec2 worldPos = elixirCollectorBtn->getParent()->convertToWorldSpace(elixirCollectorBtn->getPosition());
+                    //Vec2 localPos = background_sprite_->convertToNodeSpace();
+                    elixirCollectorPreview->setMinePosition(Vec2(elixirCollectorPreview->getX(), elixirCollectorPreview->getY()));
 
                     // 添加到背景精灵，并保存到按钮的UserData
                     background_sprite_->addChild(elixirCollectorPreview, 10);
@@ -240,7 +240,7 @@ bool SecondScene::init()
 
     // 计算菱形中心相对于背景精灵中心的位置
     Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
-    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2, background_sprite_->getContentSize().height / 2);
+    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2+28.0, background_sprite_->getContentSize().height / 2 - 42.0 * 4);
 
     // 创建菱形网格管理器
     grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 44);
@@ -278,7 +278,7 @@ bool SecondScene::init()
         // 创建圣水数量标签
         elixirLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
         elixirLabel->setColor(Color3B::BLUE);
-        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 40, elixirIcon->getPositionY()));
+        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 20, elixirIcon->getPositionY()));
         this->addChild(elixirLabel, 2);
     }
 
@@ -306,7 +306,7 @@ bool SecondScene::init()
         // 创建金币数量标签
         goldLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
         goldLabel->setColor(Color3B::YELLOW);
-        goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 40, goldIcon->getPositionY()));
+        goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 20, goldIcon->getPositionY()));
         this->addChild(goldLabel, 2);
     }
 
@@ -455,57 +455,125 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         // 区分拖拽的是金矿预览还是圣水收集器预览
         void* userData = draggingItem->getUserData();
         if (!userData) return;
-        
+
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+
         // 金矿预览
         if (draggingItem == goldMineBtn) {
             GoldMine* dragMinePreview = static_cast<GoldMine*>(userData);
-            if (dragMinePreview) {
-                Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-                float gridCellSizeX = grid_manager_->getGridCellSizeX();
-                float gridCellSizeY = grid_manager_->getGridCellSizeY();
-                float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-                float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+            if (dragMinePreview) {            
                 dragMinePreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
         // 圣水收集器预览
         else if (draggingItem == elixirCollectorBtn) {
             ElixirCollector* dragElixirPreview = static_cast<ElixirCollector*>(userData);
-            if (dragElixirPreview) {
-                Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-                float gridCellSizeX = grid_manager_->getGridCellSizeX();
-                float gridCellSizeY = grid_manager_->getGridCellSizeY();
-                float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-                float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+            if (dragElixirPreview) {             
                 dragElixirPreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
     }
-
     else if (isMovingBuilding) {
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
+        bool inDiamond = isInDiamond(diamondPos);
+
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+        static Vec2 lastValidMovePos;
+
+        if (inDiamond) {
+            // 在移动建筑的代码块中添加
+            bool isColliding = false;
+
+            // 检查与其他建筑的碰撞
+            if (movingGoldMine) {
+                // 排除自身进行检测
+                for (auto mine : placedGoldMines) {
+                    if (mine == movingGoldMine) continue;
+                    if (isPointInBuilding(Vec2(snappedX, snappedY), mine)) {
+                        isColliding = true;
+                        break;
+                    }
+                }
+                // 检查与圣水收集器的碰撞
+                if (!isColliding) {
+                    for (auto collector : placedElixirCollectors) {
+                        if (isPointInBuilding(Vec2(snappedX, snappedY), collector)) {
+                            isColliding = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (movingElixirCollector) {
+                // 排除自身进行检测
+                for (auto collector : placedElixirCollectors) {
+                    if (collector == movingElixirCollector) continue;
+                    if (isPointInBuilding(Vec2(snappedX, snappedY), collector)) {
+                        isColliding = true;
+                        break;
+                    }
+                }
+                // 检查与金矿的碰撞
+                if (!isColliding) {
+                    for (auto mine : placedGoldMines) {
+                        if (isPointInBuilding(Vec2(snappedX, snappedY), mine)) {
+                            isColliding = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 如果碰撞，不更新位置或显示红色提示
+            if (isColliding) {
+                // 可以将建筑设为红色提示碰撞
+                if (movingGoldMine) {
+                    movingGoldMine->getSprite()->setColor(Color3B::RED);
+                }
+                else if (movingElixirCollector) {
+                    movingElixirCollector->getSprite()->setColor(Color3B::RED);
+                }
+                return; // 不更新位置
+            }
+            else {
+                // 恢复颜色
+                if (movingGoldMine) {
+                    movingGoldMine->getSprite()->setColor(Color3B::WHITE);
+                }
+                else if (movingElixirCollector) {
+                    movingElixirCollector->getSprite()->setColor(Color3B::WHITE);
+                }
+            }
+
+            // 如果没有碰撞，继续移动
+            lastValidMovePos = Vec2(snappedX, snappedY);
+        }
+        else {
+            snappedX = lastValidMovePos.x;
+            snappedY = lastValidMovePos.y;
+        }
+
         // 移动金矿
         if (movingGoldMine) {
-            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-            float gridCellSizeX = grid_manager_->getGridCellSizeX();
-            float gridCellSizeY = grid_manager_->getGridCellSizeY();
-            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
             movingGoldMine->setPosition(Vec2(snappedX, snappedY));
         }
         // 移动圣水收集器
         else if (movingElixirCollector) {
-            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-            float gridCellSizeX = grid_manager_->getGridCellSizeX();
-            float gridCellSizeY = grid_manager_->getGridCellSizeY();
-            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
             movingElixirCollector->setPosition(Vec2(snappedX, snappedY));
         }
     }
     else if (zoom_manager_) {
         zoom_manager_->onTouchMoved(touch, event);
     }
-    }
+}
 
 void SecondScene::onTouchEnded(Touch* touch, Event* event)
 {
@@ -542,12 +610,67 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         // 2. 检查放置区域有效性
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
         if (isInDiamond(diamondPos)) {
+
+            // 在有效区域放置建筑的代码块中添加
+            bool isColliding = false;
+            Vec2 targetPos = snappedPos;
+
+            // 检查与已放置金矿的碰撞
+            for (auto mine : placedGoldMines) {
+                if (isPointInBuilding(targetPos, mine)) {
+                    isColliding = true;
+                    break;
+                }
+            }
+
+            // 检查与已放置圣水收集器的碰撞
+            if (!isColliding) {
+                for (auto collector : placedElixirCollectors) {
+                    if (isPointInBuilding(targetPos, collector)) {
+                        isColliding = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isColliding) {
+                // 碰撞处理：播放失败动画
+                log("放置位置与其他建筑冲突！");
+                // 这里可以添加显示提示信息的逻辑
+                if (draggingItem == goldMineBtn) {
+                    auto failGoldMine = GoldMine::create("GoldMineLv1.png");
+                    if (failGoldMine) {
+                        failGoldMine->setPosition(snappedPos);
+                        background_sprite_->addChild(failGoldMine, 15);
+                        failGoldMine->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == elixirCollectorBtn) {
+                    auto failElixir = ElixirCollector::create("ElixirCollectorLv1.png");
+                    if (failElixir) {
+                        failElixir->setPosition(snappedPos);
+                        background_sprite_->addChild(failElixir, 15);
+                        failElixir->playFailBlinkAndRemove();
+                    }
+                }
+                return; // 阻止放置
+            }
+            // 如果没有碰撞，继续执行放置逻辑           
             // 有效区域：根据按钮类型创建对应建筑
             if (draggingItem == goldMineBtn) {
                 // 创建金矿
                 auto placedGoldMine = GoldMine::create("GoldMineLv1.png");
-                if (placedGoldMine) {
+                /*if (placedGoldMine) {
                     placedGoldMine->setPosition(snappedPos);
+                    background_sprite_->addChild(placedGoldMine, 15);
+                    placedGoldMines.push_back(placedGoldMine);
+                    placedGoldMine->playSuccessBlink();
+                    log("成功放置金矿，产金速度：%.1f，位置：(%.2f, %.2f)",
+                        placedGoldMine->getGoldSpeed(), snappedPos.x, snappedPos.y);
+                }*/
+                if (placedGoldMine) {
+                    // 使用新的更新方法
+                    placedGoldMine->updatePosition(snappedPos);
                     background_sprite_->addChild(placedGoldMine, 15);
                     placedGoldMines.push_back(placedGoldMine);
                     placedGoldMine->playSuccessBlink();
@@ -559,11 +682,12 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 // 创建圣水收集器
                 auto placedElixir = ElixirCollector::create("ElixirCollectorLv1.png"); // 替换为你的圣水收集器纹理名
                 if (placedElixir) {
-                    placedElixir->setPosition(snappedPos);
+                    // 使用新的更新方法
+                    placedElixir->updatePosition(snappedPos);
                     background_sprite_->addChild(placedElixir, 15);
                     placedElixirCollectors.push_back(placedElixir);
-                    placedElixir->playSuccessBlink(); // 确保圣水收集器有该方法
-                    log("成功放置圣水收集器，产圣水速度：%.1f，位置：(%.2f, %.2f)",
+                    placedElixir->playSuccessBlink();
+                    log("成功放置金矿，产金速度：%.1f，位置：(%.2f, %.2f)",
                         placedElixir->getElixirSpeed(), snappedPos.x, snappedPos.y);
                 }
             }
@@ -595,16 +719,32 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         draggingItem = nullptr;
     }
     else if (isMovingBuilding) {
-        // 恢复金矿状态
-        if (movingGoldMine) {
-            log("金矿移动到新位置: (%.2f, %.2f)", movingGoldMine->getPosition().x, movingGoldMine->getPosition().y);
+
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
+        bool inDiamond = isInDiamond(diamondPos);
+
+        float gridCellSizeX = grid_manager_->getGridCellSizeX();
+        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+
+        // 移动金矿
+        /*if (inDiamond && movingGoldMine) {
+            movingGoldMine->setPosition(Vec2(snappedX, snappedY));
+        }*/
+        // 在移动建筑结束的代码块中添加
+      
+        if (inDiamond && movingGoldMine) {
+            // 使用新的更新方法
+            movingGoldMine->updatePosition(Vec2(snappedX, snappedY));
             movingGoldMine->setOpacity(255);
             background_sprite_->reorderChild(movingGoldMine, 15);
             movingGoldMine = nullptr;
         }
-        // 恢复圣水收集器状态
-        else if (movingElixirCollector) {
-            log("圣水收集器移动到新位置: (%.2f, %.2f)", movingElixirCollector->getPosition().x, movingElixirCollector->getPosition().y);
+        // 移动圣水收集器
+        else if (inDiamond && movingElixirCollector) {
+            movingElixirCollector->updatePosition(Vec2(snappedX, snappedY));
             movingElixirCollector->setOpacity(255);
             background_sprite_->reorderChild(movingElixirCollector, 15);
             movingElixirCollector = nullptr;
@@ -657,7 +797,6 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
         zoom_manager_->onTouchCancelled(touch, event);
     }
 }
-
 
 void SecondScene::onMouseScroll(EventMouse* event)
 {
@@ -756,5 +895,147 @@ bool SecondScene::isInDiamond(const Vec2& diamondPos)
     }
     return false;
 }
+
+//判断点是否在建筑范围内
+bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
+    if (!building) return false;
+
+    Sprite* sprite = nullptr;
+    // 判断建筑类型并获取精灵
+    if (dynamic_cast<GoldMine*>(building)) {
+        sprite = static_cast<GoldMine*>(building)->getSprite();
+    }
+    else if (dynamic_cast<ElixirCollector*>(building)) {
+        sprite = static_cast<ElixirCollector*>(building)->getSprite();
+    }
+
+    if (!sprite) return false;
+
+    // 计算建筑在背景上的世界坐标
+    Vec2 buildingPos = background_sprite_->convertToNodeSpace(building->convertToWorldSpace(Vec2::ZERO));
+    Size size = sprite->getContentSize() * sprite->getScale();
+
+    // 建筑世界坐标 → 转换为背景精灵的本地坐标（和传入的point同空间）
+    Vec2 buildingWorldPos = building->convertToWorldSpace(Vec2::ZERO);
+    Vec2 buildingLocalCenter = background_sprite_->convertToNodeSpace(buildingWorldPos);
+
+    //单个小菱形参数：水平对角线56f → 半长28f；竖直对角线42f → 半长21f
+    const float halfHoriz = 28.0f;
+    const float halfVert = 21.0f;
+    const float extendRatio = 2.5f;
+    
+    // 第一部分：原有9个核心菱形（3x3）
+    Vec2 coreOffsets[9] = {
+        Vec2(0, 0),                // 中心
+        Vec2(halfHoriz, 0),        // 右
+        Vec2(-halfHoriz, 0),       // 左
+        Vec2(0, halfVert),         // 上
+        Vec2(0, -halfVert),        // 下
+        Vec2(halfHoriz, halfVert), // 右上
+        Vec2(-halfHoriz, halfVert),// 左上
+        Vec2(halfHoriz, -halfVert),// 右下
+        Vec2(-halfHoriz, -halfVert)// 左下
+    };
+    // 第二部分：外层12个扩展半菱形（上下左右/斜向各延伸半个菱形）
+    Vec2 extendOffsets[12] = {
+        Vec2(halfHoriz * extendRatio, 0),          // 正右扩展
+        Vec2(-halfHoriz * extendRatio, 0),         // 正左扩展
+        Vec2(0, halfVert * extendRatio),           // 正上扩展
+        Vec2(0, -halfVert * extendRatio),          // 正下扩展
+        Vec2(halfHoriz * 1.25f, halfVert * 1.25f), // 右上扩展
+        Vec2(-halfHoriz * 1.25f, halfVert * 1.25f),// 左上扩展
+        Vec2(halfHoriz * 1.25f, -halfVert * 1.25f),// 右下扩展
+        Vec2(-halfHoriz * 1.25f, -halfVert * 1.25f),// 左下扩展
+        Vec2(halfHoriz * extendRatio, halfVert),   // 右中扩展（上）
+        Vec2(halfHoriz * extendRatio, -halfVert),  // 右中扩展（下）
+        Vec2(-halfHoriz * extendRatio, halfVert),  // 左中扩展（上）
+        Vec2(-halfHoriz * extendRatio, -halfVert)  // 左中扩展（下）
+    };
+
+    // 单个菱形碰撞判断（带容错）
+    auto isPointInSingleDiamond = [](const Vec2& p, const Vec2& center, float hh, float hv) -> bool {
+        float dx = abs(p.x - center.x);
+        float dy = abs(p.y - center.y);
+        return (dx / hh) + (dy / hv) <= 1.0f + 0.001f; // 浮点容错
+        };
+
+    // 第一步：检测核心9个菱形
+    for (int i = 0; i < 9; ++i) {
+        Vec2 diamondCenter = buildingLocalCenter + coreOffsets[i];
+        if (isPointInSingleDiamond(point, diamondCenter, halfHoriz, halfVert)) {
+            return true;
+        }
+    }
+
+    // 第二步：检测外层12个扩展半菱形（偏移放大，菱形尺寸不变）
+    for (int i = 0; i < 12; ++i) {
+        Vec2 diamondCenter = buildingLocalCenter + extendOffsets[i];
+        if (isPointInSingleDiamond(point, diamondCenter, halfHoriz, halfVert)) {
+            return true;
+        }
+    }
+
+    // 无碰撞
+    return false;
+}
+/*bool SecondScene::isPointInBuilding(const Vec2& point, Node* checkBuilding, Node* movingBuilding) {
+    // 1. 校验输入（无默认size，强制从建筑获取）
+    if (!checkBuilding || !movingBuilding) return false;
+    GoldMine* checkGold = dynamic_cast<GoldMine*>(checkBuilding);
+    ElixirCollector* checkElixir = dynamic_cast<ElixirCollector*>(checkBuilding);
+    GoldMine* moveGold = dynamic_cast<GoldMine*>(movingBuilding);
+    ElixirCollector* moveElixir = dynamic_cast<ElixirCollector*>(movingBuilding);
+
+    // 2. 强制获取两个建筑的size（无默认值，确保必须实现size接口）
+    float checkSize = 0.0f;
+    float moveSize = 0.0f;
+    if (checkGold) checkSize = checkGold->getSize();
+    else if (checkElixir) checkSize = checkElixir->getSize();
+    else return false; // 非目标建筑类型，直接返回无碰撞
+
+    if (moveGold) moveSize = moveGold->getSize();
+    else if (moveElixir) moveSize = moveElixir->getSize();
+    else return false;
+
+    // 3. 核心参数：小菱形尺寸固定（水平半对角线28f，竖直21f）
+    const float fixedHalfHoriz = 28.0f;
+    const float fixedHalfVert = 21.0f;
+
+    // 4. 计算碰撞检测的菱形范围（基于两个建筑的size之和）
+    // 检测半径 = (checkSize + moveSize) / 2 → 覆盖两个建筑的所有菱形区域
+    int detectRadius = static_cast<int>(ceil((checkSize + moveSize) / 2.0f));
+
+    // 5. 获取待检测建筑的中心（背景本地坐标，与point同空间）
+    Vec2 checkWorldCenter = checkBuilding->convertToWorldSpaceAR(Vec2::ZERO);
+    Vec2 checkLocalCenter = background_sprite_->convertToNodeSpace(checkWorldCenter);
+
+    // 6. 单个菱形碰撞判断（固定尺寸）
+    auto isInSingleDiamond = [&](int offsetX, int offsetY) -> bool {
+        // 计算当前偏移对应的菱形中心
+        Vec2 diamondCenter(
+            checkLocalCenter.x + (offsetX * fixedHalfHoriz),
+            checkLocalCenter.y + (offsetY * fixedHalfVert)
+        );
+        // 菱形核心公式（固定尺寸）
+        float dx = abs(point.x - diamondCenter.x);
+        float dy = abs(point.y - diamondCenter.y);
+        return (dx / fixedHalfHoriz) + (dy / fixedHalfVert) <= 1.0f + 0.001f;
+        };
+
+    // 7. 遍历需要检测的菱形区域（按detectRadius动态生成）
+    for (int x = -detectRadius; x <= detectRadius; ++x) {
+        for (int y = -detectRadius; y <= detectRadius; ++y) {
+            // 仅检测菱形分布的区域（过滤矩形冗余点，贴合菱形排列）
+            if (abs(x) + abs(y) <= detectRadius) {
+                if (isInSingleDiamond(x, y)) {
+                    return true; // 命中任意菱形即判定碰撞
+                }
+            }
+        }
+    }
+
+    // 无碰撞
+    return false;
+}*/
 
 #endif
