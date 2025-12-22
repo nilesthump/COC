@@ -79,10 +79,7 @@ void BattleManager::Update(double deltaTime)
 
 }
 
-//检查战斗是否结束
-//这里我们注意一点，实际是会给出所用英雄数量的，所以按照以下优先级来判定是否结束
-//(1)时间到了3min，返回1-->对应一个结算画面
-//(2)所有英雄都放下了，两边是否有存活的角色判断战斗是否结束，返回2/3-->对应一个成功、失败画面
+//! 返回战斗结果，目前对战斗结果的判断还不明确，需要别的判据
 BattleResult BattleManager::EvaluateBattleResult()
 {
 	//还没开始战斗，不可能结束
@@ -114,13 +111,14 @@ BattleResult BattleManager::EvaluateBattleResult()
 	}
 
 	//正确的胜负判断
-	if (!attackers_alive && heroes_placed_ > 0)
+	if (!attackers_alive && heroes_placed_ == total_heroes_)
 	{
 		return BattleResult::DEFENDERS_WIN;
 	}
 
+	//! 还没有加上对资源型建筑的问题
 	if (!defenders_alive)
-	{
+	{//或者是全部打完才算胜利
 		return BattleResult::ATTACKERS_WIN;
 	}
 

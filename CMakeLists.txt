@@ -51,7 +51,7 @@ list(APPEND GAME_SOURCE
      Classes/AttackerNormalBehavior.cpp
      Classes/DefenderData.cpp
      Classes/DefenderNormalBehavior.cpp
-     Classes/BattleTestScene.cpp
+     Classes/BattleTestLayer.cpp
      Classes/UnitState.cpp
      )
 list(APPEND GAME_HEADER
@@ -80,7 +80,7 @@ list(APPEND GAME_HEADER
      Classes/AttackerNormalBehavior.h
      Classes/DefenderData.h
      Classes/DefenderNormalBehavior.h
-     Classes/BattleTestScene.h
+     Classes/BattleTestLayer.h
      )
 
 if(ANDROID)

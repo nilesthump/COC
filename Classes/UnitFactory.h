@@ -91,7 +91,7 @@ public:
 
         unit->SetBackgroundSprite(background);
         // ÉèÖÃ¾«Áé
-        auto sprite = cocos2d::Sprite::create("ArcherTowerLv1.png");
+        auto sprite = cocos2d::Sprite::create("CannonLv1.png");
         if (sprite)
         {
             sprite->setScale(0.3f);

@@ -322,22 +322,37 @@ void BattleTestLayer::placeBarbarian()
 //固定放置（直接放逻辑位置）加农炮
 void BattleTestLayer::placeCannon()
 {
-    BattleUnit* cannon_unit = UnitFactory::CreateCompleteCannon(1, game_world_, background_sprite_);
-    if (cannon_unit)
+    BattleUnit* cannon_unit1 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    if (cannon_unit1)
     {
-        cannon_unit->SetPosition(10, 10);
-        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit), false);
+        cannon_unit1->SetPosition(10, 10);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit1), false);
     }
+
+    BattleUnit* cannon_unit2 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    if (cannon_unit2)
+    {
+        cannon_unit2->SetPosition(24, 33);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit2), false);
+    }
+
+    BattleUnit* cannon_unit3 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    if (cannon_unit3)
+    {
+        cannon_unit3->SetPosition(24, 33);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit3), false);
+    }
+
 }
 
 //在给定点的位置放置野蛮人，作为双击鼠标点击的反应
 //应该允许同一位置放置多个野蛮人
 void BattleTestLayer::placeBarbarianAt(float gridX, float gridY)
 {
-    CCLOG("I AM 0");
+
     if (!battle_manager_->CanDeployAttacker())
     {
-        CCLOG("I AM A");
+        
         Vec2 localPos = ConvertTest::convertGridToLocal(gridX, gridY, background_sprite_);
         showDeployHintAtWorldPos(localPos);
         return;
@@ -345,7 +360,7 @@ void BattleTestLayer::placeBarbarianAt(float gridX, float gridY)
 
     if (gridX < -0.5f || gridX > 49.5f || gridY < -0.5f || gridY > 49.5f)
     {
-        CCLOG("I AM B");
+        
         //创建临时单位用于失败反馈
         BattleUnit* tempBarbarian = UnitFactory::CreateCompleteBarbarian(
             0, game_world_, background_sprite_);
@@ -374,7 +389,6 @@ void BattleTestLayer::placeBarbarianAt(float gridX, float gridY)
 
     if (barbarian)
     {
-        CCLOG("I AM C");
         barbarian->SetPosition(gridX, gridY);
         battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(barbarian), true);
         barbarian_positions_.push_back(
@@ -402,17 +416,17 @@ void BattleTestLayer::updateCoordinatesDisplay()
         for (const auto& pos : barbarian_positions_)
         {
             display_text += StringUtils::format(
-                "Barbarian #%d: (%d, %d)\n",
+                "Barbarian #%d: (%.2f, %.2f)\n",
                 pos.first,
-                (int)pos.second.x,
-                (int)pos.second.y
+                pos.second.x,
+                pos.second.y
             );
         }
     }
 
     display_text += "\n";
     display_text += StringUtils::format(
-        "Deployed: %d / %d",
+        "Placed: %d / %d",
         battle_manager_->GetHeroesPlaced(),
         battle_manager_->GetMaxHeros()
     );
@@ -467,7 +481,6 @@ void BattleTestLayer::onTouchMoved(Touch* touch, Event* event)
 
 void BattleTestLayer::onTouchEnded(Touch* touch, Event* event)
 {
-    CCLOG("i enter onTouchEnded");
     double now = utils::gettime();
     double duration = now - touch_begin_time_;
     Vec2 end_pos = touch->getLocation();
@@ -534,11 +547,8 @@ void BattleTestLayer::onMouseScroll(EventMouse* event)
 //展示兵力已经满了不让再放置的提示，提示在点击位置附近
 void BattleTestLayer::showDeployHintAtWorldPos(const Vec2& worldPos)
 {
-    auto label = Label::createWithSystemFont(
-        "兵力已达上限",
-        "Arial",
-        20
-    );
+
+    auto label = Label::createWithSystemFont("NO MORE UNITS", "fonts/Marker Felt.ttf", 20);
     label->setColor(Color3B::RED);
 
     // worldPos 是 game_world_ 的本地坐标
