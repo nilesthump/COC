@@ -49,7 +49,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     float bgWidth = panelBg->getContentSize().width;
     float bgHeight = panelBg->getContentSize().height;
 
-    // 2. 标题（区分金矿/圣水收集器）
+    // 2. 标题
     std::string type;
     if (dynamic_cast<GoldMine*>(building)) {
         type = "GoldMine";
@@ -59,6 +59,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         type = "GoldStorage";
+    }
+    else if (dynamic_cast<ElixirStorage*>(building)) {
+        type = "ElixirStorage";
     }
     _titleLabel = Label::createWithTTF(
         StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
@@ -107,7 +110,13 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("Storage: %d", building->getCurrentStock()),
+            StringUtils::format("GoldStorage: %d", building->getCurrentStock()),
+            "fonts/Marker Felt.ttf", 24
+        );
+    }
+    else if (dynamic_cast<ElixirStorage*>(building)) {
+        _resourceLabel = Label::createWithTTF(
+            StringUtils::format("ElixirStorage: %d", building->getCurrentStock()),
             "fonts/Marker Felt.ttf", 24
         );
     }
@@ -175,6 +184,9 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<GoldStorage*>(building)) {
         type = "GoldStorage";
     }
+    else if (dynamic_cast<ElixirStorage*>(building)) {
+        type = "ElixirStorage";
+    }
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
     _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
@@ -187,7 +199,10 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
         _resourceLabel->setString(StringUtils::format("Elixir: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
-        _resourceLabel->setString(StringUtils::format("Storage: %d", building->getCurrentStock()));
+        _resourceLabel->setString(StringUtils::format("GoldStorage: %d", building->getCurrentStock()));
+    }
+    else if (dynamic_cast<ElixirStorage*>(building)) {
+        _resourceLabel->setString(StringUtils::format("ElixirStorage: %d", building->getCurrentStock()));
     }
 }
 
@@ -228,6 +243,9 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
         newTexture = StringUtils::format("GoldStorageLv%d.png", _targetBuilding->getLv());
     }
+    else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
+        newTexture = StringUtils::format("ElixirStorageLv%d.png", _targetBuilding->getLv());
+    }
     // 调用 更新纹理
     _targetBuilding->updateTexture(newTexture);
     // 播放升级成功动画
@@ -255,6 +273,12 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
         }
     }
     else if (auto elixirCollector = dynamic_cast<ElixirCollector*>(_targetBuilding)) {
+        collected = elixirCollector->collectStock();
+        if (collected > 0) {
+            g_elixirCount += collected;
+        }
+    }
+    else if (auto elixirStorage = dynamic_cast<ElixirStorage*>(_targetBuilding)) {
         collected = elixirCollector->collectStock();
         if (collected > 0) {
             g_elixirCount += collected;

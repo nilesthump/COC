@@ -7,6 +7,7 @@
 #include "GoldMine.h"
 #include "GoldStorage.h"
 #include "ElixirCollector.h"
+#include "ElixirStorage.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
 
@@ -88,13 +89,13 @@ private:
 	cocos2d::MenuItemImage* goldMineBtn;
 	cocos2d::MenuItemImage* elixirCollectorBtn;
 	cocos2d::MenuItemImage* goldStorageBtn;
+	cocos2d::MenuItemImage* elixirStorageBtn;
+
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
 	bool isDragging; // 是否正在拖拽
     
     // 建筑移动相关成员变量
-	//GoldMine* movingGoldMine;
-	//ElixirCollector* movingElixirCollector;
 	Building* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
 
