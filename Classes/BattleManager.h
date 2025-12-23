@@ -86,6 +86,9 @@ public:
        return battle_result_ != BattleResult::NONE;
     }
 
+    //获取战斗剩余时间
+    float GetRemainTime()const { return MAX_BATTLE_TIME_ - battle_time_elapsed_; }
+
 };
 #endif 
 

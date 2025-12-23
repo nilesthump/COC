@@ -20,7 +20,7 @@ BattleUnit* BarbarianNavigation::FindTarget(BattleUnit* self,
 
 	for (auto target : allTargets)
 	{
-		if (!target->IsAlive()) continue;
+		if (!target->IsAlive()||target->GetUnitTargetType()== UnitTargetType::AIR) continue;
 
 		float dist = CalculateDistance(self, target);
 		if (dist < minDistance)
@@ -62,7 +62,7 @@ void BarbarianNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, fl
     // 如果本次移动会超过目标位置，则直接移动到目标位置
     if (moveAmount >= distance)
     {
-        self->SetPosition(targetX, targetY);
+        self->SetPositionAttacker(targetX, targetY);
         return;
     }
 
@@ -75,7 +75,7 @@ void BarbarianNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, fl
     float newY = selfY + dirY * moveAmount;
 
     // 设置新的位置
-    self->SetPosition(newX, newY);
+    self->SetPositionAttacker(newX, newY);
 }
 
 bool BarbarianNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)

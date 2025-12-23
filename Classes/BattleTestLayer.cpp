@@ -12,7 +12,7 @@
 #include <ctime>
 
 USING_NS_CC;
-
+void DebugFullGrid(Node* gameWorld, Sprite* backgroundSprite, int gridStep, bool showLabels);
 //错误加载
 static void problemLoading(const char* filename)
 {
@@ -63,151 +63,6 @@ bool BattleTestLayer::init()
     return true;
 }
 
-//返回HelloWorldScene触发
-void BattleTestLayer::menuFirstCallback(Ref* pSender)
-{
-    Director::getInstance()->replaceScene(HelloWorld::createScene());
-}
-
-//Debug用的放置条格子，辅助用
-void DebugFullGrid(Node* gameWorld, Sprite* backgroundSprite, int gridStep, bool showLabels)
-{
-    if (!gameWorld || !backgroundSprite)
-        return;
-
-    auto gridContainer = Node::create();
-    gridContainer->setName("GridDebugContainer");
-    gameWorld->addChild(gridContainer, 1000);
-
-    int pointCount = 0;
-
-    //0-49
-    for (int gridX = 0; gridX <= 49; gridX += gridStep)
-    {
-        for (int gridY = 0; gridY <= 49; gridY += gridStep)
-        {
-            Vec2 local_pos = ConvertTest::convertGridToLocal(gridX, gridY, backgroundSprite);
-
-            Color3B color;
-            float markerSize = 3.0f;
-
-            // 【修改】特殊点标记
-            if (gridX == 0 && gridY == 0)
-            {
-                color = Color3B::RED;
-                markerSize = 6.0f;
-            }
-            else if (gridX == 49 && gridY == 49)  // 改为49
-            {
-                color = Color3B::BLUE;
-                markerSize = 6.0f;
-            }
-            else if (gridX == 0 && gridY == 49)  // 改为49
-            {
-                color = Color3B::GREEN;
-                markerSize = 6.0f;
-            }
-            else if (gridX == 49 && gridY == 0)  // 改为49
-            {
-                color = Color3B::YELLOW;
-                markerSize = 6.0f;
-            }
-            else if (gridX == 24 && gridY == 24)  // 中心点改为24
-            {
-                color = Color3B::WHITE;
-                markerSize = 5.0f;
-            }
-            else if (gridX == 0 || gridX == 49 || gridY == 0 || gridY == 49)  // 边界改为49
-            {
-                color = Color3B::ORANGE;
-                markerSize = 4.0f;
-            }
-            else
-            {
-                color = Color3B(150, 150, 150);
-                markerSize = 3.0f;
-            }
-
-            auto drawNode = DrawNode::create();
-            drawNode->drawSolidCircle(Vec2::ZERO, markerSize, 0, 16, Color4F(color));
-            drawNode->setPosition(local_pos);
-            gridContainer->addChild(drawNode);
-
-            // 标签显示逻辑
-            bool shouldShowLabel = false;
-            if (gridStep >= 4)
-            {
-                shouldShowLabel = showLabels;
-            }
-            else
-            {
-                shouldShowLabel = showLabels && (
-                    (gridX == 0 || gridX == 49 || gridX == 24) &&  // 改为49和24
-                    (gridY == 0 || gridY == 49 || gridY == 24)
-                    );
-            }
-
-            if (shouldShowLabel)
-            {
-                auto label = Label::createWithSystemFont(
-                    StringUtils::format("(%d,%d)", gridX, gridY),
-                    "Arial",
-                    14
-                );
-                label->setColor(color);
-                label->setPosition(local_pos + Vec2(0, 20));
-                gridContainer->addChild(label);
-            }
-
-            pointCount++;
-        }
-    }
-
-    CCLOG("[DEBUG] Drew %d grid points", pointCount);
-
-    // 绘制网格线
-    auto gridLines = DrawNode::create();
-    gridLines->setName("GridLines");
-
-    for (int gridY = 0; gridY <= 49; gridY += (gridStep * 2))  // 改为49
-    {
-        Vec2 start = ConvertTest::convertGridToLocal(0, gridY, backgroundSprite);
-        Vec2 end = ConvertTest::convertGridToLocal(49, gridY, backgroundSprite);  // 改为49
-        gridLines->drawLine(start, end, Color4F(0.5f, 0.5f, 0.5f, 0.5f));
-    }
-
-    for (int gridX = 0; gridX <= 49; gridX += (gridStep * 2))  // 改为49
-    {
-        Vec2 start = ConvertTest::convertGridToLocal(gridX, 0, backgroundSprite);
-        Vec2 end = ConvertTest::convertGridToLocal(gridX, 49, backgroundSprite);  // 改为49
-        gridLines->drawLine(start, end, Color4F(0.5f, 0.5f, 0.5f, 0.5f));
-    }
-
-    gridContainer->addChild(gridLines, -1);
-
-    // 绘制边界
-    auto boundaryDraw = DrawNode::create();
-    boundaryDraw->setName("Boundary");
-
-    Vec2 corners[] = {
-        ConvertTest::convertGridToLocal(0, 0, backgroundSprite),
-        ConvertTest::convertGridToLocal(49, 0, backgroundSprite),    // 改为49
-        ConvertTest::convertGridToLocal(49, 49, backgroundSprite),   // 改为49
-        ConvertTest::convertGridToLocal(0, 49, backgroundSprite)     // 改为49
-    };
-
-    for (int i = 0; i < 4; i++)
-    {
-        boundaryDraw->drawLine(
-            corners[i],
-            corners[(i + 1) % 4],
-            Color4F::RED
-        );
-    }
-
-    gridContainer->addChild(boundaryDraw, 10);
-}
-
 //战斗启动！
 void BattleTestLayer::setupBattle()
 {
@@ -243,6 +98,7 @@ void BattleTestLayer::setupBattle()
     background_sprite_ = Sprite::create("normal(winter).jpg");
     if (background_sprite_)
     {
+        CCLOG(" Background loaded successfully");
         background_sprite_->setPosition(Vec2(
             visibleSize.width / 2 + origin.x,
             visibleSize.height / 2 + origin.y
@@ -296,7 +152,8 @@ void BattleTestLayer::setupBattle()
         //debug放置格子线条，可删除
         DebugFullGrid(game_world_, background_sprite_, 2, true);
 
-        placeCannon();
+        placeDefender();
+        CCLOG("Setup complete, cannon should be visible now");
 
         //6.一些坐标标签提示辅助，可以删除
         coordinates_label_ = Label::createWithSystemFont("Double-click to place Barbarian", "Arial", 20);
@@ -305,42 +162,39 @@ void BattleTestLayer::setupBattle()
         coordinates_label_->setAnchorPoint(Vec2(0, 1));
         this->addChild(coordinates_label_, 100);
 
+        //时间倒计时标签
+        countdown_label_ = Label::createWithSystemFont(
+            "Time: 180",
+            "Arial",
+            24
+        );
+        countdown_label_->setColor(Color3B::RED);
+
+        //
+        countdown_label_->setAnchorPoint(Vec2(0, 1));
+        countdown_label_->setPosition(Vec2(
+            origin.x + visibleSize.width/2,
+            origin.y + visibleSize.height - 20
+        ));
+        this->addChild(countdown_label_, 1000);
     }
 }
 
-//固定放置（直接放逻辑位置）野蛮人，没在setup中调用，可删除
-void BattleTestLayer::placeBarbarian()
+//固定放置（直接放逻辑位置）
+void BattleTestLayer::placeDefender()
 {
-    BattleUnit* barbarian = UnitFactory::CreateCompleteBarbarian(1, game_world_, background_sprite_);
-    if (barbarian)
-    {
-        barbarian->SetPosition(0, 0);
-        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(barbarian), true);
-    }
-}
-
-//固定放置（直接放逻辑位置）加农炮
-void BattleTestLayer::placeCannon()
-{
-    BattleUnit* cannon_unit1 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
+    BattleUnit* cannon_unit1 = UnitFactory::CreateCannon(1, game_world_, background_sprite_);
     if (cannon_unit1)
     {
-        cannon_unit1->SetPosition(10, 10);
+        cannon_unit1->SetPositionDefender(10, 10);
         battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit1), false);
     }
 
-    BattleUnit* cannon_unit2 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
-    if (cannon_unit2)
+    BattleUnit* archer_tower_unit1 = UnitFactory::CreateArcherTower(1, game_world_, background_sprite_);
+    if (archer_tower_unit1)
     {
-        cannon_unit2->SetPosition(24, 33);
-        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit2), false);
-    }
-
-    BattleUnit* cannon_unit3 = UnitFactory::CreateCompleteCannon(4, game_world_, background_sprite_);
-    if (cannon_unit3)
-    {
-        cannon_unit3->SetPosition(24, 33);
-        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(cannon_unit3), false);
+        archer_tower_unit1->SetPositionDefender(15, 33);
+        battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(archer_tower_unit1), false);
     }
 
 }
@@ -362,12 +216,12 @@ void BattleTestLayer::placeBarbarianAt(float gridX, float gridY)
     {
         
         //创建临时单位用于失败反馈
-        BattleUnit* tempBarbarian = UnitFactory::CreateCompleteBarbarian(
+        BattleUnit* tempBarbarian = UnitFactory::CreateBarbarian(
             0, game_world_, background_sprite_);
 
         if (tempBarbarian)
         {
-            tempBarbarian->SetPosition(gridX, gridY);
+            tempBarbarian->SetPositionAttacker(gridX, gridY);
 
             //播放失败动画（动画结束后会自动清理视觉组件）
             tempBarbarian->PlayPlacementFailAnimation();
@@ -384,12 +238,12 @@ void BattleTestLayer::placeBarbarianAt(float gridX, float gridY)
         return;
     }
     // 无论是否被占用，都允许放置
-    BattleUnit* barbarian = UnitFactory::CreateCompleteBarbarian(
-        next_barbarian_id_, game_world_, background_sprite_);
+    BattleUnit* barbarian = UnitFactory::CreateBarbarian(
+        1, game_world_, background_sprite_);
 
     if (barbarian)
     {
-        barbarian->SetPosition(gridX, gridY);
+        barbarian->SetPositionAttacker(gridX, gridY);
         battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(barbarian), true);
         barbarian_positions_.push_back(
             std::make_pair(next_barbarian_id_, Vec2(gridX, gridY)));
@@ -437,6 +291,22 @@ void BattleTestLayer::updateCoordinatesDisplay()
 //整体更新，判断战斗结束等，需要拓展
 void BattleTestLayer::update(float delta)
 {
+    auto remaining_time_ = battle_manager_->GetRemainTime();
+    //倒计时标识显示，更新剩余时间
+    if (remaining_time_ > 0.0f)
+    {
+        remaining_time_ -= delta;
+        if (remaining_time_ < 0.0f)
+            remaining_time_ = 0.0f;
+
+        if (countdown_label_)
+        {
+            countdown_label_->setString(
+                StringUtils::format("Time: %d", (int)ceil(remaining_time_))
+            );
+        }
+    }
+
     if (battle_manager_)
     {
         battle_manager_->Update(delta);
@@ -578,4 +448,147 @@ void BattleTestLayer::showBattleResultLayer(BattleResult result)
     this->addChild(layer, 10000);
 }
 
+//返回HelloWorldScene触发
+void BattleTestLayer::menuFirstCallback(Ref* pSender)
+{
+    Director::getInstance()->replaceScene(HelloWorld::createScene());
+}
 
+//Debug用的放置条格子，辅助用
+void DebugFullGrid(Node* gameWorld, Sprite* backgroundSprite, int gridStep, bool showLabels)
+{
+    if (!gameWorld || !backgroundSprite)
+        return;
+
+    auto gridContainer = Node::create();
+    gridContainer->setName("GridDebugContainer");
+    gameWorld->addChild(gridContainer, 1000);
+
+    int pointCount = 0;
+
+    //0-49
+    for (int gridX = 0; gridX <= 49; gridX += gridStep)
+    {
+        for (int gridY = 0; gridY <= 49; gridY += gridStep)
+        {
+            Vec2 local_pos = ConvertTest::convertGridToLocal(gridX, gridY, backgroundSprite);
+
+            Color3B color;
+            float markerSize = 3.0f;
+
+            // 特殊点标记
+            if (gridX == 0 && gridY == 0)
+            {
+                color = Color3B::RED;
+                markerSize = 6.0f;
+            }
+            else if (gridX == 49 && gridY == 49)  // 改为49
+            {
+                color = Color3B::BLUE;
+                markerSize = 6.0f;
+            }
+            else if (gridX == 0 && gridY == 49)  // 改为49
+            {
+                color = Color3B::GREEN;
+                markerSize = 6.0f;
+            }
+            else if (gridX == 49 && gridY == 0)  // 改为49
+            {
+                color = Color3B::YELLOW;
+                markerSize = 6.0f;
+            }
+            else if (gridX == 24 && gridY == 24)  // 中心点改为24
+            {
+                color = Color3B::WHITE;
+                markerSize = 5.0f;
+            }
+            else if (gridX == 0 || gridX == 49 || gridY == 0 || gridY == 49)  // 边界改为49
+            {
+                color = Color3B::ORANGE;
+                markerSize = 4.0f;
+            }
+            else
+            {
+                color = Color3B(150, 150, 150);
+                markerSize = 3.0f;
+            }
+
+            auto drawNode = DrawNode::create();
+            drawNode->drawSolidCircle(Vec2::ZERO, markerSize, 0, 16, Color4F(color));
+            drawNode->setPosition(local_pos);
+            gridContainer->addChild(drawNode);
+
+            // 标签显示逻辑
+            bool shouldShowLabel = false;
+            if (gridStep >= 4)
+            {
+                shouldShowLabel = showLabels;
+            }
+            else
+            {
+                shouldShowLabel = showLabels && (
+                    (gridX == 0 || gridX == 49 || gridX == 24) &&  // 改为49和24
+                    (gridY == 0 || gridY == 49 || gridY == 24)
+                    );
+            }
+
+            if (shouldShowLabel)
+            {
+                auto label = Label::createWithSystemFont(
+                    StringUtils::format("(%d,%d)", gridX, gridY),
+                    "Arial",
+                    14
+                );
+                label->setColor(color);
+                label->setPosition(local_pos + Vec2(0, 20));
+                gridContainer->addChild(label);
+            }
+
+            pointCount++;
+        }
+    }
+
+    CCLOG("[DEBUG] Drew %d grid points", pointCount);
+
+    // 绘制网格线
+    auto gridLines = DrawNode::create();
+    gridLines->setName("GridLines");
+
+    for (int gridY = 0; gridY <= 49; gridY += (gridStep * 2))  // 改为49
+    {
+        Vec2 start = ConvertTest::convertGridToLocal(0, gridY, backgroundSprite);
+        Vec2 end = ConvertTest::convertGridToLocal(49, gridY, backgroundSprite);  // 改为49
+        gridLines->drawLine(start, end, Color4F(0.5f, 0.5f, 0.5f, 0.5f));
+    }
+
+    for (int gridX = 0; gridX <= 49; gridX += (gridStep * 2))  // 改为49
+    {
+        Vec2 start = ConvertTest::convertGridToLocal(gridX, 0, backgroundSprite);
+        Vec2 end = ConvertTest::convertGridToLocal(gridX, 49, backgroundSprite);  // 改为49
+        gridLines->drawLine(start, end, Color4F(0.5f, 0.5f, 0.5f, 0.5f));
+    }
+
+    gridContainer->addChild(gridLines, -1);
+
+    // 绘制边界
+    auto boundaryDraw = DrawNode::create();
+    boundaryDraw->setName("Boundary");
+
+    Vec2 corners[] = {
+        ConvertTest::convertGridToLocal(0, 0, backgroundSprite),
+        ConvertTest::convertGridToLocal(49, 0, backgroundSprite),    // 改为49
+        ConvertTest::convertGridToLocal(49, 49, backgroundSprite),   // 改为49
+        ConvertTest::convertGridToLocal(0, 49, backgroundSprite)     // 改为49
+    };
+
+    for (int i = 0; i < 4; i++)
+    {
+        boundaryDraw->drawLine(
+            corners[i],
+            corners[(i + 1) % 4],
+            Color4F::RED
+        );
+    }
+
+    gridContainer->addChild(boundaryDraw, 10);
+}

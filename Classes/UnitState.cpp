@@ -15,7 +15,7 @@ bool UnitState::IsAttacker() const
     return base_data_ptr_ && base_data_ptr_->IsAttacker();
 }
 
-bool UnitState::IsDefense() const
+bool UnitState::IsDefender() const
 {
     return base_data_ptr_ && base_data_ptr_->IsDefender();
 }
@@ -103,7 +103,7 @@ float UnitState::GetAttackDistance() const
 
 float UnitState::GetDamage() const
 {
-    return base_data_ptr_ ? static_cast<float>(base_data_ptr_->damage) : 0.0;
+    return base_data_ptr_ ?(base_data_ptr_->damage) : 0.0;
 }
 
 float UnitState::GetAttackInterval() const
@@ -113,12 +113,17 @@ float UnitState::GetAttackInterval() const
 
 float UnitState::GetMaxHealth() const
 {
-    return base_data_ptr_ ? static_cast<float>(base_data_ptr_->health) : 0.0;
+    return base_data_ptr_ ? (base_data_ptr_->health) : 0.0;
 }
 
-UnitType UnitState::GetTargetType() const
+AttackTargetType UnitState::GetAttackTargetType() const
 {
-    return base_data_ptr_ ? base_data_ptr_->unit_type : UnitType::GROUND;
+    return base_data_ptr_ ? base_data_ptr_->attack_target_type : AttackTargetType::GROUND;
+}
+
+UnitTargetType UnitState::GetUnitTargetType() const
+{
+    return base_data_ptr_ ? base_data_ptr_->unit_target_type : UnitTargetType::GROUND;
 }
 
 AttackType UnitState::GetAttackType() const

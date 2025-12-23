@@ -15,7 +15,8 @@ AttackerData AttackerData::CreateBarbarianData(int level)
 	data.name = "野蛮人";
 	data.level = level;
 	data.combat_type = CombatType::MELEE;
-	data.unit_type = UnitType::GROUND;
+	data.attack_target_type = AttackTargetType::GROUND;
+	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::ANY;
 	data.resource_type = ResourceType::ELIXIR;
@@ -57,7 +58,8 @@ AttackerData AttackerData::CreateArcherData(int level)
 	data.name = "弓箭手";
 	data.level = level;
 	data.combat_type = CombatType::RANGED;
-	data.unit_type = UnitType::BOTH;
+	data.attack_target_type = AttackTargetType::BOTH;
+	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::ANY;
 	data.resource_type = ResourceType::ELIXIR;
@@ -100,7 +102,8 @@ AttackerData AttackerData::CreateGiantData(int level)
 	data.name = "巨人";
 	data.level = level;
 	data.combat_type = CombatType::MELEE;
-	data.unit_type = UnitType::GROUND;
+	data.attack_target_type = AttackTargetType::GROUND;
+	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::DEFENSES;
 	data.resource_type = ResourceType::ELIXIR;
@@ -143,7 +146,8 @@ AttackerData AttackerData::CreateGoblinData(int level)
 	data.name = "哥布林";
 	data.level = level;
 	data.combat_type = CombatType::MELEE;
-	data.unit_type = UnitType::GROUND;
+	data.attack_target_type = AttackTargetType::GROUND;
+	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::RESOURCES;
 	data.resource_type = ResourceType::ELIXIR;
@@ -187,7 +191,8 @@ AttackerData AttackerData::CreateBomberData(int level)
 	data.name = "炸弹人";
 	data.level = level;
 	data.combat_type = CombatType::MELEE;
-	data.unit_type = UnitType::GROUND;
+	data.attack_target_type = AttackTargetType::GROUND;
+	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SPLASH;
 	data.preferred_target = TargetPriority::WALLS;
 	data.resource_type = ResourceType::ELIXIR;
