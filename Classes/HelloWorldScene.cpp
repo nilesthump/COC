@@ -642,6 +642,16 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
             origin.y + visibleSize.height / 2 - 20));
         loginLayer->addChild(passwordLabel);
 
+        // Clear input fields when first creating login layer
+        if (usernameEditBox != nullptr)
+        {
+            usernameEditBox->setText("");
+        }
+        if (passwordEditBox != nullptr)
+        {
+            passwordEditBox->setText("");
+        }
+
         // Create password edit box
         passwordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
         passwordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
@@ -828,6 +838,20 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         confirmPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::DONE);
         confirmPasswordEditBox->setDelegate(this);
         registerLayer->addChild(confirmPasswordEditBox);
+
+        // Clear input fields when first creating login layer
+        if (usernameEditBox != nullptr)
+        {
+            usernameEditBox->setText("");
+        }
+        if (passwordEditBox != nullptr)
+        {
+            passwordEditBox->setText("");
+        }
+        if (confirmPasswordEditBox != nullptr)
+        {
+            confirmPasswordEditBox->setText("");
+        }
 
         // Create register confirm button
         registerConfirmItem = MenuItemImage::create(
