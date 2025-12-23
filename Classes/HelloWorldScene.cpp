@@ -8,9 +8,6 @@ USING_NS_CC;
 // Initialize static login status variable
 bool HelloWorld::isLoggedIn = false;
 
-// Initialize static user database
-std::vector<std::pair<std::string, std::string>> HelloWorld::userDatabase;
-
 Scene* HelloWorld::createScene()
 {
     return HelloWorld::create();
@@ -183,8 +180,34 @@ bool HelloWorld::init()
         registerItem->addChild(registerLabel);
     }
 
+    // Create delete account button
+    deleteAccountItem = MenuItemImage::create(
+        "btn_normal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(HelloWorld::menuDeleteAccountCallback, this));
+
+    if (deleteAccountItem == nullptr ||
+        deleteAccountItem->getContentSize().width <= 0 ||
+        deleteAccountItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        // Position at bottom left corner
+        double x = origin.x + deleteAccountItem->getContentSize().width / 2 + 20;
+        double y = origin.y + deleteAccountItem->getContentSize().height / 2 + 20;
+        deleteAccountItem->setPosition(Vec2(x, y));
+
+        deleteAccountLabel = Label::createWithSystemFont("DELETE ACCOUNT", "fonts/Marker Felt.ttf", 18);
+        deleteAccountLabel->setColor(Color3B::WHITE);
+        deleteAccountLabel->setPosition(Vec2(deleteAccountItem->getContentSize().width / 2,
+            deleteAccountItem->getContentSize().height / 2));
+        deleteAccountItem->addChild(deleteAccountLabel);
+    }
+
     auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem,
-        guestLoginItem, loginItem, registerItem, NULL);
+        guestLoginItem, loginItem, registerItem, deleteAccountItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -192,15 +215,23 @@ bool HelloWorld::init()
     loginLayer = nullptr;
     registerLayer = nullptr;
     logoutConfirmLayer = nullptr;
+    deleteAccountConfirmLayer = nullptr;
+
     usernameEditBox = nullptr;
     passwordEditBox = nullptr;
     confirmPasswordEditBox = nullptr;
     confirmItem = nullptr;
     registerConfirmItem = nullptr;
+
     confirmLogoutItem = nullptr;
     cancelLogoutItem = nullptr;
+
+    confirmDeleteItem = nullptr;
+    cancelDeleteItem = nullptr;
+
     usernameLabel = nullptr;
     passwordLabel = nullptr;
+
     confirmPasswordLabel = nullptr;
     registerResultLabel = nullptr;
 
@@ -245,6 +276,18 @@ bool HelloWorld::init()
         // Change login button to logout button
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
         loginLabel->setString("LOGOUT");
+
+        // Show delete account button only when logged in with username/password
+        if (deleteAccountItem != nullptr && !currentLoggedInUser.empty())
+        {
+            deleteAccountItem->setVisible(true);
+            deleteAccountItem->setEnabled(true);
+        }
+        else if (deleteAccountItem != nullptr)
+        {
+            deleteAccountItem->setVisible(false);
+            deleteAccountItem->setEnabled(false);
+        }
     }
     else
     {
@@ -286,13 +329,16 @@ bool HelloWorld::init()
         // Ensure login button is in login state
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
         loginLabel->setString("LOGIN");
+
+        // Hide delete account button when not logged in
+        if (deleteAccountItem != nullptr)
+        {
+            deleteAccountItem->setVisible(false);
+            deleteAccountItem->setEnabled(false);
+        }
     }
     /////////////////////////////
     // 3. add your codes below...
-
-    // 测试SQLite配置
-    SQLiteTest sqliteTest;
-
     // add a label shows "Hello World"
     // create and initialize a label
 
@@ -328,7 +374,208 @@ bool HelloWorld::init()
         this->addChild(sprite, 0);
     }
 
+    // 初始化SQLite数据库并创建用户表
+    sqlite3* db;
+    int rc = sqlite3_open("users.db", &db);
+
+    if (rc) {
+        CCLOG("无法打开数据库: %s", sqlite3_errmsg(db));
+    }
+    else {
+        CCLOG("数据库打开成功");
+
+        // 创建用户表（如果不存在）
+        const char* sql = "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT);";
+        char* errMsg = nullptr;
+
+        rc = sqlite3_exec(db, sql, nullptr, nullptr, &errMsg);
+
+        if (rc != SQLITE_OK) {
+            CCLOG("创建表失败: %s", errMsg);
+            sqlite3_free(errMsg);
+        }
+        else {
+            CCLOG("用户表创建成功");
+        }
+
+        sqlite3_close(db);
+    }
+
     return true;
+}
+
+void HelloWorld::menuDeleteAccountCallback(cocos2d::Ref* pSender)
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // Create a semi-transparent background layer for confirmation dialog
+    if (deleteAccountConfirmLayer == nullptr)
+    {
+        deleteAccountConfirmLayer = LayerColor::create(Color4B(0, 0, 0, 180));
+        this->addChild(deleteAccountConfirmLayer, 10);
+
+        // Create confirm delete button
+        confirmDeleteItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuConfirmDeleteCallback, this));
+
+        if (confirmDeleteItem != nullptr &&
+            confirmDeleteItem->getContentSize().width > 0 &&
+            confirmDeleteItem->getContentSize().height > 0)
+        {
+            double x = origin.x + visibleSize.width / 2 - 120;
+            double y = origin.y + visibleSize.height / 2;
+            confirmDeleteItem->setPosition(Vec2(x, y));
+
+            auto confirmLabel = Label::createWithSystemFont("Confirm Delete", "fonts/Marker Felt.ttf", 24);
+            confirmLabel->setColor(Color3B::WHITE);
+            confirmLabel->setPosition(Vec2(confirmDeleteItem->getContentSize().width / 2,
+                confirmDeleteItem->getContentSize().height / 2));
+            confirmDeleteItem->addChild(confirmLabel);
+        }
+
+        // Create cancel delete button
+        cancelDeleteItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuCancelDeleteCallback, this));
+
+        if (cancelDeleteItem != nullptr &&
+            cancelDeleteItem->getContentSize().width > 0 &&
+            cancelDeleteItem->getContentSize().height > 0)
+        {
+            double x = origin.x + visibleSize.width / 2 + 120;
+            double y = origin.y + visibleSize.height / 2;
+            cancelDeleteItem->setPosition(Vec2(x, y));
+
+            auto cancelLabel = Label::createWithSystemFont("Cancel", "fonts/Marker Felt.ttf", 24);
+            cancelLabel->setColor(Color3B::WHITE);
+            cancelLabel->setPosition(Vec2(cancelDeleteItem->getContentSize().width / 2,
+                cancelDeleteItem->getContentSize().height / 2));
+            cancelDeleteItem->addChild(cancelLabel);
+        }
+
+        // Create menu with the buttons
+        auto deleteMenu = Menu::create(confirmDeleteItem, cancelDeleteItem, NULL);
+        deleteMenu->setPosition(Vec2::ZERO);
+        deleteAccountConfirmLayer->addChild(deleteMenu);
+
+        // Add a label to ask for confirmation
+        auto confirmLabel = Label::createWithSystemFont("Are you sure you want to delete your account?", "fonts/Marker Felt.ttf", 24);
+        confirmLabel->setColor(Color3B::WHITE);
+        confirmLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 + 60));
+        deleteAccountConfirmLayer->addChild(confirmLabel);
+    }
+    else
+    {
+        deleteAccountConfirmLayer->setVisible(true);
+    }
+}
+
+void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
+{
+    // Hide delete confirmation layer
+    if (deleteAccountConfirmLayer != nullptr)
+    {
+        deleteAccountConfirmLayer->setVisible(false);
+    }
+
+    // Delete account from SQLite database
+    if (!currentLoggedInUser.empty())
+    {
+        sqlite3* db;
+        int rc = sqlite3_open("users.db", &db);
+
+        if (rc == SQLITE_OK)
+        {
+            // Prepare SQL statement to delete user
+            const char* sql = "DELETE FROM users WHERE username = ?;";
+            sqlite3_stmt* stmt;
+
+            rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+            if (rc == SQLITE_OK)
+            {
+                // Bind username parameter
+                sqlite3_bind_text(stmt, 1, currentLoggedInUser.c_str(), -1, SQLITE_TRANSIENT);
+
+                // Execute the query
+                if (sqlite3_step(stmt) == SQLITE_DONE)
+                {
+                    CCLOG("Account deleted successfully");
+                }
+                else
+                {
+                    CCLOG("Error deleting account: %s", sqlite3_errmsg(db));
+                }
+
+                sqlite3_finalize(stmt);
+            }
+
+            sqlite3_close(db);
+        }
+
+        // Reset login status
+        isLoggedIn = false;
+        currentLoggedInUser.clear();
+
+        // Hide secondSceneItem and battleTestItem
+        if (secondSceneItem != nullptr)
+        {
+            secondSceneItem->setVisible(false);
+            secondSceneItem->setEnabled(false);
+        }
+
+        if (battleTestItem != nullptr)
+        {
+            battleTestItem->setVisible(false);
+            battleTestItem->setEnabled(false);
+        }
+
+        // Hide delete account button
+        if (deleteAccountItem != nullptr)
+        {
+            deleteAccountItem->setVisible(false);
+            deleteAccountItem->setEnabled(false);
+        }
+
+        // Show guest login and register buttons
+        if (guestLoginItem != nullptr)
+        {
+            guestLoginItem->setVisible(true);
+            guestLoginItem->setEnabled(true);
+            // Also show the label to be extra thorough
+            if (guestLoginLabel != nullptr)
+            {
+                guestLoginLabel->setVisible(true);
+            }
+        }
+        if (registerItem != nullptr)
+        {
+            registerItem->setVisible(true);
+            registerItem->setEnabled(true);
+            // Also show the label to be extra thorough
+            if (registerLabel != nullptr)
+            {
+                registerLabel->setVisible(true);
+            }
+        }
+
+        // Ensure login button is in login state
+        loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
+        loginLabel->setString("LOGIN");
+    }
+}
+
+void HelloWorld::menuCancelDeleteCallback(cocos2d::Ref* pSender)
+{
+    // Hide delete confirmation layer and keep login status
+    if (deleteAccountConfirmLayer != nullptr)
+    {
+        deleteAccountConfirmLayer->setVisible(false);
+    }
 }
 
 void HelloWorld::menuSecondSceneCallback(Ref* pSender)
@@ -694,15 +941,39 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
     std::string username = usernameEditBox->getText();
     std::string password = passwordEditBox->getText();
 
-    // Check if username and password match any account in the database
+    // Check if username and password match any account in the SQLite database
     bool loginSuccess = false;
-    for (const auto& user : userDatabase)
+    sqlite3* db;
+    int rc = sqlite3_open("users.db", &db);
+
+    if (rc == SQLITE_OK)
     {
-        if (user.first == username && user.second == password)
+        // Prepare SQL statement to check credentials
+        const char* sql = "SELECT password FROM users WHERE username = ?;";
+        sqlite3_stmt* stmt;
+
+        rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+        if (rc == SQLITE_OK)
         {
-            loginSuccess = true;
-            break;
+            // Bind username parameter
+            sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+
+            // Execute the query
+            if (sqlite3_step(stmt) == SQLITE_ROW)
+            {
+                // Get password from database
+                const char* dbPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                if (dbPassword != nullptr && password == dbPassword)
+                {
+                    loginSuccess = true;
+                }
+            }
+
+            sqlite3_finalize(stmt);
         }
+
+        sqlite3_close(db);
     }
 
     if (loginSuccess)
@@ -724,6 +995,13 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
         {
             battleTestItem->setVisible(true);
             battleTestItem->setEnabled(true);
+        }
+
+        // Show delete account button for username/password login
+        if (deleteAccountItem != nullptr)
+        {
+            deleteAccountItem->setVisible(true);
+            deleteAccountItem->setEnabled(true);
         }
 
         // Hide guest login and register buttons
@@ -759,6 +1037,7 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
 
         // Update login status
         isLoggedIn = true;
+        currentLoggedInUser = username;
 
         // Change login button to logout button
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
@@ -985,7 +1264,7 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
     loginLabel->setString("LOGIN");
 
-    // Hide and disable secondSceneItem and battleTestItem
+    // Hide and disable secondSceneItem, battleTestItem, and deleteAccountItem
     if (secondSceneItem != nullptr)
     {
         secondSceneItem->setVisible(false);
@@ -996,6 +1275,12 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     {
         battleTestItem->setVisible(false);
         battleTestItem->setEnabled(false);
+    }
+
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(false);
+        deleteAccountItem->setEnabled(false);
     }
 
     // Show guest login and register buttons
@@ -1022,6 +1307,7 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
 
     // Update login status
     isLoggedIn = false;
+    currentLoggedInUser.clear();
 }
 
 void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
@@ -1044,13 +1330,7 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
     if (registerResultLabel != nullptr)
     {
         // Check if database is full (max 3 accounts)
-        if (userDatabase.size() >= 3)
-        {
-            registerResultLabel->setString("Registration Failed: Database full (max 3 accounts)");
-            registerResultLabel->setColor(Color3B::RED);
-        }
-        // Validate username (at least 1 character)
-        else if (username.empty())
+        if (username.empty())
         {
             registerResultLabel->setString("Registration Failed: Username too short");
             registerResultLabel->setColor(Color3B::RED);
@@ -1067,91 +1347,159 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
             registerResultLabel->setString("Registration Failed: Passwords do not match");
             registerResultLabel->setColor(Color3B::RED);
         }
-        // Check if username already exists
+        // Check if username already exists in SQLite database
         else
         {
-            bool usernameExists = false;
-            for (const auto& user : userDatabase)
-            {
-                if (user.first == username)
-                {
-                    usernameExists = true;
-                    break;
-                }
-            }
+            sqlite3* db;
+            int rc = sqlite3_open("users.db", &db);
 
-            if (usernameExists)
+
+            if (rc == SQLITE_OK)
             {
-                registerResultLabel->setString("Registration Failed: Username already exists");
-                registerResultLabel->setColor(Color3B::RED);
+                // Start a transaction
+                rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+                if (rc != SQLITE_OK)
+                {
+                    registerResultLabel->setString("Registration Failed: Database error");
+                    registerResultLabel->setColor(Color3B::RED);
+                    sqlite3_close(db);
+                    return;
+                }
+
+                bool usernameExists = false;
+
+                // Prepare SQL statement to check if username exists
+                const char* sql = "SELECT username FROM users WHERE username = ?;";
+                sqlite3_stmt* stmt;
+
+                rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+                if (rc == SQLITE_OK)
+                {
+                    // Bind username parameter
+                    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+
+                    // Execute the query
+                    if (sqlite3_step(stmt) == SQLITE_ROW)
+                    {
+                        usernameExists = true;
+                    }
+
+                    sqlite3_finalize(stmt);
+                }
+
+                if (usernameExists)
+                {
+                    sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
+                    registerResultLabel->setString("Registration Failed: Username already exists");
+                    registerResultLabel->setColor(Color3B::RED);
+                }
+                else
+                {
+                    // Prepare SQL statement to insert new user
+                    const char* insertSql = "INSERT INTO users (username, password) VALUES (?, ?);";
+                    sqlite3_stmt* insertStmt;
+
+                    rc = sqlite3_prepare_v2(db, insertSql, -1, &insertStmt, nullptr);
+
+                    if (rc == SQLITE_OK)
+                    {
+                        // Bind parameters
+                        sqlite3_bind_text(insertStmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+                        sqlite3_bind_text(insertStmt, 2, password.c_str(), -1, SQLITE_TRANSIENT);
+
+                        // Execute the statement
+                        rc = sqlite3_step(insertStmt);
+
+                        if (rc == SQLITE_DONE)
+                        {
+                            sqlite3_exec(db, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
+                            registerResultLabel->setString("Registration Success");
+                            registerResultLabel->setColor(Color3B::GREEN);
+
+                            // Add a 1-second delay before hiding the register layer
+                            if (registerLayer != nullptr)
+                            {
+                                auto delay = DelayTime::create(1.0f);
+                                auto hideLayer = CallFunc::create([this]() {
+                                    if (registerLayer != nullptr)
+                                    {
+                                        registerLayer->setVisible(false);
+                                    }
+                                    // Clear input fields after successful registration
+                                    if (usernameEditBox != nullptr)
+                                    {
+                                        usernameEditBox->setText("");
+                                    }
+                                    if (passwordEditBox != nullptr)
+                                    {
+                                        passwordEditBox->setText("");
+                                    }
+                                    if (confirmPasswordEditBox != nullptr)
+                                    {
+                                        confirmPasswordEditBox->setText("");
+                                    }
+                                    // Clear registration result message
+                                    if (registerResultLabel != nullptr)
+                                    {
+                                        registerResultLabel->setString("");
+                                    }
+                                    // Show login, register, and guest login buttons
+                                    if (loginItem != nullptr)
+                                    {
+                                        loginItem->setVisible(true);
+                                        loginItem->setEnabled(true);
+                                        if (loginLabel != nullptr)
+                                        {
+                                            loginLabel->setVisible(true);
+                                        }
+                                    }
+                                    if (registerItem != nullptr)
+                                    {
+                                        registerItem->setVisible(true);
+                                        registerItem->setEnabled(true);
+                                        if (registerLabel != nullptr)
+                                        {
+                                            registerLabel->setVisible(true);
+                                        }
+                                    }
+                                    if (guestLoginItem != nullptr)
+                                    {
+                                        guestLoginItem->setVisible(true);
+                                        guestLoginItem->setEnabled(true);
+                                        if (guestLoginLabel != nullptr)
+                                        {
+                                            guestLoginLabel->setVisible(true);
+                                        }
+                                    }
+                                    });
+                                auto sequence = Sequence::create(delay, hideLayer, nullptr);
+                                registerLayer->runAction(sequence);
+                            }
+                        }
+                        else
+                        {
+                            sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
+                            registerResultLabel->setString("Registration Failed: Database error");
+                            registerResultLabel->setColor(Color3B::RED);
+                        }
+
+                        sqlite3_finalize(insertStmt);
+                    }
+                    else
+                    {
+                        sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
+                        registerResultLabel->setString("Registration Failed: Database error");
+                        registerResultLabel->setColor(Color3B::RED);
+                    }
+                }
+
+                sqlite3_close(db);
             }
             else
             {
-                // Add new account to database
-                userDatabase.push_back(std::make_pair(username, password));
-
-                registerResultLabel->setString("Registration Success");
-                registerResultLabel->setColor(Color3B::GREEN);
-
-                // Add a 1-second delay before hiding the register layer
-                if (registerLayer != nullptr)
-                {
-                    auto delay = DelayTime::create(1.0f);
-                    auto hideLayer = CallFunc::create([this]() {
-                        if (registerLayer != nullptr)
-                        {
-                            registerLayer->setVisible(false);
-                        }
-                        // Clear input fields after successful registration
-                        if (usernameEditBox != nullptr)
-                        {
-                            usernameEditBox->setText("");
-                        }
-                        if (passwordEditBox != nullptr)
-                        {
-                            passwordEditBox->setText("");
-                        }
-                        if (confirmPasswordEditBox != nullptr)
-                        {
-                            confirmPasswordEditBox->setText("");
-                        }
-                        // Clear registration result message
-                        if (registerResultLabel != nullptr)
-                        {
-                            registerResultLabel->setString("");
-                        }
-                        // Show login, register, and guest login buttons
-                        if (loginItem != nullptr)
-                        {
-                            loginItem->setVisible(true);
-                            loginItem->setEnabled(true);
-                            if (loginLabel != nullptr)
-                            {
-                                loginLabel->setVisible(true);
-                            }
-                        }
-                        if (registerItem != nullptr)
-                        {
-                            registerItem->setVisible(true);
-                            registerItem->setEnabled(true);
-                            if (registerLabel != nullptr)
-                            {
-                                registerLabel->setVisible(true);
-                            }
-                        }
-                        if (guestLoginItem != nullptr)
-                        {
-                            guestLoginItem->setVisible(true);
-                            guestLoginItem->setEnabled(true);
-                            if (guestLoginLabel != nullptr)
-                            {
-                                guestLoginLabel->setVisible(true);
-                            }
-                        }
-                        });
-                    auto sequence = Sequence::create(delay, hideLayer, nullptr);
-                    registerLayer->runAction(sequence);
-                }
+                registerResultLabel->setString("Registration Failed: Database error");
+                registerResultLabel->setColor(Color3B::RED);
             }
         }
     }
@@ -1194,10 +1542,17 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
             registerLabel->setVisible(false);
         }
     }
-    // Update login status
+    // Update login status - guest login doesn't set currentLoggedInUser
     isLoggedIn = true;
 
     // Change login button to logout button
     loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
     loginLabel->setString("LOGOUT");
+
+    // Hide delete account button for guest login
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(false);
+        deleteAccountItem->setEnabled(false);
+    }
 }
