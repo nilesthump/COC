@@ -4,8 +4,7 @@
 #include "cocos2d.h"
 #include "ui/UIWidget.h"
 #include "ui/UIEditBox/UIEditBox.h"
-#include <vector>
-#include <utility>
+#include "sqlite3.h"
 
 class HelloWorld : public cocos2d::Scene,public cocos2d::ui::EditBoxDelegate
 {
@@ -22,6 +21,11 @@ public:
     void menuLoginCallback(cocos2d::Ref* pSender);
     void menuConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelLoginCallback(cocos2d::Ref* pSender);
+
+    // 添加删除账号相关的回调函数声明
+    void menuDeleteAccountCallback(cocos2d::Ref* pSender);
+    void menuConfirmDeleteCallback(cocos2d::Ref* pSender);
+    void menuCancelDeleteCallback(cocos2d::Ref* pSender);
 
     void menuLogoutCallback(cocos2d::Ref* pSender);
     void menuConfirmLogoutCallback(cocos2d::Ref* pSender);
@@ -55,6 +59,9 @@ private:
 
     cocos2d::MenuItemImage* confirmLogoutItem;
     cocos2d::MenuItemImage* cancelLogoutItem;
+    cocos2d::MenuItemImage* deleteAccountItem;
+    cocos2d::MenuItemImage* confirmDeleteItem;
+    cocos2d::MenuItemImage* cancelDeleteItem;
 
     cocos2d::ui::EditBox* usernameEditBox;
     cocos2d::ui::EditBox* passwordEditBox;
@@ -63,6 +70,7 @@ private:
     cocos2d::LayerColor* loginLayer;
     cocos2d::LayerColor* registerLayer;
     cocos2d::LayerColor* logoutConfirmLayer;
+    cocos2d::LayerColor* deleteAccountConfirmLayer;
 
     cocos2d::Label* usernameLabel;
     cocos2d::Label* passwordLabel;
@@ -71,9 +79,10 @@ private:
     cocos2d::Label* loginLabel;
     cocos2d::Label* registerLabel;
     cocos2d::Label* registerResultLabel;
+    cocos2d::Label* deleteAccountLabel;
 
     static bool isLoggedIn;
-    static std::vector<std::pair<std::string, std::string>> userDatabase; // 存储最多3个账号的微型数据库
+    std::string currentLoggedInUser;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
