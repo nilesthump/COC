@@ -63,8 +63,13 @@ private:
     cocos2d::MenuItemImage* confirmDeleteItem;
     cocos2d::MenuItemImage* cancelDeleteItem;
 
-    cocos2d::ui::EditBox* usernameEditBox;
-    cocos2d::ui::EditBox* passwordEditBox;
+    // Login specific edit boxes
+    cocos2d::ui::EditBox* loginUsernameEditBox;
+    cocos2d::ui::EditBox* loginPasswordEditBox;
+
+    // Register specific edit boxes
+    cocos2d::ui::EditBox* registerUsernameEditBox;
+    cocos2d::ui::EditBox* registerPasswordEditBox;
     cocos2d::ui::EditBox* confirmPasswordEditBox;
 
     cocos2d::LayerColor* loginLayer;
