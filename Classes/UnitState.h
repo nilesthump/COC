@@ -85,7 +85,8 @@ public:
 	float GetDamage() const;
 	float GetAttackInterval() const;
 	float GetMaxHealth() const;
-	UnitType GetTargetType() const;     //攻击目标类型（地面/空中/两者）
+	AttackTargetType GetAttackTargetType() const;     //攻击目标类型（地面/空中/两者）
+	UnitTargetType GetUnitTargetType()const;		//获取自身类型（空中/地面）
 	AttackType GetAttackType() const;   //攻击类型（单体/范围/连锁）
 	CombatType GetCombatType() const;   //近战/远程
 };

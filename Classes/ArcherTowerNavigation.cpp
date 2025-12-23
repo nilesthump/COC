@@ -1,4 +1,4 @@
-#include "CannonNavigation.h"
+#include "ArcherTowerNavigation.h"
 #include "BattleUnit.h"
 #include "cocos2d.h"
 #include <cmath>
@@ -6,23 +6,23 @@
 #include <string>
 #include <limits>
 
-CannonNavigation::CannonNavigation()
+ArcherTowerNavigation::ArcherTowerNavigation()
 {}
 
-CannonNavigation::~CannonNavigation()
+ArcherTowerNavigation::~ArcherTowerNavigation()
 {}
 
-BattleUnit* CannonNavigation::FindTarget(BattleUnit* self, const std::vector<BattleUnit*>& allTargets)
+BattleUnit* ArcherTowerNavigation::FindTarget(BattleUnit* self, const std::vector<BattleUnit*>& allTargets)
 {
     if (allTargets.empty())
         return nullptr;
     BattleUnit* nearestTarget = nullptr;
     float minDistance = std::numeric_limits<float>::max();
 
-    // 寻找最近的地面目标
+    // 寻找最近的目标
     for (auto target : allTargets)
     {
-        if (!target || !target->IsAlive()||target->GetUnitTargetType()!= UnitTargetType::GROUND)
+        if (!target || !target->IsAlive())
             continue;
 
         float distance = CalculateDistance(self, target);
@@ -36,15 +36,15 @@ BattleUnit* CannonNavigation::FindTarget(BattleUnit* self, const std::vector<Bat
     return nearestTarget;
 }
 
-void CannonNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime)
+void ArcherTowerNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime)
 {
-    // 加农炮固定，无需移动
+    //无需移动
     (void)self;
     (void)target;
     (void)deltaTime;
 }
 
-bool CannonNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)
+bool ArcherTowerNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)
 {
     if (!self || !target)
         return false;
@@ -55,12 +55,12 @@ bool CannonNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)
     return distance <= attackRange;
 }
 
-std::string CannonNavigation::GetNavigationType() const
+std::string ArcherTowerNavigation::GetNavigationType() const
 {
-    return "Cannon";
+    return "ArcherTowerNavigation";
 }
 
-float CannonNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
+float ArcherTowerNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
 {
     if (!a || !b)
         return std::numeric_limits<float>::max();

@@ -43,6 +43,11 @@ void BattleUnit::SetNavigation(std::unique_ptr<UnitNavigation> navigation)
 	navigation_ = std::move(navigation);  // 转移所有权
 }
 
+void BattleUnit::SetBuildingComponent(std::unique_ptr<BuildingComponent> comp)
+{
+	building_ = std::move(comp);
+}
+
 void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 {
 	if (!in_battle_)
@@ -170,9 +175,14 @@ float BattleUnit::GetMaxHealth() const
 	return state_.GetMaxHealth();
 }
 
-UnitType BattleUnit::GetTargetType() const
+AttackTargetType BattleUnit::GetAttackTargetType() const
 {
-	return state_.GetTargetType();
+	return state_.GetAttackTargetType();
+}
+
+UnitTargetType BattleUnit::GetUnitTargetType() const
+{
+	return state_.GetUnitTargetType();
 }
 
 AttackType BattleUnit::GetAttackType() const
@@ -405,10 +415,19 @@ void BattleUnit::UpdateHealthBar()
 	}
 }
 
-void BattleUnit::SetPosition(float x, float y)
+void BattleUnit::SetPositionAttacker(float x, float y)
 {
 	state_.SetPosition(x, y);
 	UpdateSpritePosition();  // 这里会自动进行坐标转换
+	UpdateHealthBar();
+}
+
+void BattleUnit::SetPositionDefender(float x, float y)
+{
+	//这里采用建筑的放置规则，主要处理图标大小适配和中心2*2 3*3偏移问题
+	auto building = building_.get();
+	state_.SetPosition(x, y);
+	building->SetGridPosition(x, y, background_sprite_);
 	UpdateHealthBar();
 }
 

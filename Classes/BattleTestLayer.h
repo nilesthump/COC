@@ -25,6 +25,9 @@ private:
 	std::vector<std::pair<int, cocos2d::Vec2>> barbarian_positions_;		// 存储每个Barbarian的ID和网格坐标
 	int next_barbarian_id_ = 1;			
 
+	// 倒计时显示
+	Label* countdown_label_ = nullptr;
+
 	// 双击检测
 	double last_click_time_ = 0;
 	cocos2d::Vec2 last_click_pos_ = cocos2d::Vec2::ZERO;
@@ -51,8 +54,7 @@ public:
 	void setupBattle();
 
 	//置逻辑
-	void placeCannon();
-	void placeBarbarian();
+	void placeDefender();
 	void placeBarbarianAt(float gridX, float gridY);
 	void updateCoordinatesDisplay();
 

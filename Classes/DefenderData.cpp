@@ -14,7 +14,8 @@ DefenderData DefenderData::CreateCannonData(int level)
     data.tile_width = 3;
     data.tile_height = 3;
     data.attack_type = AttackType::SINGLE_TARGET;
-    data.unit_type = UnitType::GROUND; 
+    data.attack_target_type = AttackTargetType::GROUND; 
+    data.unit_target_type = UnitTargetType::GROUND;
     data.combat_type = CombatType::RANGED;
     data.resource_type = ResourceType::GOLD;  
     static const std::vector<std::pair<double, int>> klevel_stats = {
@@ -53,7 +54,8 @@ DefenderData DefenderData::CreateArcherTowerData(int level)
     data.tile_width = 3;
     data.tile_height = 3;
     data.attack_type = AttackType::SINGLE_TARGET;
-    data.unit_type = UnitType::BOTH;
+    data.unit_target_type = UnitTargetType::GROUND;
+    data.attack_target_type = AttackTargetType::BOTH;
     data.combat_type = CombatType::RANGED;
     data.resource_type = ResourceType::GOLD;
 

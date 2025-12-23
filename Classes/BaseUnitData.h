@@ -10,8 +10,15 @@ enum class CombatType
 	RANGED      //远程
 };
 
-//单位类型枚举
-enum class UnitType
+//自身目标类型
+enum class UnitTargetType
+{
+    GROUND,     //自己是地面的
+    AIR         //自己是空中的
+};
+
+//攻击目标类型枚举
+enum class AttackTargetType
 {
 	GROUND,		    // 只攻击地面
 	AIR,			// 只攻击空中
@@ -48,7 +55,8 @@ struct BaseUnitData
 
     //攻击特性
     AttackType attack_type;     //单体/范围/连锁
-    UnitType unit_type;         //地面/空中/两者
+    AttackTargetType attack_target_type;         //地面/空中/两者
+    UnitTargetType unit_target_type;;           //地面/空中
     CombatType combat_type;     //近战/远程
     ResourceType resource_type; //圣水/暗黑重油/金币
 
