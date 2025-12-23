@@ -231,18 +231,26 @@ bool SecondScene::init()
     this->addChild(zoom_manager_);
 
     // 初始化菱形位置信息（根据原有测量数据）
-    int left_x = 667;          // 左顶点x坐标（距左边界）
-    int right_x = 3705 - 556;  // 右顶点x坐标（图像宽度 - 距右边界距离）
-    int top_y = 264;           // 上顶点y坐标（距上边界）
-    int bottom_y = 2545 - 471; // 下顶点y坐标（图像高度 - 距下边界距离）
+    int LEFT_X = 667;          // 左顶点x坐标（距左边界）
+    int RIGHT_X = 3705 - 556;  // 右顶点x坐标（图像宽度 - 距右边界距离）
+    int TOP_Y = 264;           // 上顶点y坐标（距上边界）
+    int BOTTOM_Y = 2545 - 471; // 下顶点y坐标（图像高度 - 距下边界距离）
 
-    float diamond_width = right_x - left_x;       // 菱形宽度: 3149 - 667 = 2482
-    float diamond_height = bottom_y - top_y;      // 菱形高度: 2074 - 264 = 1810
+    float diamond_width = RIGHT_X - LEFT_X;       // 菱形宽度: 3149 - 667 = 2482
+    float diamond_height = BOTTOM_Y - TOP_Y;      // 菱形高度: 2074 - 264 = 1810
 
     // 计算菱形中心相对于背景精灵中心的位置
-    Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
-    Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2+28.0, background_sprite_->getContentSize().height / 2 - 42.0 * 4);
+    //Vec2 diamond_center_absolute = Vec2((left_x + right_x) / 2.0f, (top_y + bottom_y) / 2.0f);
+    //Vec2 diamond_center = diamond_center_absolute - Vec2(background_sprite_->getContentSize().width / 2+28.0, background_sprite_->getContentSize().height / 2 -42.0*4);
 
+    float diamond_center_x = (LEFT_X + RIGHT_X) / 2.0f;
+    float diamond_center_y = (TOP_Y + BOTTOM_Y) / 2.0f;
+
+    Vec2 diamond_center_absolute = Vec2(diamond_center_x, diamond_center_y);
+    Vec2 diamond_center = diamond_center_absolute - Vec2(
+        background_sprite_->getContentSize().width / 2.0f,
+        background_sprite_->getContentSize().height / 2.0f
+    );
     // 创建菱形网格管理器
     grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 44);
     this->addChild(grid_manager_);
@@ -355,27 +363,18 @@ void SecondScene::update(float delta)
         for (auto building : placedBuildings) {
             // 判断建筑类型并分别累加速度
             if (dynamic_cast<GoldMine*>(building)) {
-                totalGoldRate += (building->getSpeed()* building->getLv()); // 只有金矿贡献金币速度
+                // 金矿：计算单座金矿的产速，先产到自己的库存（而非全局）
+                static_cast<GoldMine*>(building)->produceToStock(building->getSpeed()); // 产到库存
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                totalElixirRate += (building->getSpeed()* building->getLv()); // 只有圣水收集器贡献圣水速度
+                static_cast<ElixirCollector*>(building)->produceToStock(building->getSpeed()); // 产到库存
             }
         }
-        // 增加圣水数量
-        g_elixirCount+= totalElixirRate;
-        
-        // 增加金币数量
-        g_goldCount += totalGoldRate;
-
         // 更新标签显示
-        if (elixirLabel)
-        {
+        if (elixirLabel){
             elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
         }
-        
-        // 更新金币标签显示
-        if (goldLabel)
-        {
+        if (goldLabel){
             goldLabel->setString(StringUtils::format("%d", g_goldCount));
         }
 
@@ -436,7 +435,7 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
         // 若找到建筑，显示信息面板
         if (clickedBuilding) {
             // 创建面板并传入建筑数据
-            auto infoPanel = BuildingInfoPanel::create(clickedBuilding);
+            auto infoPanel = BuildingInfoPanel::create(clickedBuilding, background_sprite_);
             this->addChild(infoPanel, 100); // 确保面板在最上层
         }
         return true; // 吞噬事件，避免触发移动
