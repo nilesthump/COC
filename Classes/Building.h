@@ -43,6 +43,9 @@ public:
     int getLv() {
         return level;
     }
+    int getHp() {
+        return _hp;
+    }
 
     void updatePosition(const cocos2d::Vec2& newPos) {
         this->setPosition(newPos);

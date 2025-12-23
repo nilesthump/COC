@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Building.h"
+#include "BuildingInfoPanel.h" 
 #include "GoldMine.h"
 #include "ElixirCollector.h"
 #include "ZoomScrollManager.h"
@@ -45,11 +46,17 @@ public:
 	//new判断
 	CREATE_FUNC(SecondScene);
 private:
+	// 双击检测相关
+	double _lastClickTime; // 上一次点击的时间（使用double类型更精确）
+	cocos2d::Vec2 _lastClickPos; // 上一次点击的位置
+	bool _isDoubleClick; // 是否为双击
+	const double DOUBLE_CLICK_INTERVAL = 0.3; // 双击时间间隔阈值（秒）
 
 	//碰撞判断
 	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
 
-	Node* buildPanel;
+	Node* buildPanel;//建造建筑面板
+	BuildingInfoPanel* _buildingInfoPanel=nullptr; // 建筑信息面板
 
 	cocos2d::Sprite* background_sprite_;
 

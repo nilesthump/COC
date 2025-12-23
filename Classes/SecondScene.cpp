@@ -4,6 +4,7 @@
 #include "ConvertTest.h"
 #include "cocos2d.h"
 #include <cmath>
+#include<ctime>
 
 // 初始化全局变量
 int g_elixirCount = 750;
@@ -334,7 +335,6 @@ bool SecondScene::init()
 
     // 启动定时器，每秒更新一次
     this->scheduleUpdate();
-
     return true;
 }
 
@@ -386,7 +386,6 @@ void SecondScene::update(float delta)
 
 void SecondScene::menuFirstCallback(Ref* pSender)
 {
-
     Director::getInstance()->replaceScene(HelloWorld::createScene());
 }
 
@@ -397,7 +396,53 @@ void SecondScene::menuBuildCallback(Ref* pSender)
 
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 {
-    // 只处理拖拽状态下的逻辑、建筑移动逻辑和缩放管理器的逻辑   
+    // 1. 获取当前时间（使用clock()计算程序运行总时间，单位为秒）
+    double currentTime = clock() / (double)CLOCKS_PER_SEC;
+    Vec2 currentPos = touch->getLocation();
+    double timeDiff = currentTime - _lastClickTime; // 时间差
+    float posDiff = currentPos.distance(_lastClickPos); // 位置差
+
+    // 判断是否为双击（时间差小于阈值且位置偏差较小）
+    _isDoubleClick = (timeDiff < DOUBLE_CLICK_INTERVAL) && (posDiff < 10.0f);
+
+    // 更新上一次点击记录
+    _lastClickTime = currentTime;
+    _lastClickPos = currentPos;
+
+    // 2. 如果是双击，执行双击操作（例如打开升级面板）
+    if (_isDoubleClick) {
+        log("检测到双击");
+        // 找到被双击的建筑（复用之前的碰撞检测逻辑）
+        Building* clickedBuilding = nullptr;
+        Vec2 touchPos = touch->getLocation();
+        for (auto& building : placedBuildings) {
+            // 复用菱形碰撞检测代码（判断触摸点是否在当前建筑的菱形范围内）
+            Sprite* mineSprite = building->getSprite();
+            Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
+            const float horizontalDiag = 56.0f * 3;
+            const float verticalDiag = 42.0f * 3;
+            float a = horizontalDiag / 2;
+            float b = verticalDiag / 2;
+            float dx = touchPos.x - buildingScreenPos.x;
+            float dy = touchPos.y - buildingScreenPos.y;
+            bool isInDiamond = (fabs(dx) / a + fabs(dy) / b) <= 1.0f;
+
+            if (isInDiamond) {
+                clickedBuilding = building;
+                break;
+            }
+        }
+
+        // 若找到建筑，显示信息面板
+        if (clickedBuilding) {
+            // 创建面板并传入建筑数据
+            auto infoPanel = BuildingInfoPanel::create(clickedBuilding);
+            this->addChild(infoPanel, 100); // 确保面板在最上层
+        }
+        return true; // 吞噬事件，避免触发移动
+    }
+
+    // 非双击，只处理拖拽状态下的逻辑、建筑移动逻辑和缩放管理器的逻辑   
     if (isDragging) {
         return true; // 正在拖拽时返回true，保持事件被捕获
     }
@@ -527,6 +572,11 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
 
 void SecondScene::onTouchEnded(Touch* touch, Event* event)
 {
+    if (_isDoubleClick) {
+        _isDoubleClick = false; // 重置双击标记
+        return; // 双击时不执行移动逻辑
+    }
+
     if (isDragging && draggingItem) {
         // 获取拖拽结束位置
         Vec2 screenPos = touch->getLocation();

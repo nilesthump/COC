@@ -1,5 +1,5 @@
 #ifndef __ELIXIR_COLLECTOR_H__
-#define __ELIXIR_COLLECTOR_H_
+#define __ELIXIR_COLLECTOR_H__
 
 #include "Building.h"
 
