@@ -34,8 +34,10 @@ bool DiamondGridManager::init(const Vec2& diamondCenter,
     grid_count_ = gridCount;
 
     // 计算网格单元格大小
-    grid_cell_size_x_ = diamond_width_ / grid_count_;
-    grid_cell_size_y_ = diamond_height_ / grid_count_;
+    //grid_cell_size_x_ = diamond_width_ / grid_count_;
+    //grid_cell_size_y_ = diamond_height_ / grid_count_;
+    grid_cell_size_x_ = 56.0;
+    grid_cell_size_y_ = 42.0;
 
     _gridDraw = nullptr;
 
@@ -144,6 +146,9 @@ std::vector<std::vector<cocos2d::Vec2>>* DiamondGridManager::drawDiamondGrid(Spr
     backgroundSprite->addChild(grid_draw, 1);
 
     // 计算左上角位置
+    //Vec2 leftCorner = Vec2(diamondCenterPos.x - 16 * horizontalSize,
+        //diamondCenterPos.y + 9 * verticalSize);
+    //grid_draw->drawDiamond(leftCorner, horizontalSize, verticalSize);
     Vec2 leftCorner = Vec2(diamondCenterPos.x - 16 * horizontalSize,
         diamondCenterPos.y + 9 * verticalSize);
     grid_draw->drawDiamond(leftCorner, horizontalSize, verticalSize);

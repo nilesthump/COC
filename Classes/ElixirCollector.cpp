@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, int lv, float elixirSpeed, float x0, float y0)
+ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp, int lv, float elixirSpeed, float x0, float y0,int max,int current)
 {
     ElixirCollector* mine = new (std::nothrow) ElixirCollector();
-    if (mine && mine->init(textureName, hp, lv,elixirSpeed, x0, y0))
+    if (mine && mine->init(textureName, hp, lv,elixirSpeed, x0, y0, max,current))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ ElixirCollector* ElixirCollector::create(const std::string& textureName, int hp,
     return nullptr;
 }
 
-bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float generateSpeed, float x0, float y0)
+bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float generateSpeed, float x0, float y0,int max,int current)
 {
     if (!Node::init())
     {
@@ -34,6 +34,8 @@ bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float 
     x = x0;
     y = y0;
     level = lv;
+    maxSize = max;
+    currentSize = current;
     this->setPosition(Vec2(x0, y0));
 
     // 初始化精灵（关键：类内管理图像）
@@ -47,6 +49,27 @@ bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float 
     _sprite->setAnchorPoint(Vec2(0.5f, 0.5f));
 
     return true;
+}
+
+// 生产圣水到库存（核心：判断上限）
+void ElixirCollector::produceToStock(int elixir)
+{
+    if (currentSize + elixir <= maxSize)
+    {
+        currentSize += elixir;
+    }
+    else
+    {
+        currentSize = maxSize; // 达到上限则填满
+    }
+}
+
+// 收集库存（玩家点击圣水收集器时调用）
+int ElixirCollector::collectStock()
+{
+    int collected = currentSize;
+    currentSize = 0; // 清空库存
+    return collected;
 }
 
 bool ElixirCollector::initSprite(const std::string& textureName)
