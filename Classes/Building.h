@@ -29,10 +29,32 @@ public:
     void changeY(float t) {
         y = t;
     }
-    //更新元素
+    //升级
     void updateLv() {
         level++;
     }
+    void updateHp() {
+        _hp = _hp + 50 * level;
+    }
+    void updateSpeed() {
+        _generateSpeed = _generateSpeed * level;
+    }
+    void updateSize() {
+        maxSize = maxSize + maxSize * level;
+    }
+    void updateTexture(const std::string& newTextureName) {
+        if (_sprite) {
+            // 尝试加载新纹理
+            auto newTexture = Director::getInstance()->getTextureCache()->addImage(newTextureName);
+            if (newTexture) {
+                _sprite->setTexture(newTexture);
+            }
+            else {
+                return;
+            }
+        }
+    }
+    //更新元素
     void updatePosition(const cocos2d::Vec2& newPos) {
         this->setPosition(newPos);
         x = newPos.x;
@@ -79,6 +101,8 @@ public:
     void playSuccessBlink() { this->runAction(cocos2d::Blink::create(1.0f, 2)); }
     // 视觉反馈：红色闪烁+销毁（失败放置）
     void playFailBlinkAndRemove();
+    // 视觉反馈：红色闪烁
+    void playFailBlink();
 
     float getSpeed() const { return _generateSpeed; }
 };

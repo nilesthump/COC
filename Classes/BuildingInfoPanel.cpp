@@ -23,7 +23,6 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     temp = background_sprite_;
 
     if (!_targetBuilding) {
-
         return false; // 建筑为空则初始化失败
     }
     /*
@@ -46,12 +45,21 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         return false;
     }
     panelBg->setPosition(building->getContentSize().width + panelBg->getContentSize().width / 2, building->getContentSize().height - panelBg->getContentSize().height / 2);
-    building->addChild(panelBg);
+    this->addChild(panelBg);
     float bgWidth = panelBg->getContentSize().width;
     float bgHeight = panelBg->getContentSize().height;
 
     // 2. 标题（区分金矿/圣水收集器）
-    std::string type = dynamic_cast<GoldMine*>(building) ? "GoldMine" : "ElixirCollector";
+    std::string type;
+    if (dynamic_cast<GoldMine*>(building)) {
+        type = "GoldMine";
+    }
+    else if (dynamic_cast<ElixirCollector*>(building)) {
+        type = "ElixirCollector";
+    }
+    else if (dynamic_cast<GoldStorage*>(building)) {
+        type = "GoldStorage";
+    }
     _titleLabel = Label::createWithTTF(
         StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
         "fonts/Marker Felt.ttf", 24
@@ -97,24 +105,32 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
     }
+    else if (dynamic_cast<GoldStorage*>(building)) {
+        _resourceLabel = Label::createWithTTF(
+            StringUtils::format("Storage: %d", building->getCurrentStock()),
+            "fonts/Marker Felt.ttf", 24
+        );
+    }
     _resourceLabel->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
     panelBg->addChild(_resourceLabel);
 
-    // 7. 升级按钮
-    _upgradeBtn = MenuItemImage::create(
-        "btn_disabled.png",  // 正常状态图
-        "btn_disabled.png", // 按下状态图
-        CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
-    );
-    //设置文字提示
-    auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
-    upGradeLabel->setColor(Color3B::WHITE);
-    upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2,
-        _upgradeBtn->getContentSize().height / 2));
-    _upgradeBtn->addChild(upGradeLabel);
-    //缩放和位置
-    _upgradeBtn->setScale(0.75f);
-    _upgradeBtn->setPosition(bgWidth / 2, 70);
+    // 7. 升级按钮,最高等级15
+    if (_targetBuilding->getLv() < 15) {
+        _upgradeBtn = MenuItemImage::create(
+            "btn_disabled.png",  // 正常状态图
+            "btn_disabled.png", // 按下状态图
+            CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
+        );
+        //设置文字提示
+        auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
+        upGradeLabel->setColor(Color3B::WHITE);
+        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2,
+            _upgradeBtn->getContentSize().height / 2));
+        _upgradeBtn->addChild(upGradeLabel);
+        //缩放和位置
+        _upgradeBtn->setScale(0.75f);
+        _upgradeBtn->setPosition(bgWidth / 2, 70);
+    }
 
     // 8. 收集按钮
     _collectBtn = MenuItemImage::create(
@@ -133,16 +149,32 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _collectBtn->setPosition(bgWidth / 2, 120); // 位置在升级按钮上方
 
     // 菜单容器
-    auto menu = Menu::create(_collectBtn,_upgradeBtn,nullptr);
-    menu->setPosition(Vec2::ZERO);
-    panelBg->addChild(menu);
+    if (_targetBuilding->getLv() < 15) {
+        auto menu = Menu::create(_collectBtn, _upgradeBtn, nullptr);
+        menu->setPosition(Vec2::ZERO);
+        panelBg->addChild(menu);
+    }
+    else {
+        auto menu = Menu::create(_collectBtn, nullptr);
+        menu->setPosition(Vec2::ZERO);
+        panelBg->addChild(menu);
+    }
 
     return true;
 }
 
 void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* background_sprite_) {
     if (!building) return;
-    std::string type = dynamic_cast<GoldMine*>(building) ? "GoldMine" : "ElixirCollector";
+    std::string type;
+    if (dynamic_cast<GoldMine*>(building)) {
+        type = "GoldMine";
+    }
+    else if (dynamic_cast<ElixirCollector*>(building)) {
+        type = "ElixirCollector";
+    }
+    else if (dynamic_cast<GoldStorage*>(building)) {
+        type = "GoldStorage";
+    }
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
     _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
@@ -154,14 +186,57 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<ElixirCollector*>(building)) {
         _resourceLabel->setString(StringUtils::format("Elixir: %d", building->getCurrentStock()));
     }
+    else if (dynamic_cast<GoldStorage*>(building)) {
+        _resourceLabel->setString(StringUtils::format("Storage: %d", building->getCurrentStock()));
+    }
 }
 
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     if (!_targetBuilding) return;
 
-    // 升级逻辑（示例：消耗金币，提升属性）
-    
+    // 升级所需资源（可根据建筑类型和当前等级调整）
+    int requiredGold = 1;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
+    int requiredElixir = 1;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
+
+    // 检查是否有足够资源
+    if (g_goldCount < requiredGold || g_elixirCount < requiredElixir) {
+        // 资源不足，播放失败动画
+        _targetBuilding->playFailBlink();
+        _targetBuilding->setColor(Color3B::WHITE);
+        return;
+    }
+
+    // 消耗升级资源
+    g_goldCount -= requiredGold;
+    g_elixirCount -= requiredElixir;
+
+    _targetBuilding->updateLv(); // 等级提升
+    _targetBuilding->updateHp();  // 生命值提升
+    _targetBuilding->updateSpeed();  // 生成速度提升
+    _targetBuilding->updateSize();  // 最大容量提升
+
+    //根据新等级切换建筑外观
+    std::string newTexture;
+    if (dynamic_cast<GoldMine*>(_targetBuilding)) {
+        // 金矿纹理命名规则："goldMineLv2.png"、"goldMineLv3.png"等
+        newTexture = StringUtils::format("GoldMineLv%d.png", _targetBuilding->getLv());
+    }
+    else if (dynamic_cast<ElixirCollector*>(_targetBuilding)) {
+        // 圣水收集器纹理命名规则："elixirCollectorLv2.png"等
+        newTexture = StringUtils::format("ElixirCollectorLv%d.png", _targetBuilding->getLv());
+    }
+    else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
+        newTexture = StringUtils::format("GoldStorageLv%d.png", _targetBuilding->getLv());
+    }
+    // 调用 更新纹理
+    _targetBuilding->updateTexture(newTexture);
+    // 播放升级成功动画
+    _targetBuilding->playSuccessBlink();
+
+    // 更新信息面板显示
+    updateInfo(_targetBuilding, temp);
 }
+
 void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     if (!_targetBuilding) return;
 
@@ -171,6 +246,12 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
         collected = goldMine->collectStock();
         if (collected > 0) {
             g_goldCount += collected;
+        }
+    }
+    else if (auto elixirCollector = dynamic_cast<ElixirCollector*>(_targetBuilding)) {
+        collected = elixirCollector->collectStock();
+        if (collected > 0) {
+            g_elixirCount += collected;
         }
     }
     else if (auto elixirCollector = dynamic_cast<ElixirCollector*>(_targetBuilding)) {

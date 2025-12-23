@@ -17,3 +17,12 @@ void Building::playFailBlinkAndRemove()
         nullptr
     ));
 }
+
+void Building::playFailBlink()
+{
+    _sprite->setColor(Color3B::RED); // 设为红色
+    this->runAction(Sequence::create(
+        Blink::create(0.5f, 2),    // 闪烁2次      
+        nullptr
+    ));
+}

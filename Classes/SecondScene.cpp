@@ -7,6 +7,7 @@
 #include<ctime>
 
 // 初始化全局变量
+int MAXGOLD = 10000, MAXELIXIR = 5000;
 int g_elixirCount = 750;
 int g_goldCount = 750;
 
@@ -39,6 +40,14 @@ bool SecondScene::init()
     baseElixirRate = 0;
     g_goldCount = 750; // 确保金币计数初始化为0
     g_elixirCount = 750;
+
+    // 初始化拖拽状态
+    isDragging = false;
+    draggingItem = nullptr;
+
+    // 初始化建筑移动相关变量
+    isMovingBuilding = false;
+    movingBuilding = nullptr;
 
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
@@ -108,8 +117,8 @@ bool SecondScene::init()
         panelBg->setPosition(Vec2(panelBgX, panelBgY));
         buildPanel->addChild(panelBg);
     }
-
-    // 创建金矿按钮
+    //112-217 Build按钮图像
+    // 1.创建金矿按钮
     goldMineBtn = MenuItemImage::create(
         "GoldMineLv1.png",
         "GoldMineLv1.png",
@@ -145,10 +154,9 @@ bool SecondScene::init()
     if (goldMineBtn) {
         goldMineBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.5 / 2 - 10));
     }
-    goldMineBtn->setScale(0.5f);
+    goldMineBtn->setScale(0.7f);
 
-
-    // 创建圣水收集器按钮
+    // 2.创建圣水收集器按钮
     elixirCollectorBtn = MenuItemImage::create(
         "ElixirCollectorLv1.png",
         "ElixirCollectorLv1.png",
@@ -163,11 +171,7 @@ bool SecondScene::init()
                 if (elixirCollectorPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     elixirCollectorPreview->setOpacity(150);
-                    // goldMinePreview->setScale(0.5f); // 如需缩放可加
-
-                    // 计算预览初始位置（和原来的逻辑一致）
-                    //Vec2 worldPos = elixirCollectorBtn->getParent()->convertToWorldSpace(elixirCollectorBtn->getPosition());
-                    //Vec2 localPos = background_sprite_->convertToNodeSpace();
+                    
                     Vec2 my = Vec2(elixirCollectorPreview->getX(), elixirCollectorPreview->getY());
                     Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
                     elixirCollectorPreview->setMinePosition(you);
@@ -176,28 +180,50 @@ bool SecondScene::init()
                     background_sprite_->addChild(elixirCollectorPreview, 10);
                     elixirCollectorBtn->setUserData(elixirCollectorPreview);
                 }
-                // 移除隐藏按钮的代码，这样在拖拽时原始按钮仍然可见
-                // storageBtn->setVisible(false);
             }
         }
     );
     if (elixirCollectorBtn) {
-        elixirCollectorBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.5 * 1.5 - 10 - 10));
+        elixirCollectorBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.7 * 1.5 - 10 - 10));
     }
-    elixirCollectorBtn->setScale(0.5f);
+    elixirCollectorBtn->setScale(0.7f);
 
-    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, nullptr);
+    // 3.创建存钱罐按钮
+    goldStorageBtn = MenuItemImage::create(
+        "GoldStorageLv1.png",
+        "GoldStorageLv1.png",
+        [=](Ref* pSender) {
+            if (!isDragging) {
+                log("goldStorage ");
+                isDragging = true;
+                draggingItem = goldStorageBtn;
+                dragStartPosition = goldStorageBtn->getPosition();
+
+                auto goldStoragePreview = GoldStorage::create("GoldStorageLv1.png"); // 预览用存钱罐纹理
+                if (goldStoragePreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    goldStoragePreview->setOpacity(150);                   
+                    Vec2 my = Vec2(goldStoragePreview->getX(), goldStoragePreview->getY());
+                    Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                    goldStoragePreview->setMinePosition(you);
+
+                    // 添加到背景精灵，并保存到按钮的UserData
+                    background_sprite_->addChild(goldStoragePreview, 10);
+                    goldStorageBtn->setUserData(goldStoragePreview);
+                }
+            }
+        }
+    );
+    if (goldStorageBtn) {
+        goldStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.7 * 2.5 - 10 -10 -10));
+    }
+    goldStorageBtn->setScale(0.7f);
+
+    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn , nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
 
-    // 初始化拖拽状态
-    isDragging = false;
-    draggingItem = nullptr;
-    
-    // 初始化建筑移动相关变量
-    isMovingBuilding = false;
-    movingBuilding = nullptr;
-
+    //226-251 游戏背景
     auto label = Label::createWithTTF("Your Clan!!!", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
     {
@@ -205,12 +231,10 @@ bool SecondScene::init()
     }
     else
     {
-
         label->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height - label->getContentSize().height));
         this->addChild(label, 1);
-    }
-    // add "HelloWorld" splash screen"
+    }   
     background_sprite_ = Sprite::create("normal(winter).jpg");
     if (background_sprite_ == nullptr)
     {
@@ -264,7 +288,7 @@ bool SecondScene::init()
     coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
     this->addChild(coordinate_label_, 2);
   
-    // 创建圣水图标和标签
+    //291-316 创建圣水图标和标签
     // 尝试加载圣水图标，如果失败则使用HelloWorld.png作为替代
     elixirIcon = Sprite::create("btn_normal.png"); // 实际项目中应该替换为正确的圣水图标资源名
     if (elixirIcon == nullptr)
@@ -319,8 +343,8 @@ bool SecondScene::init()
         this->addChild(goldLabel, 2);
     }
 
-    // 设置事件监听器（使用新类的成员函数）
 
+    // 设置事件监听器（使用新类的成员函数）
     auto touch_listener = EventListenerTouchOneByOne::create();
     touch_listener->setSwallowTouches(true);
     touch_listener->onTouchBegan = CC_CALLBACK_2(SecondScene::onTouchBegan, this);
@@ -352,22 +376,22 @@ void SecondScene::update(float delta)
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
 
-
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
-    {
-        
+    {     
         int totalGoldRate = baseGoldRate;
         int totalElixirRate = baseElixirRate;
-
+        // 判断建筑类型并分别累加速度
         for (auto building : placedBuildings) {
-            // 判断建筑类型并分别累加速度
-            if (dynamic_cast<GoldMine*>(building)) {
-                // 金矿：计算单座金矿的产速，先产到自己的库存（而非全局）
+            // 金矿：计算单座金矿的产速，先产到自己的库存（而非全局）
+            if (dynamic_cast<GoldMine*>(building)) {               
                 static_cast<GoldMine*>(building)->produceToStock(building->getSpeed()); // 产到库存
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
                 static_cast<ElixirCollector*>(building)->produceToStock(building->getSpeed()); // 产到库存
+            }
+            else {
+                continue;
             }
         }
         // 更新标签显示
@@ -377,7 +401,6 @@ void SecondScene::update(float delta)
         if (goldLabel){
             goldLabel->setString(StringUtils::format("%d", g_goldCount));
         }
-
         // 重置计时器
         elapsedTime = 0.0f;
     }
@@ -463,6 +486,7 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 
     // 非双击，只处理拖拽状态下的逻辑、建筑移动逻辑和缩放管理器的逻辑   
     if (isDragging) {
+
         return true; // 正在拖拽时返回true，保持事件被捕获
     }
     Vec2 touchPos = touch->getLocation();
@@ -488,6 +512,10 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 
         // 如果触摸点在菱形内，触发建筑移动逻辑
         if (isInDiamond) {
+            if (_curOpenInfoPanel) {
+                _curOpenInfoPanel->removeFromParent(); // 关闭面板
+                _curOpenInfoPanel = nullptr;
+            }
             isMovingBuilding = true;
             movingBuilding = building;
             building->setOpacity(128);
@@ -528,6 +556,13 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
                 dragElixirPreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
+        //存钱罐预览
+        else if(draggingItem == goldStorageBtn){
+            GoldStorage* dragStoragePreview = static_cast<GoldStorage*>(userData);
+            if (dragStoragePreview) {
+                dragStoragePreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
     }
     else if (isMovingBuilding) {
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
@@ -559,7 +594,7 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
             if (isColliding) {
                 // 可以将建筑设为红色提示碰撞
                 if (movingBuilding) {
-                    movingBuilding->getSprite()->setColor(Color3B::RED);
+                    movingBuilding->playFailBlink();
                 }
                 return; // 不更新位置
             }
@@ -609,7 +644,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         Vec2 snappedPos = Vec2(snappedX, snappedY);
 
-        // 1. 移除预览对象（区分金矿/圣水收集器）
+        // 1. 移除预览对象
         if (draggingItem == goldMineBtn) {
             GoldMine* dragMinePreview = static_cast<GoldMine*>(draggingItem->getUserData());
             if (dragMinePreview) {
@@ -624,6 +659,13 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 draggingItem->setUserData(nullptr);
             }
         }
+        else if (draggingItem == goldStorageBtn) {
+            GoldStorage* dragStoragePreview = static_cast<GoldStorage*>(draggingItem->getUserData());
+            if (dragStoragePreview) {
+                dragStoragePreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
 
         // 2. 检查放置区域有效性
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
@@ -632,7 +674,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             bool isColliding = false;
             Vec2 targetPos = snappedPos;
 
-            // 检查与已放置金矿的碰撞
+            // 检查与已放置建筑的碰撞
             for (auto building : placedBuildings) {
                 if (isPointInBuilding(targetPos, building)) {
                     isColliding = true;
@@ -643,7 +685,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             if (isColliding) {
                 // 碰撞处理：播放失败动画
                 log("放置位置与其他建筑冲突！");
-                // 这里可以添加显示提示信息的逻辑
+                // 这里可以添加显示提示信息的逻辑——难道都会生成1级建筑？
                 if (draggingItem == goldMineBtn) {
                     auto failGoldMine = GoldMine::create("GoldMineLv1.png");
                     if (failGoldMine) {
@@ -660,6 +702,14 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         failElixir->playFailBlinkAndRemove();
                     }
                 }
+                else if (draggingItem == goldStorageBtn) {
+                    auto failStorage = GoldStorage::create("GoldStorageLv1.png");
+                    if (failStorage) {
+                        failStorage->setPosition(snappedPos);
+                        background_sprite_->addChild(failStorage, 15);
+                        failStorage->playFailBlinkAndRemove();
+                    }
+                }
 
                 return; // 阻止放置
             }
@@ -673,8 +723,6 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     background_sprite_->addChild(placedGoldMine, 15);
                     placedBuildings.push_back(placedGoldMine);
                     placedGoldMine->playSuccessBlink();
-                    log("成功放置金矿，产金速度：%.1f，位置：(%.2f, %.2f)",
-                        placedGoldMine->getSpeed(), snappedPos.x, snappedPos.y);
                 }
             }
             else if (draggingItem == elixirCollectorBtn) {
@@ -686,8 +734,17 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     background_sprite_->addChild(placedElixir, 15);
                     placedBuildings.push_back(placedElixir);
                     placedElixir->playSuccessBlink();
-                    log("成功放置金矿，产金速度：%.1f，位置：(%.2f, %.2f)",
-                        placedElixir->getSpeed(), snappedPos.x, snappedPos.y);
+                }
+            }
+            else if (draggingItem == goldStorageBtn) {
+                // 创建存钱罐
+                auto placedStorage = GoldStorage::create("GoldStorageLv1.png"); // 替换为你的圣水收集器纹理名
+                if (placedStorage) {
+                    // 更新
+                    placedStorage->updatePosition(snappedPos);
+                    background_sprite_->addChild(placedStorage, 15);
+                    placedBuildings.push_back(placedStorage);
+                    placedStorage->playSuccessBlink();
                 }
             }
         }
@@ -699,7 +756,6 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     failGoldMine->setPosition(snappedPos);
                     background_sprite_->addChild(failGoldMine, 15);
                     failGoldMine->playFailBlinkAndRemove();
-                    log("尝试在无效位置放置金矿: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
                 }
             }
             else if (draggingItem == elixirCollectorBtn) {
@@ -707,8 +763,15 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 if (failElixir) {
                     failElixir->setPosition(snappedPos);
                     background_sprite_->addChild(failElixir, 15);
-                    failElixir->playFailBlinkAndRemove(); // 确保圣水收集器有该方法
-                    log("尝试在无效位置放置圣水收集器: (%.2f, %.2f)", snappedPos.x, snappedPos.y);
+                    failElixir->playFailBlinkAndRemove();                     
+                }
+            }
+            else if(draggingItem == goldStorageBtn){
+                auto failStorage = GoldStorage::create("GoldStorageLv1.png");
+                if (failStorage) {
+                    failStorage->setPosition(snappedPos);
+                    background_sprite_->addChild(failStorage, 15);
+                    failStorage->playFailBlinkAndRemove();
                 }
             }
         }
@@ -757,6 +820,13 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
             ElixirCollector* dragElixirPreview = static_cast<ElixirCollector*>(draggingItem->getUserData());
             if (dragElixirPreview) {
                 dragElixirPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == goldStorageBtn) {
+            GoldStorage* dragStoragePreview = static_cast<GoldStorage*>(draggingItem->getUserData());
+            if (dragStoragePreview) {
+                dragStoragePreview->removeFromParentAndCleanup(true);
                 draggingItem->setUserData(nullptr);
             }
         }
@@ -881,11 +951,14 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
 
     Sprite* sprite = nullptr;
     // 判断建筑类型并获取精灵
-    if (dynamic_cast<GoldMine*>(building)) {
+    if (dynamic_cast<GoldMine*>(building)){
         sprite = static_cast<GoldMine*>(building)->getSprite();
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         sprite = static_cast<ElixirCollector*>(building)->getSprite();
+    }
+    else if (dynamic_cast<GoldStorage*>(building)) {
+        sprite = static_cast<GoldStorage*>(building)->getSprite();
     }
 
     if (!sprite) return false;
