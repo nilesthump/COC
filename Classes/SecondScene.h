@@ -5,6 +5,7 @@
 #include "Building.h"
 #include "BuildingInfoPanel.h" 
 #include "GoldMine.h"
+#include "GoldStorage.h"
 #include "ElixirCollector.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
@@ -66,14 +67,17 @@ private:
 
 	cocos2d::Label* coordinate_label_;
 
+	//圣水、金币、宝石
 	cocos2d::Sprite* elixirIcon; 
 	cocos2d::Label* elixirLabel; 
 	cocos2d::Label* elixirNameLabel; 
-    
-    // 金币相关成员变量
     cocos2d::Sprite* goldIcon; 
 	cocos2d::Label* goldLabel; 
 	cocos2d::Label* goldNameLabel; 
+	cocos2d::Sprite* gemIcon;
+	cocos2d::Label* gemLabel;
+	cocos2d::Label* gemNameLabel;
+
 
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
@@ -83,6 +87,7 @@ private:
 	// 拖拽相关成员变量
 	cocos2d::MenuItemImage* goldMineBtn;
 	cocos2d::MenuItemImage* elixirCollectorBtn;
+	cocos2d::MenuItemImage* goldStorageBtn;
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
 	bool isDragging; // 是否正在拖拽
@@ -102,6 +107,7 @@ private:
 extern int g_elixirCount;
 //金币
 extern int g_goldCount;
-
+//宝石
+extern int g_gemCount;
 #endif
 
