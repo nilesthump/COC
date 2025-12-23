@@ -327,52 +327,7 @@ bool HelloWorld::init()
         // add the sprite as a child to this layer
         this->addChild(sprite, 0);
     }
-#if 0
-    auto head_pic_left = Sprite::create("headpic.png");
-    if (head_pic_left == nullptr)
-    {
-        problemLoading("headpic.png");
-    }
-    else
-    {
-        head_pic_left->setPosition(Vec2(origin.x + 150, origin.y + visibleSize.height - label->getContentSize().height - 150));
 
-        head_pic_left->setRotation(-45.0);
-
-        head_pic_left->setOpacity(32);
-
-        head_pic_left->setScale(0.25);
-
-        this->addChild(head_pic_left, -1);
-
-        auto moveby = MoveBy::create(10, Vec2(50, 50));
-        auto fadein = FadeIn::create(10.0);
-        auto rotation = RotateBy::create(10, 45.0);
-        auto spawn = Spawn::create(moveby, fadein, rotation, nullptr);
-        auto seq = Sequence::create(spawn, spawn->reverse(), nullptr);
-        head_pic_left->runAction(seq);
-
-    }
-
-    auto head_pic_right = Sprite::create("headpic.png");
-    if (head_pic_left == nullptr)
-    {
-        problemLoading("headpic.png");
-    }
-    else
-    {
-        head_pic_right->setPosition(Vec2(origin.x + visibleSize.width -
-            150, origin.y + visibleSize.height - label->getContentSize().height - 150));
-
-        head_pic_right->setRotation(45.0);
-
-        head_pic_right->setOpacity(32);
-
-        head_pic_right->setScale(0.25);
-
-        this->addChild(head_pic_right, -1);
-    }
-#endif
     return true;
 }
 
@@ -792,6 +747,15 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
                 registerLabel->setVisible(false);
             }
         }
+        if (loginItem != nullptr)
+        {
+            loginItem->setVisible(true);
+            loginItem->setEnabled(true);
+            if (loginLabel != nullptr)
+            {
+                loginLabel->setVisible(true);
+            }
+        }
 
         // Update login status
         isLoggedIn = true;
@@ -1155,6 +1119,34 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
                         if (registerResultLabel != nullptr)
                         {
                             registerResultLabel->setString("");
+                        }
+                        // Show login, register, and guest login buttons
+                        if (loginItem != nullptr)
+                        {
+                            loginItem->setVisible(true);
+                            loginItem->setEnabled(true);
+                            if (loginLabel != nullptr)
+                            {
+                                loginLabel->setVisible(true);
+                            }
+                        }
+                        if (registerItem != nullptr)
+                        {
+                            registerItem->setVisible(true);
+                            registerItem->setEnabled(true);
+                            if (registerLabel != nullptr)
+                            {
+                                registerLabel->setVisible(true);
+                            }
+                        }
+                        if (guestLoginItem != nullptr)
+                        {
+                            guestLoginItem->setVisible(true);
+                            guestLoginItem->setEnabled(true);
+                            if (guestLoginLabel != nullptr)
+                            {
+                                guestLoginLabel->setVisible(true);
+                            }
                         }
                         });
                     auto sequence = Sequence::create(delay, hideLayer, nullptr);
