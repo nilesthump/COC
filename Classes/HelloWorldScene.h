@@ -85,6 +85,7 @@ private:
     cocos2d::Label* registerLabel;
     cocos2d::Label* registerResultLabel;
     cocos2d::Label* deleteAccountLabel;
+    cocos2d::Label* welcomeLabel;
 
     static bool isLoggedIn;
     std::string currentLoggedInUser;
