@@ -334,6 +334,10 @@ bool HelloWorld::init()
         // Ensure login button is in login state
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
         loginLabel->setString("LOGIN");
+        // Show login button that was hidden during delete confirmation
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
+        loginLabel->setVisible(true);
 
         // Hide delete account button when not logged in
         if (deleteAccountItem != nullptr)
@@ -346,7 +350,7 @@ bool HelloWorld::init()
     // 3. add your codes below...
     // add a label shows "Hello World"
     // create and initialize a label
-
+#if 0
     auto label = Label::createWithTTF("Hello Mimi--From yzlgai", "fonts/Marker Felt.ttf", 36);
     if (label == nullptr)
     {
@@ -361,6 +365,22 @@ bool HelloWorld::init()
         // add the label as a child to this layer
         this->addChild(label, 1);
     }
+#endif
+    // Create welcome label (initially hidden)
+    welcomeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 36);
+    if (welcomeLabel == nullptr)
+    {
+        problemLoading("'fonts/Marker Felt.ttf'");
+    }
+    else
+    {
+        welcomeLabel->setColor(Color3B::GREEN);
+        welcomeLabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height - 36));
+        welcomeLabel->setVisible(false);
+        this->addChild(welcomeLabel, 1);
+    }
+
 
     // add "HelloWorld" splash screen"
     auto sprite = Sprite::create("LoadingScene.jpg");
@@ -477,6 +497,33 @@ void HelloWorld::menuDeleteAccountCallback(cocos2d::Ref* pSender)
     {
         deleteAccountConfirmLayer->setVisible(true);
     }
+
+
+    // Hide all scene buttons except sub-buttons
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(false);
+        secondSceneItem->setEnabled(false);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(false);
+        battleTestItem->setEnabled(false);
+    }
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(false);
+        deleteAccountItem->setEnabled(false);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(false);
+        loginItem->setEnabled(false);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(false);
+        }
+    }
 }
 
 void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
@@ -556,6 +603,10 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
             // Ensure login button is in login state
             loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
             loginLabel->setString("LOGIN");
+            // Show login button that was hidden during logout confirmation
+            loginItem->setVisible(true);
+            loginItem->setEnabled(true);
+            loginLabel->setVisible(true);
 
             // Hide and disable secondSceneItem, battleTestItem, and deleteAccountItem
             if (secondSceneItem != nullptr)
@@ -601,6 +652,13 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
             // Update login status
             isLoggedIn = false;
             currentLoggedInUser.clear();
+
+            // Hide welcome label
+            if (welcomeLabel != nullptr)
+            {
+                welcomeLabel->setVisible(false);
+                welcomeLabel->setString("");
+            }
         }
     }
 }
@@ -611,6 +669,32 @@ void HelloWorld::menuCancelDeleteCallback(cocos2d::Ref* pSender)
     if (deleteAccountConfirmLayer != nullptr)
     {
         deleteAccountConfirmLayer->setVisible(false);
+    }
+
+    // Show all scene buttons that were hidden
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(true);
+        secondSceneItem->setEnabled(true);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(true);
+        battleTestItem->setEnabled(true);
+    }
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(true);
+        deleteAccountItem->setEnabled(true);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(true);
+        }
     }
 }
 
@@ -1099,6 +1183,13 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
         isLoggedIn = true;
         currentLoggedInUser = username;
 
+        // Update welcome label
+        if (welcomeLabel != nullptr)
+        {
+            welcomeLabel->setString("Welcome " + username + "!");
+            welcomeLabel->setVisible(true);
+        }
+
         // Change login button to logout button
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
         loginLabel->setString("LOGOUT");
@@ -1310,6 +1401,33 @@ void HelloWorld::menuLogoutCallback(cocos2d::Ref* pSender)
         // Show the existing logout confirmation layer if it was already created
         logoutConfirmLayer->setVisible(true);
     }
+        
+
+    // Hide all scene buttons except sub-buttons
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(false);
+        secondSceneItem->setEnabled(false);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(false);
+        battleTestItem->setEnabled(false);
+    }
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(false);
+        deleteAccountItem->setEnabled(false);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(false);
+        loginItem->setEnabled(false);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(false);
+        }
+    }
 }
 
 void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
@@ -1323,7 +1441,10 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     // Change logout button back to login button
     loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
     loginLabel->setString("LOGIN");
-
+    // Show login button that was hidden during logout confirmation
+    loginItem->setVisible(true);
+    loginItem->setEnabled(true);
+    loginLabel->setVisible(true);
     // Hide and disable secondSceneItem, battleTestItem, and deleteAccountItem
     if (secondSceneItem != nullptr)
     {
@@ -1368,6 +1489,13 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     // Update login status
     isLoggedIn = false;
     currentLoggedInUser.clear();
+
+    // Hide welcome label
+    if (welcomeLabel != nullptr)
+    {
+        welcomeLabel->setVisible(false);
+        welcomeLabel->setString("");
+    }
 }
 
 void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
@@ -1376,6 +1504,32 @@ void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
     if (logoutConfirmLayer != nullptr)
     {
         logoutConfirmLayer->setVisible(false);
+    }
+
+    // Show all scene buttons that were hidden
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(true);
+        secondSceneItem->setEnabled(true);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(true);
+        battleTestItem->setEnabled(true);
+    }
+    if (deleteAccountItem != nullptr && currentLoggedInUser != "")
+    {
+        deleteAccountItem->setVisible(true);
+        deleteAccountItem->setEnabled(true);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(true);
+        }
     }
 }
 
@@ -1605,6 +1759,12 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
     // Update login status - guest login doesn't set currentLoggedInUser
     isLoggedIn = true;
 
+    // Update welcome label for guest login
+    if (welcomeLabel != nullptr)
+    {
+        welcomeLabel->setString("Welcome!");
+        welcomeLabel->setVisible(true);
+    }
     // Change login button to logout button
     loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
     loginLabel->setString("LOGOUT");
