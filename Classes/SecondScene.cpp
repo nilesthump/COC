@@ -8,8 +8,8 @@
 
 // 初始化全局变量
 int MAXGOLD = 10000, MAXELIXIR = 5000;
-int g_elixirCount = 750;
-int g_goldCount = 750;
+int g_elixirCount = 750,g_goldCount = 750;
+int g_gemCount = 15;
 
 USING_NS_CC;
 
@@ -40,6 +40,7 @@ bool SecondScene::init()
     baseElixirRate = 0;
     g_goldCount = 750; // 确保金币计数初始化为0
     g_elixirCount = 750;
+    g_gemCount = 15;
 
     // 初始化拖拽状态
     isDragging = false;
@@ -309,13 +310,13 @@ bool SecondScene::init()
         this->addChild(elixirNameLabel, 2);
 
         // 创建圣水数量标签
-        elixirLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
+        elixirLabel = Label::createWithTTF("750", "fonts/Marker Felt.ttf", 24);
         elixirLabel->setColor(Color3B::BLUE);
         elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 20, elixirIcon->getPositionY()));
         this->addChild(elixirLabel, 2);
     }
 
-    // 创建金币图标和标签
+    // 318-344 创建金币图标和标签
     // 尝试加载金币图标，如果失败则使用btn_pressed.png作为替代
     goldIcon = Sprite::create("btn_pressed.png"); // 实际项目中应该替换为正确的金币图标资源名
     if (goldIcon == nullptr)
@@ -337,12 +338,39 @@ bool SecondScene::init()
         this->addChild(goldNameLabel, 2);
 
         // 创建金币数量标签
-        goldLabel = Label::createWithTTF("0", "fonts/Marker Felt.ttf", 24);
+        goldLabel = Label::createWithTTF("750", "fonts/Marker Felt.ttf", 24);
         goldLabel->setColor(Color3B::YELLOW);
         goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 20, goldIcon->getPositionY()));
         this->addChild(goldLabel, 2);
     }
 
+    // 347-361 创建宝石图标和标签
+    // 尝试加载宝石图标，如果失败则使用btn_pressed.png作为替代
+    gemIcon= Sprite::create("btn_disabled.png");
+    if (gemIcon == nullptr)
+    {
+        problemLoading("'btn_disabled.png' (作为金币图标的替代)");
+    }
+    else
+    {
+        // 设置图标位置和大小，紧挨着圣水图标
+        float spacing = 40.0f; // 与圣水图标之间的间距
+        gemIcon->setPosition(Vec2(goldIcon->getPositionX(), goldIcon->getPositionY() - spacing));
+        gemIcon->setScale(0.5f);
+        this->addChild(gemIcon, 2);
+
+        // 创建"宝石"文字标签
+        gemNameLabel = Label::createWithTTF("宝石", "fonts/STZhongSong_Bold.ttf", 20);
+        gemNameLabel->setColor(Color3B::GREEN);
+        gemNameLabel->setPosition(Vec2(gemIcon->getPositionX() - gemNameLabel->getContentSize().width / 2, gemIcon->getPositionY()));
+        this->addChild(gemNameLabel, 2);
+
+        // 创建金币数量标签
+        gemLabel = Label::createWithTTF("15", "fonts/Marker Felt.ttf", 24);
+        gemLabel->setColor(Color3B::GREEN);
+        gemLabel->setPosition(Vec2(gemIcon->getPositionX() + 20, gemIcon->getPositionY()));
+        this->addChild(gemLabel, 2);
+    }
 
     // 设置事件监听器（使用新类的成员函数）
     auto touch_listener = EventListenerTouchOneByOne::create();
@@ -377,7 +405,7 @@ void SecondScene::update(float delta)
     elapsedTime += delta;
 
     // 当经过1秒时
-    if (elapsedTime >= 1.0f)
+    if (elapsedTime >= 0.50f)
     {     
         int totalGoldRate = baseGoldRate;
         int totalElixirRate = baseElixirRate;
@@ -400,6 +428,9 @@ void SecondScene::update(float delta)
         }
         if (goldLabel){
             goldLabel->setString(StringUtils::format("%d", g_goldCount));
+        }
+        if (gemLabel) {
+            gemLabel->setString(StringUtils::format("%d", g_gemCount));
         }
         // 重置计时器
         elapsedTime = 0.0f;

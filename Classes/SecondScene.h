@@ -67,14 +67,17 @@ private:
 
 	cocos2d::Label* coordinate_label_;
 
+	//圣水、金币、宝石
 	cocos2d::Sprite* elixirIcon; 
 	cocos2d::Label* elixirLabel; 
 	cocos2d::Label* elixirNameLabel; 
-    
-    // 金币相关成员变量
     cocos2d::Sprite* goldIcon; 
 	cocos2d::Label* goldLabel; 
 	cocos2d::Label* goldNameLabel; 
+	cocos2d::Sprite* gemIcon;
+	cocos2d::Label* gemLabel;
+	cocos2d::Label* gemNameLabel;
+
 
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
@@ -104,6 +107,7 @@ private:
 extern int g_elixirCount;
 //金币
 extern int g_goldCount;
-
+//宝石
+extern int g_gemCount;
 #endif
 
