@@ -26,7 +26,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 
         return false; // 建筑为空则初始化失败
     }
-
+    /*
     // 1. 半透明遮罩（点击关闭面板）
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto mask = LayerColor::create(Color4B(0, 0, 0, 128), visibleSize.width, visibleSize.height);
@@ -38,19 +38,19 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         return true;
         };
     touchListener->setSwallowTouches(true);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, mask);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, mask);*/
 
-    // 2. 面板主体
+    // 1. 面板主体
     auto panelBg = Sprite::create("btn_long.png"); // 面板背景图
     if (!panelBg) {
         return false;
     }
-    panelBg->setPosition(visibleSize.width / 2, visibleSize.height / 2);
-    this->addChild(panelBg);
+    panelBg->setPosition(building->getContentSize().width + panelBg->getContentSize().width / 2, building->getContentSize().height - panelBg->getContentSize().height / 2);
+    building->addChild(panelBg);
     float bgWidth = panelBg->getContentSize().width;
     float bgHeight = panelBg->getContentSize().height;
 
-    // 3. 标题（区分金矿/圣水收集器）
+    // 2. 标题（区分金矿/圣水收集器）
     std::string type = dynamic_cast<GoldMine*>(building) ? "GoldMine" : "ElixirCollector";
     _titleLabel = Label::createWithTTF(
         StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
@@ -59,7 +59,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _titleLabel->setPosition(bgWidth / 2, bgHeight - 30);
     panelBg->addChild(_titleLabel);
 
-    // 4. 血量信息
+    // 3. 血量信息
     _hpLabel = Label::createWithTTF(
         StringUtils::format("HP: %d", building->getHp()),
         "fonts/Marker Felt.ttf", 24
@@ -67,7 +67,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _hpLabel->setPosition(bgWidth / 2, bgHeight - 70);
     panelBg->addChild(_hpLabel);
 
-    // 5. 生产速度信息
+    // 4. 生产速度信息
     _speedLabel = Label::createWithTTF(
         StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
         "fonts/Marker Felt.ttf", 24
@@ -75,7 +75,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _speedLabel->setPosition(bgWidth / 2, bgHeight - 110);
     panelBg->addChild(_speedLabel);
 
-    //6.网格坐标
+    //5.网格坐标
     _positionLabel= Label::createWithTTF(
         StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(background_sprite_),building->getYY(background_sprite_)),
         "fonts/Marker Felt.ttf", 24
@@ -83,7 +83,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _positionLabel->setPosition(bgWidth / 2, bgHeight - 150);
     panelBg->addChild(_positionLabel);
     
-    // 7. 资源数量显示
+    // 6. 资源数量显示
 // 判断建筑类型并显示对应资源
     if (dynamic_cast<GoldMine*>(building)) {
         _resourceLabel = Label::createWithTTF(
@@ -100,7 +100,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _resourceLabel->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
     panelBg->addChild(_resourceLabel);
 
-    // 8. 升级按钮
+    // 7. 升级按钮
     _upgradeBtn = MenuItemImage::create(
         "btn_disabled.png",  // 正常状态图
         "btn_disabled.png", // 按下状态图
@@ -116,7 +116,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _upgradeBtn->setScale(0.75f);
     _upgradeBtn->setPosition(bgWidth / 2, 70);
 
-    // 9. 收集按钮
+    // 8. 收集按钮
     _collectBtn = MenuItemImage::create(
         "btn_disabled.png",  // 正常状态图
         "btn_disabled.png", // 按下状态图

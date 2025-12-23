@@ -411,9 +411,10 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
     // 2. 如果是双击，执行双击操作（例如打开升级面板）
     if (_isDoubleClick) {
         log("检测到双击");
-        // 找到被双击的建筑（复用之前的碰撞检测逻辑）
+        // 找到被双击的建筑
         Building* clickedBuilding = nullptr;
         Vec2 touchPos = touch->getLocation();
+
         for (auto& building : placedBuildings) {
             // 复用菱形碰撞检测代码（判断触摸点是否在当前建筑的菱形范围内）
             Sprite* mineSprite = building->getSprite();
@@ -433,10 +434,29 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
         }
 
         // 若找到建筑，显示信息面板
-        if (clickedBuilding) {
-            // 创建面板并传入建筑数据
-            auto infoPanel = BuildingInfoPanel::create(clickedBuilding, background_sprite_);
-            this->addChild(infoPanel, 100); // 确保面板在最上层
+        if (clickedBuilding) {       
+            // 已有面板，且是当前建筑 → 关闭面板
+            if (_curOpenInfoPanel && _curOpenBuilding == clickedBuilding) {
+                _curOpenInfoPanel->removeFromParent(); // 关闭面板
+                _curOpenInfoPanel = nullptr;
+                _curOpenBuilding = nullptr;
+            }
+            // 已有面板，但不是当前建筑 → 关闭旧面板，打开新面板
+            else if (_curOpenInfoPanel && _curOpenBuilding != clickedBuilding) {
+                _curOpenInfoPanel->removeFromParent(); // 关闭旧面板
+                _curOpenInfoPanel = nullptr;
+
+                // 创建新面板
+                _curOpenInfoPanel = BuildingInfoPanel::create(clickedBuilding, background_sprite_);
+                clickedBuilding->addChild(_curOpenInfoPanel, 100); // 确保面板在最上层
+                _curOpenBuilding = clickedBuilding; // 更新绑定的建筑
+            }
+            // 无面板 → 打开新面板
+            else {
+                _curOpenInfoPanel = BuildingInfoPanel::create(clickedBuilding, background_sprite_);
+                clickedBuilding->addChild(_curOpenInfoPanel, 100);
+                _curOpenBuilding = clickedBuilding;
+            }
         }
         return true; // 吞噬事件，避免触发移动
     }

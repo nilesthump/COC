@@ -18,7 +18,11 @@
  * Update:BattleUnit = UnitState + UnitBehavior + UnitNavigation + VisualComponet
  * BattleUnit作为一个战斗单位，血条/音效/图片/死亡效果都跟着角色走
  * 而且visual部分可以根据实际快速更新，注意和战斗逻辑分离即可
- */
+ */ 
+
+ //! 区分了attacker和defender的setposition问题
+ //! 根本原因还是建筑设置坐标时要考虑2*2 3*3中心偏移和图片自适应
+
 
 #ifndef BATTLEUNIT_H
 #define BATTLEUNIT_H
@@ -27,6 +31,7 @@
 #include "UnitBehavior.h"
 #include "UnitNavigation.h"
 #include "ConvertTest.h"
+#include "BuildingComponentYZL.h"
 #include <vector>
 #include <string>
 #include <functional>
@@ -42,6 +47,7 @@ private:
 	//战斗状态
 	bool in_battle_ = false;
 	BattleUnit* target_;
+	bool has_target_in_range_ = false;
 
 	//视觉组件
 	cocos2d::Sprite* unit_sprite_;
@@ -53,6 +59,10 @@ private:
 	//音效组件
 	std::string attack_sound_;
 	std::string death_sound_;
+
+	//防御建筑类相关（用于适配图片和位置）
+	std::unique_ptr<BuildingComponent> building_;
+	
 
 public:
 	BattleUnit();
@@ -73,6 +83,7 @@ public:
 	void SetBehavior(std::unique_ptr<UnitBehavior> behavior);
 	void SetNavigation(std::unique_ptr<UnitNavigation> navigation);
 	void SetBackgroundSprite(cocos2d::Sprite* background_sprite);
+	void SetBuildingComponent(std::unique_ptr<BuildingComponent> comp);
 
 	//更新函数
 	void Update(float deltaTime, std::vector<BattleUnit*>& enemies);
@@ -87,7 +98,8 @@ public:
 	bool IsAlive() const;
 	float GetPositionX() const;
 	float GetPositionY() const;
-	void SetPosition(float x, float y);
+	void SetPositionAttacker(float x, float y);
+	void SetPositionDefender(float x, float y);
 
 	float GetHealthPercent() const;
 	float GetCurrentHealth() const;
@@ -97,7 +109,8 @@ public:
 	float GetDamage() const;
 	float GetAttackInterval() const;
 
-	UnitType GetTargetType() const;
+	AttackTargetType GetAttackTargetType() const;
+	UnitTargetType GetUnitTargetType() const;
 	AttackType GetAttackType() const;
 	CombatType GetCombatType() const;
 	BattleUnit* GetTarget() const;

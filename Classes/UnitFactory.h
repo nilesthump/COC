@@ -26,7 +26,9 @@
 #include "AttackerNormalBehavior.h"
 #include "DefenderNormalBehavior.h"
 #include "BarbarianNavigation.h"
+#include "ArcherNavigation.h"
 #include "CannonNavigation.h"
+#include "ArcherTowerNavigation.h"
 #include "AttackerData.h"
 #include "DefenderData.h"
 #include "cocos2d.h" 
@@ -39,74 +41,12 @@ namespace cocos2d
 class UnitFactory
 {
 public:
-    //创建野蛮人单位
-    static BattleUnit* CreateBarbarian(int level = 1)
-    {
-        AttackerData data = AttackerData::CreateBarbarianData(level);
-        BattleUnit* unit = new BattleUnit();
-        unit->Init(data);
-        unit->SetBehavior(std::make_unique<AttackerNormalBehavior>()); //先用通用行为
-        unit->SetNavigation(std::make_unique <BarbarianNavigation>());
-        return unit;
-    }
-
-    // 创建加农炮单位
-    static BattleUnit* CreateCannon(int level = 1)
-    {
-        DefenderData data = DefenderData::CreateCannonData(level);
-        BattleUnit* unit = new BattleUnit();
-        unit->Init(data);
-        unit->SetBehavior(std::make_unique <DefenderNormalBehavior>());
-        unit->SetNavigation(std::make_unique<CannonNavigation>()); // 使用加农炮导航（固定，无移动）
-        return unit;
-    }
-
     // 创建带有视觉效果的完整单位（用于场景直接使用）
-    static BattleUnit* CreateCompleteBarbarian(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
-    {
-        BattleUnit* unit = CreateBarbarian(level);
+    static BattleUnit* CreateBarbarian(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
+    static BattleUnit* CreateArcher(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
+    static BattleUnit* CreateCannon(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
+    static BattleUnit* CreateArcherTower(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
 
-        unit->SetBackgroundSprite(background);
-        // 设置精灵
-        auto sprite = cocos2d::Sprite::create("BarbarianLv1.png");
-        if (sprite)
-        {
-            sprite->setScale(0.5f);
-            unit->SetSprite(sprite, parent); //这里会调用UpdateSpritePosition
-        }
-
-        // 设置血条
-        unit->SetupHealthBar(parent);
-
-        // 设置音效
-        unit->SetAttackSound("sounds/barbarian_attack.mp3");
-        unit->SetDeathSound("sounds/barbarian_death.mp3");
-
-        return unit;
-    }
-
-    static BattleUnit* CreateCompleteCannon(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
-    {
-        BattleUnit* unit = CreateCannon(level);
-
-        unit->SetBackgroundSprite(background);
-        // 设置精灵
-        auto sprite = cocos2d::Sprite::create("CannonLv1.png");
-        if (sprite)
-        {
-            sprite->setScale(0.3f);
-            unit->SetSprite(sprite, parent);
-        }
-
-        // 设置血条
-        unit->SetupHealthBar(parent);
-
-        // 设置音效
-        unit->SetAttackSound("sounds/cannon_attack.mp3");
-        unit->SetDeathSound("sounds/cannon_death.mp3");
-
-        return unit;
-    }
 };
 
 #endif

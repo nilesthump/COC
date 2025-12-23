@@ -56,7 +56,9 @@ private:
 	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
 
 	Node* buildPanel;//建造建筑面板
-	BuildingInfoPanel* _buildingInfoPanel=nullptr; // 建筑信息面板
+
+	BuildingInfoPanel* _curOpenInfoPanel = nullptr;// 建筑信息面板
+	Building* _curOpenBuilding = nullptr;
 
 	cocos2d::Sprite* background_sprite_;
 
