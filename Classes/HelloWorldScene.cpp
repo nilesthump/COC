@@ -217,8 +217,13 @@ bool HelloWorld::init()
     logoutConfirmLayer = nullptr;
     deleteAccountConfirmLayer = nullptr;
 
-    usernameEditBox = nullptr;
-    passwordEditBox = nullptr;
+    // Initialize login specific edit boxes
+    loginUsernameEditBox = nullptr;
+    loginPasswordEditBox = nullptr;
+
+    // Initialize register specific edit boxes
+    registerUsernameEditBox = nullptr;
+    registerPasswordEditBox = nullptr;
     confirmPasswordEditBox = nullptr;
     confirmItem = nullptr;
     registerConfirmItem = nullptr;
@@ -485,11 +490,21 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
     // Delete account from SQLite database
     if (!currentLoggedInUser.empty())
     {
+        bool deleteSuccess = false;
         sqlite3* db;
         int rc = sqlite3_open("users.db", &db);
 
         if (rc == SQLITE_OK)
         {
+            // Start a transaction
+            rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+            if (rc != SQLITE_OK)
+            {
+                CCLOG("Error starting transaction: %s", sqlite3_errmsg(db));
+                sqlite3_close(db);
+                return;
+            }
+
             // Prepare SQL statement to delete user
             const char* sql = "DELETE FROM users WHERE username = ?;";
             sqlite3_stmt* stmt;
@@ -505,6 +520,7 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
                 if (sqlite3_step(stmt) == SQLITE_DONE)
                 {
                     CCLOG("Account deleted successfully");
+                    deleteSuccess = true;
                 }
                 else
                 {
@@ -513,59 +529,79 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
 
                 sqlite3_finalize(stmt);
             }
+            else
+            {
+                CCLOG("Error preparing SQL statement: %s", sqlite3_errmsg(db));
+            }
+
+            // Commit or rollback transaction based on result
+            if (deleteSuccess)
+            {
+                sqlite3_exec(db, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
+            }
+            else
+            {
+                sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
+            }
 
             sqlite3_close(db);
         }
-
-        // Reset login status
-        isLoggedIn = false;
-        currentLoggedInUser.clear();
-
-        // Hide secondSceneItem and battleTestItem
-        if (secondSceneItem != nullptr)
+        else
         {
-            secondSceneItem->setVisible(false);
-            secondSceneItem->setEnabled(false);
+            CCLOG("Error opening database: %s", sqlite3_errmsg(db));
         }
 
-        if (battleTestItem != nullptr)
+        if (deleteSuccess)
         {
-            battleTestItem->setVisible(false);
-            battleTestItem->setEnabled(false);
-        }
+            // Ensure login button is in login state
+            loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
+            loginLabel->setString("LOGIN");
 
-        // Hide delete account button
-        if (deleteAccountItem != nullptr)
-        {
-            deleteAccountItem->setVisible(false);
-            deleteAccountItem->setEnabled(false);
-        }
-
-        // Show guest login and register buttons
-        if (guestLoginItem != nullptr)
-        {
-            guestLoginItem->setVisible(true);
-            guestLoginItem->setEnabled(true);
-            // Also show the label to be extra thorough
-            if (guestLoginLabel != nullptr)
+            // Hide and disable secondSceneItem, battleTestItem, and deleteAccountItem
+            if (secondSceneItem != nullptr)
             {
-                guestLoginLabel->setVisible(true);
+                secondSceneItem->setVisible(false);
+                secondSceneItem->setEnabled(false);
             }
-        }
-        if (registerItem != nullptr)
-        {
-            registerItem->setVisible(true);
-            registerItem->setEnabled(true);
-            // Also show the label to be extra thorough
-            if (registerLabel != nullptr)
-            {
-                registerLabel->setVisible(true);
-            }
-        }
 
-        // Ensure login button is in login state
-        loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
-        loginLabel->setString("LOGIN");
+            if (battleTestItem != nullptr)
+            {
+                battleTestItem->setVisible(false);
+                battleTestItem->setEnabled(false);
+            }
+
+            if (deleteAccountItem != nullptr)
+            {
+                deleteAccountItem->setVisible(false);
+                deleteAccountItem->setEnabled(false);
+            }
+
+            // Show guest login and register buttons
+            if (guestLoginItem != nullptr)
+            {
+                guestLoginItem->setVisible(true);
+                guestLoginItem->setEnabled(true);
+                // Also show the label to be extra thorough
+                if (guestLoginLabel != nullptr)
+                {
+                    guestLoginLabel->setVisible(true);
+                }
+            }
+            if (registerItem != nullptr)
+            {
+                registerItem->setVisible(true);
+                registerItem->setEnabled(true);
+                // Also show the label to be extra thorough
+                if (registerLabel != nullptr)
+                {
+                    registerLabel->setVisible(true);
+                }
+            }
+
+            // Update login status
+            isLoggedIn = false;
+            currentLoggedInUser.clear();
+        }
     }
 }
 
@@ -622,18 +658,18 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
         loginLayer->addChild(usernameLabel);
 
         // Create username edit box
-        usernameEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
-        usernameEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+        loginUsernameEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        loginUsernameEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height / 2 + 50));
-        usernameEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
-        usernameEditBox->setPlaceholderFontSize(20);
-        usernameEditBox->setPlaceHolder("Enter your account name");
-        usernameEditBox->setFontName("fonts/Marker Felt.ttf");
-        usernameEditBox->setFontSize(20);
-        usernameEditBox->setFontColor(Color3B::WHITE);
-        usernameEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
-        usernameEditBox->setDelegate(this);
-        loginLayer->addChild(usernameEditBox);
+        loginUsernameEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        loginUsernameEditBox->setPlaceholderFontSize(20);
+        loginUsernameEditBox->setPlaceHolder("Enter your account name");
+        loginUsernameEditBox->setFontName("fonts/Marker Felt.ttf");
+        loginUsernameEditBox->setFontSize(20);
+        loginUsernameEditBox->setFontColor(Color3B::WHITE);
+        loginUsernameEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        loginUsernameEditBox->setDelegate(this);
+        loginLayer->addChild(loginUsernameEditBox);
 
         // Create password label
         passwordLabel = Label::createWithSystemFont("Password:", "fonts/Marker Felt.ttf", 20);
@@ -643,30 +679,30 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
         loginLayer->addChild(passwordLabel);
 
         // Clear input fields when first creating login layer
-        if (usernameEditBox != nullptr)
+        if (loginUsernameEditBox != nullptr)
         {
-            usernameEditBox->setText("");
+            loginUsernameEditBox->setText("");
         }
-        if (passwordEditBox != nullptr)
+        if (loginPasswordEditBox != nullptr)
         {
-            passwordEditBox->setText("");
+            loginPasswordEditBox->setText("");
         }
 
         // Create password edit box
-        passwordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
-        passwordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+        loginPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        loginPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height / 2 - 20));
-        passwordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
-        passwordEditBox->setPlaceholderFontSize(20);
-        passwordEditBox->setPlaceHolder("Enter your password");
-        passwordEditBox->setFontName("fonts/Marker Felt.ttf");
-        passwordEditBox->setFontSize(20);
-        passwordEditBox->setFontColor(Color3B::WHITE);
-        passwordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
-        passwordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
-        passwordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::DONE);
-        passwordEditBox->setDelegate(this);
-        loginLayer->addChild(passwordEditBox);
+        loginPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        loginPasswordEditBox->setPlaceholderFontSize(20);
+        loginPasswordEditBox->setPlaceHolder("Enter your password");
+        loginPasswordEditBox->setFontName("fonts/Marker Felt.ttf");
+        loginPasswordEditBox->setFontSize(20);
+        loginPasswordEditBox->setFontColor(Color3B::WHITE);
+        loginPasswordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        loginPasswordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        loginPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::DONE);
+        loginPasswordEditBox->setDelegate(this);
+        loginLayer->addChild(loginPasswordEditBox);
 
         // Create confirm button
         confirmItem = MenuItemImage::create(
@@ -721,13 +757,13 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
         // Show the existing login layer if it was already created
         loginLayer->setVisible(true);
         // Clear input fields when re-showing the login layer
-        if (usernameEditBox != nullptr)
+        if (loginUsernameEditBox != nullptr)
         {
-            usernameEditBox->setText("");
+            loginUsernameEditBox->setText("");
         }
-        if (passwordEditBox != nullptr)
+        if (loginPasswordEditBox != nullptr)
         {
-            passwordEditBox->setText("");
+            loginPasswordEditBox->setText("");
         }
     }
 
@@ -780,18 +816,18 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         registerLayer->addChild(usernameLabel);
 
         // Create username edit box
-        usernameEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
-        usernameEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+        registerUsernameEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        registerUsernameEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height / 2 + 80));
-        usernameEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
-        usernameEditBox->setPlaceholderFontSize(20);
-        usernameEditBox->setPlaceHolder("Enter your account name");
-        usernameEditBox->setFontName("fonts/Marker Felt.ttf");
-        usernameEditBox->setFontSize(20);
-        usernameEditBox->setFontColor(Color3B::WHITE);
-        usernameEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
-        usernameEditBox->setDelegate(this);
-        registerLayer->addChild(usernameEditBox);
+        registerUsernameEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        registerUsernameEditBox->setPlaceholderFontSize(20);
+        registerUsernameEditBox->setPlaceHolder("Enter your account name");
+        registerUsernameEditBox->setFontName("fonts/Marker Felt.ttf");
+        registerUsernameEditBox->setFontSize(20);
+        registerUsernameEditBox->setFontColor(Color3B::WHITE);
+        registerUsernameEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        registerUsernameEditBox->setDelegate(this);
+        registerLayer->addChild(registerUsernameEditBox);
 
         // Create password label
         passwordLabel = Label::createWithSystemFont("Password:", "fonts/Marker Felt.ttf", 20);
@@ -801,20 +837,20 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         registerLayer->addChild(passwordLabel);
 
         // Create password edit box
-        passwordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
-        passwordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+        registerPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        registerPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height / 2 + 10));
-        passwordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
-        passwordEditBox->setPlaceholderFontSize(20);
-        passwordEditBox->setPlaceHolder("Enter your password");
-        passwordEditBox->setFontName("fonts/Marker Felt.ttf");
-        passwordEditBox->setFontSize(20);
-        passwordEditBox->setFontColor(Color3B::WHITE);
-        passwordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
-        passwordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
-        passwordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
-        passwordEditBox->setDelegate(this);
-        registerLayer->addChild(passwordEditBox);
+        registerPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        registerPasswordEditBox->setPlaceholderFontSize(20);
+        registerPasswordEditBox->setPlaceHolder("Enter your password");
+        registerPasswordEditBox->setFontName("fonts/Marker Felt.ttf");
+        registerPasswordEditBox->setFontSize(20);
+        registerPasswordEditBox->setFontColor(Color3B::WHITE);
+        registerPasswordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        registerPasswordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        registerPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        registerPasswordEditBox->setDelegate(this);
+        registerLayer->addChild(registerPasswordEditBox);
 
         // Create confirm password label
         confirmPasswordLabel = Label::createWithSystemFont("Confirm Password:", "fonts/Marker Felt.ttf", 20);
@@ -839,14 +875,14 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
         confirmPasswordEditBox->setDelegate(this);
         registerLayer->addChild(confirmPasswordEditBox);
 
-        // Clear input fields when first creating login layer
-        if (usernameEditBox != nullptr)
+        // Clear input fields when first creating register layer
+        if (registerUsernameEditBox != nullptr)
         {
-            usernameEditBox->setText("");
+            registerUsernameEditBox->setText("");
         }
-        if (passwordEditBox != nullptr)
+        if (registerPasswordEditBox != nullptr)
         {
-            passwordEditBox->setText("");
+            registerPasswordEditBox->setText("");
         }
         if (confirmPasswordEditBox != nullptr)
         {
@@ -914,13 +950,13 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
             registerResultLabel->setString("");
         }
         // Clear input fields
-        if (usernameEditBox != nullptr)
+        if (registerUsernameEditBox != nullptr)
         {
-            usernameEditBox->setText("");
+            registerUsernameEditBox->setText("");
         }
-        if (passwordEditBox != nullptr)
+        if (registerPasswordEditBox != nullptr)
         {
-            passwordEditBox->setText("");
+            registerPasswordEditBox->setText("");
         }
         if (confirmPasswordEditBox != nullptr)
         {
@@ -962,8 +998,8 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
 void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
 {
     // Get input values
-    std::string username = usernameEditBox->getText();
-    std::string password = passwordEditBox->getText();
+    std::string username = loginUsernameEditBox->getText();
+    std::string password = loginPasswordEditBox->getText();
 
     // Check if username and password match any account in the SQLite database
     bool loginSuccess = false;
@@ -1115,13 +1151,13 @@ void HelloWorld::menuCancelLoginCallback(cocos2d::Ref* pSender)
     {
         loginLayer->setVisible(false);
         // Clear input fields
-        if (usernameEditBox != nullptr)
+        if (loginUsernameEditBox != nullptr)
         {
-            usernameEditBox->setText("");
+            loginUsernameEditBox->setText("");
         }
-        if (passwordEditBox != nullptr)
+        if (loginPasswordEditBox != nullptr)
         {
-            passwordEditBox->setText("");
+            loginPasswordEditBox->setText("");
         }
     }
 
@@ -1162,13 +1198,13 @@ void HelloWorld::menuCancelRegisterCallback(cocos2d::Ref* pSender)
     {
         registerLayer->setVisible(false);
         // Clear input fields
-        if (usernameEditBox != nullptr)
+        if (registerUsernameEditBox != nullptr)
         {
-            usernameEditBox->setText("");
+            registerUsernameEditBox->setText("");
         }
-        if (passwordEditBox != nullptr)
+        if (registerPasswordEditBox != nullptr)
         {
-            passwordEditBox->setText("");
+            registerPasswordEditBox->setText("");
         }
         if (confirmPasswordEditBox != nullptr)
         {
@@ -1346,8 +1382,8 @@ void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
 void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
 {
     // Get input values
-    std::string username = usernameEditBox->getText();
-    std::string password = passwordEditBox->getText();
+    std::string username = registerUsernameEditBox->getText();
+    std::string password = registerPasswordEditBox->getText();
     std::string confirmPassword = confirmPasswordEditBox->getText();
 
     // Update registration result message
@@ -1451,13 +1487,13 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
                                         registerLayer->setVisible(false);
                                     }
                                     // Clear input fields after successful registration
-                                    if (usernameEditBox != nullptr)
+                                    if (registerUsernameEditBox != nullptr)
                                     {
-                                        usernameEditBox->setText("");
+                                        registerUsernameEditBox->setText("");
                                     }
-                                    if (passwordEditBox != nullptr)
+                                    if (registerPasswordEditBox != nullptr)
                                     {
-                                        passwordEditBox->setText("");
+                                        registerPasswordEditBox->setText("");
                                     }
                                     if (confirmPasswordEditBox != nullptr)
                                     {
