@@ -18,7 +18,6 @@ public:
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
 
-
 	void update(float delta);
 
 	// Touch event handlers
@@ -46,20 +45,17 @@ public:
 	//new判断
 	CREATE_FUNC(SecondScene);
 private:
+
 	//碰撞判断
 	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
-	//bool isPointInBuilding(const Vec2& point, Node* checkBuilding, Node* movingBuilding);
 
 	Node* buildPanel;
 
 	cocos2d::Sprite* background_sprite_;
 
-
 	cocos2d::Vec2 mouse_pos_;
 
-
 	cocos2d::Label* coordinate_label_;
-
 
 	cocos2d::Sprite* elixirIcon; 
 	cocos2d::Label* elixirLabel; 
@@ -73,7 +69,6 @@ private:
 	ZoomScrollManager* zoom_manager_;
 	DiamondGridManager* grid_manager_;
 
-	//std::vector<std::vector<cocos2d::Vec2>>* grids_;
 	std::vector<std::vector<cocos2d::Vec2>>* grids_;
 
 	// 拖拽相关成员变量
@@ -89,8 +84,6 @@ private:
 	Building* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
 
-	//std::vector<GoldMine*> placedGoldMines; // 存储已放置的金矿
-	//std::vector<ElixirCollector*> placedElixirCollectors;
 	std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率
 	int baseElixirRate;

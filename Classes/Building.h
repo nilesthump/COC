@@ -27,6 +27,10 @@ public:
     void changeY(float t) {
         y = t;
     }
+    void updateLv() {
+        level++;
+    }
+
     float getX() {
         return x;
     }

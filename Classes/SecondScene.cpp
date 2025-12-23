@@ -344,17 +344,22 @@ void SecondScene::update(float delta)
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
 
+
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
+        
         int totalGoldRate = baseGoldRate;
-        for (auto mine : placedBuildings) {
-            totalGoldRate += mine->getSpeed();
-        }
-
         int totalElixirRate = baseElixirRate;
-        for (auto mine : placedBuildings) {
-            totalElixirRate += mine->getSpeed();
+
+        for (auto building : placedBuildings) {
+            // 判断建筑类型并分别累加速度
+            if (dynamic_cast<GoldMine*>(building)) {
+                totalGoldRate += (building->getSpeed()* building->getLv()); // 只有金矿贡献金币速度
+            }
+            else if (dynamic_cast<ElixirCollector*>(building)) {
+                totalElixirRate += (building->getSpeed()* building->getLv()); // 只有圣水收集器贡献圣水速度
+            }
         }
         // 增加圣水数量
         g_elixirCount+= totalElixirRate;
