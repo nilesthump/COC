@@ -95,12 +95,12 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     panelBg->addChild(_positionLabel);
     
     // 6. 资源数量显示
-// 判断建筑类型并显示对应资源
+    // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源、存钱罐和圣水瓶显示的是容量，同时只有前两者有收集按钮
     if (dynamic_cast<GoldMine*>(building)) {
         _resourceLabel = Label::createWithTTF(
             StringUtils::format("Gold: %d", building->getCurrentStock()), 
             "fonts/Marker Felt.ttf", 24
-        );
+        );    
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         _resourceLabel = Label::createWithTTF(
@@ -110,13 +110,13 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("GoldStorage: %d", building->getCurrentStock()),
+            StringUtils::format("GoldVolum: %d", building->getMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("ElixirStorage: %d", building->getCurrentStock()),
+            StringUtils::format("ElixirVolum: %d", building->getMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
     }
@@ -124,23 +124,28 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     panelBg->addChild(_resourceLabel);
 
     // 7. 升级按钮,最高等级15
+    _upgradeBtn = MenuItemImage::create(
+        "btn_disabled.png",  // 正常状态图
+        "btn_disabled.png", // 按下状态图
+        CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
+     );
+    //设置文字提示
     if (_targetBuilding->getLv() < 15) {
-        _upgradeBtn = MenuItemImage::create(
-            "btn_disabled.png",  // 正常状态图
-            "btn_disabled.png", // 按下状态图
-            CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
-        );
-        //设置文字提示
         auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
         upGradeLabel->setColor(Color3B::WHITE);
-        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2,
-            _upgradeBtn->getContentSize().height / 2));
+        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _upgradeBtn->addChild(upGradeLabel);
-        //缩放和位置
-        _upgradeBtn->setScale(0.75f);
-        _upgradeBtn->setPosition(bgWidth / 2, 70);
     }
-
+    else {
+        auto upGradeLabel = Label::createWithSystemFont("maxGrade", "fonts/Marker Felt.ttf", 24);
+        upGradeLabel->setColor(Color3B::RED);
+        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+        _upgradeBtn->addChild(upGradeLabel);
+    }
+    //缩放和位置
+    _upgradeBtn->setScale(0.75f);
+    _upgradeBtn->setPosition(bgWidth / 2, 70);
+    
     // 8. 收集按钮
     _collectBtn = MenuItemImage::create(
         "btn_disabled.png",  // 正常状态图
@@ -158,17 +163,16 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _collectBtn->setPosition(bgWidth / 2, 120); // 位置在升级按钮上方
 
     // 菜单容器
-    if (_targetBuilding->getLv() < 15) {
+    if (dynamic_cast<GoldMine*>(building)|| dynamic_cast<ElixirCollector*>(building)) {
         auto menu = Menu::create(_collectBtn, _upgradeBtn, nullptr);
         menu->setPosition(Vec2::ZERO);
         panelBg->addChild(menu);
     }
     else {
-        auto menu = Menu::create(_collectBtn, nullptr);
+        auto menu = Menu::create(_upgradeBtn, nullptr);
         menu->setPosition(Vec2::ZERO);
         panelBg->addChild(menu);
     }
-
     return true;
 }
 
@@ -177,9 +181,11 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     std::string type;
     if (dynamic_cast<GoldMine*>(building)) {
         type = "GoldMine";
+        _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         type = "ElixirCollector";
+        _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         type = "GoldStorage";
@@ -189,7 +195,6 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     }
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
     _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(background_sprite_), building->getYY(background_sprite_)));
     // 添加资源数量更新
     if (dynamic_cast<GoldMine*>(building)) {
@@ -199,10 +204,10 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
         _resourceLabel->setString(StringUtils::format("Elixir: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
-        _resourceLabel->setString(StringUtils::format("GoldStorage: %d", building->getCurrentStock()));
+        _resourceLabel->setString(StringUtils::format("GoldVolum: %d", building->getMaxStock()));
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
-        _resourceLabel->setString(StringUtils::format("ElixirStorage: %d", building->getCurrentStock()));
+        _resourceLabel->setString(StringUtils::format("ElixirVolum: %d", building->getMaxStock()));
     }
 }
 
@@ -272,18 +277,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
             g_elixirCount += collected;
         }
     }
-    else if (auto elixirCollector = dynamic_cast<ElixirCollector*>(_targetBuilding)) {
-        collected = elixirCollector->collectStock();
-        if (collected > 0) {
-            g_elixirCount += collected;
-        }
-    }
-    else if (auto elixirStorage = dynamic_cast<ElixirStorage*>(_targetBuilding)) {
-        collected = elixirCollector->collectStock();
-        if (collected > 0) {
-            g_elixirCount += collected;
-        }
-    }
+
     // 更新面板显示的资源数量
     if (collected > 0) {
         updateInfo(_targetBuilding,temp); // 刷新信息显示

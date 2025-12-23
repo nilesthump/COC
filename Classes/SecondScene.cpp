@@ -494,7 +494,7 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
         log("检测到双击");
         // 找到被双击的建筑
         Building* clickedBuilding = nullptr;
-        Vec2 touchPos = touch->getLocation();
+        Vec2 touchPos = touch->getLocation();//!!!改为附近坐标
 
         for (auto& building : placedBuildings) {
             // 复用菱形碰撞检测代码（判断触摸点是否在当前建筑的菱形范围内）
@@ -594,7 +594,7 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
             return;
         }
 
-        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());//!!!改为附近坐标
         float gridCellSizeX = grid_manager_->getGridCellSizeX();
         float gridCellSizeY = grid_manager_->getGridCellSizeY();
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
