@@ -15,7 +15,7 @@ bool UnitState::IsAttacker() const
     return base_data_ptr_ && base_data_ptr_->IsAttacker();
 }
 
-bool UnitState::IsDefense() const
+bool UnitState::IsDefender() const
 {
     return base_data_ptr_ && base_data_ptr_->IsDefender();
 }

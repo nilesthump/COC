@@ -47,6 +47,7 @@ private:
 	//战斗状态
 	bool in_battle_ = false;
 	BattleUnit* target_;
+	bool has_target_in_range_ = false;
 
 	//视觉组件
 	cocos2d::Sprite* unit_sprite_;
@@ -61,6 +62,7 @@ private:
 
 	//防御建筑类相关（用于适配图片和位置）
 	std::unique_ptr<BuildingComponent> building_;
+	
 
 public:
 	BattleUnit();

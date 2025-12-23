@@ -14,20 +14,14 @@ BattleUnit::BattleUnit()
 
 BattleUnit::~BattleUnit()
 {
+	if (building_)
+	{
+		if (auto root = building_->GetRootNode())
+			root->removeFromParent();
+	}
 	//清理视觉组件
 	RemoveSprite();
-	//这里update那里如果死了就!visible了冲突吗
-	if (health_bar_bg_)
-	{
-		health_bar_bg_->removeFromParentAndCleanup(true);
-		health_bar_bg_ = nullptr;
-	}
 
-	if (health_bar_)
-	{
-		health_bar_->removeFromParentAndCleanup(true);
-		health_bar_ = nullptr;
-	}
 	target_ = nullptr;
 	background_sprite_ = nullptr;
 	parent_node_ = nullptr;
@@ -55,6 +49,9 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	if (!state_.IsAlive())
 		return;
 	
+	//0.更新冷却
+	state_.UpdateCoolDowns(deltaTime);
+
 	//1.行为更新
 	if (behavior_)
 	{
@@ -65,17 +62,30 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	if (navigation_ && (!target_ || !target_->IsAlive()))
 	{
 		target_ = navigation_->FindTarget(this, enemies);
+		has_target_in_range_ = false;
 	}
 
 	//3.移动
-	if (navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
+	if (state_.IsAttacker() && navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
 	{
 		navigation_->CalculateMove(this, target_, deltaTime);
 	}
 
-	//4.攻击
-	if (behavior_ && target_ && navigation_ &&
-		navigation_->IsInAttackRange(this, target_) &&
+	//  4. 先做“是否进入攻击范围”的判定
+	bool in_range = false;
+	if (navigation_ && target_)
+	{
+		in_range = navigation_->IsInAttackRange(this, target_);
+		if (in_range)
+		{
+			// 只要进过范围，就记住
+			has_target_in_range_ = true;
+		}
+	}
+
+	//  5. 攻击：消耗预约
+	if (behavior_ && target_ && in_range &&
+		has_target_in_range_ &&
 		state_.CanAttack())
 	{
 		if (behavior_->CanAttack(this, target_))
@@ -85,16 +95,16 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 			target_->TakeDamage(damage, this);
 			behavior_->OnAttack(this, target_);
 			state_.ResetAttackCooldown();
-			//播放攻击音效
 			PlayAttackSound();
+
+			// 攻击完成，清掉预约
+			has_target_in_range_ = false;
 		}
 	}
 
-	//5.更新状态
-	state_.UpdateCoolDowns(deltaTime);
-
-	//6.更新视觉表现
-	UpdateSpritePosition();
+	// 6. 更新视觉
+	if (state_.IsAttacker())
+		UpdateSpritePosition();
 	UpdateHealthBar();
 }
 
@@ -283,7 +293,7 @@ void BattleUnit::RemoveSprite()
 		unit_sprite_->removeFromParent();
 		unit_sprite_ = nullptr;
 	}
-
+	
 	if (health_bar_bg_ && health_bar_bg_->getParent())
 	{
 		health_bar_bg_->removeFromParent();
@@ -424,9 +434,11 @@ void BattleUnit::SetPositionAttacker(float x, float y)
 
 void BattleUnit::SetPositionDefender(float x, float y)
 {
+	
 	//这里采用建筑的放置规则，主要处理图标大小适配和中心2*2 3*3偏移问题
 	auto building = building_.get();
 	state_.SetPosition(x, y);
+	//建筑就不让他动了
 	building->SetGridPosition(x, y, background_sprite_);
 	UpdateHealthBar();
 }

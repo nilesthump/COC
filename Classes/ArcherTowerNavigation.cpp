@@ -51,8 +51,9 @@ bool ArcherTowerNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target
 
     float distance = CalculateDistance(self, target);
     float attackRange = self->GetAttackDistance();
-    // 攻击范围现在表示格子数
-    return distance <= attackRange;
+    //攻击范围现在表示格子数
+    constexpr float RANGE_EPSILON = 0.5f;
+    return distance <= attackRange+RANGE_EPSILON;
 }
 
 std::string ArcherTowerNavigation::GetNavigationType() const

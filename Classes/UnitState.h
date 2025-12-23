@@ -60,7 +60,7 @@ public:
 	
 	//¿‡–Õ≈–∂œ
 	bool IsAttacker() const;
-	bool IsDefense() const;
+	bool IsDefender() const;
 
 	//Œª÷√
 	float GetPositionX() const;
