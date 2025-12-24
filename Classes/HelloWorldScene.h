@@ -22,7 +22,7 @@ public:
     void menuConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelLoginCallback(cocos2d::Ref* pSender);
 
-    // Ìí¼ÓÉ¾³ıÕËºÅÏà¹ØµÄ»Øµ÷º¯ÊıÉùÃ÷
+    // æ·»åŠ åˆ é™¤è´¦å·ç›¸å…³çš„å›è°ƒå‡½æ•°å£°æ˜
     void menuDeleteAccountCallback(cocos2d::Ref* pSender);
     void menuConfirmDeleteCallback(cocos2d::Ref* pSender);
     void menuCancelDeleteCallback(cocos2d::Ref* pSender);

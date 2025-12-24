@@ -443,28 +443,28 @@ bool HelloWorld::init()
         this->addChild(sprite, 0);
     }
 
-    // ³õÊ¼»¯SQLiteÊı¾İ¿â²¢´´½¨ÓÃ»§±í
+    // åˆå§‹åŒ–SQLiteæ•°æ®åº“å¹¶åˆ›å»ºç”¨æˆ·è¡¨
     sqlite3* db;
     int rc = sqlite3_open("users.db", &db);
 
     if (rc) {
-        CCLOG("ÎŞ·¨´ò¿ªÊı¾İ¿â: %s", sqlite3_errmsg(db));
+        CCLOG("æ— æ³•æ‰“å¼€æ•°æ®åº“: %s", sqlite3_errmsg(db));
     }
     else {
-        CCLOG("Êı¾İ¿â´ò¿ª³É¹¦");
+        CCLOG("æ•°æ®åº“æ‰“å¼€æˆåŠŸ");
 
-        // ´´½¨ÓÃ»§±í£¨Èç¹û²»´æÔÚ£©
+        // åˆ›å»ºç”¨æˆ·è¡¨ï¼ˆå¦‚æœä¸å­˜åœ¨ï¼‰
         const char* sql = "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT);";
         char* errMsg = nullptr;
 
         rc = sqlite3_exec(db, sql, nullptr, nullptr, &errMsg);
 
         if (rc != SQLITE_OK) {
-            CCLOG("´´½¨±íÊ§°Ü: %s", errMsg);
+            CCLOG("åˆ›å»ºè¡¨å¤±è´¥: %s", errMsg);
             sqlite3_free(errMsg);
         }
         else {
-            CCLOG("ÓÃ»§±í´´½¨³É¹¦");
+            CCLOG("ç”¨æˆ·è¡¨åˆ›å»ºæˆåŠŸ");
         }
 
         sqlite3_close(db);
