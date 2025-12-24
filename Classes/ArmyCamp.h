@@ -7,6 +7,7 @@ class ArmyCamp : public Building
 {
 protected:
     bool initSprite(const std::string& textureName)override;
+
 public:
     // 静态创建函数（Cocos推荐方式）
     bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)override;

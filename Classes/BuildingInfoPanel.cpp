@@ -37,6 +37,47 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     touchListener->setSwallowTouches(true);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, mask);*/
 
+    //兵营的额外训练面板
+    if (dynamic_cast<ArmyCamp*>(building))
+    {
+        armyExtraPanel = Node::create();
+        armyExtraPanel->setPosition(Vec2::ZERO);
+        this->addChild(armyExtraPanel, 100);
+
+        auto armybg = Sprite::create("btn_flat.png");
+        if (!armybg) {
+            return false;
+        }
+        float bgWidth = armybg->getContentSize().width;
+        float bgHeight = armybg->getContentSize().height;
+        armybg->setPosition(Vec2(bgWidth / 2, bgHeight / 2));
+        armyExtraPanel->addChild(armybg);
+
+ 
+        
+        // 添加士兵图像按钮
+    // 参数分别为：正常状态图片、选中状态图片、点击回调（暂时为空）
+        archerBtn = MenuItemImage::create(
+            "ArcherLv1.png",  
+            "ArcherLv1.png", 
+            [](cocos2d::Ref* sender) {
+                // 暂时为空，后续实现点击功能
+            }
+        );
+        // 设置士兵按钮位置（相对于armyExtraPanel）
+        archerBtn->setScale(2.0f);
+        archerBtn->setPosition(archerBtn->getContentSize().width*2, archerBtn->getContentSize().height*3); // 可根据需要调整位置
+
+
+
+        // 创建菜单
+        menu = cocos2d::Menu::create(archerBtn, nullptr);
+        menu->setPosition(0, 0); // 菜单位置相对于父节点（armyExtraPanel）
+        armyExtraPanel->addChild(menu);
+    }
+
+ 
+
     // 1. 面板主体
     auto panelBg = Sprite::create("btn_long.png"); // 面板背景图
     if (!panelBg) {

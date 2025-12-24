@@ -232,11 +232,11 @@ void DiamondGridManager::updateMouseGridPosition(const Vec2& mousePos,
         int grid_y = static_cast<int>(floor(diamond_pos.y / grid_cell_size_y_ + 0.5f));
 
         // 显示网格坐标
-        coordinateLabel->setString(StringUtils::format("坐标: (%d, %d)", grid_x, grid_y));
+        //coordinateLabel->setString(StringUtils::format("坐标: (%d, %d)", grid_x, grid_y));
     }
     else
     {
         // 显示越界信息
-        coordinateLabel->setString("坐标: 界外");
+        //coordinateLabel->setString("坐标: 界外");
     }
 }

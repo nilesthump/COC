@@ -34,7 +34,6 @@ bool SecondScene::init()
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
     // 初始化产金相关变量
     baseGoldRate = 0; 
     baseElixirRate = 0;
@@ -61,7 +60,6 @@ bool SecondScene::init()
     }
     else
     {
-
         double x = origin.x + backItem->getContentSize().width / 2;
         double y = origin.y + visibleSize.height - backItem->getContentSize().height / 2;
         backItem->setPosition(Vec2(x, y));
@@ -83,9 +81,8 @@ bool SecondScene::init()
     }
     else
     {
-
         double x = origin.x + buildItem->getContentSize().width / 2;
-        double y = origin.y + backItem->getPositionY() - buildItem->getContentSize().height;
+        double y = origin.y + visibleSize.height - buildItem->getContentSize().height*1.5;
         buildItem->setPosition(Vec2(x, y));
 
         auto buildLabel = Label::createWithSystemFont("BUILD", "fonts/Marker Felt.ttf", 24);
@@ -94,10 +91,53 @@ bool SecondScene::init()
         buildItem->addChild(buildLabel);
     }
 
-    auto menu = Menu::create(backItem, buildItem, nullptr);
+    auto attackItem1 = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
+        CC_CALLBACK_1(SecondScene::menuBuildCallback, this));
+    if (attackItem1 == nullptr ||
+        attackItem1->getContentSize().width <= 0 ||
+        attackItem1->getContentSize().height <= 0)
+
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        double x = origin.x + visibleSize.width- attackItem1->getContentSize().width/2;
+        double y = origin.y + attackItem1->getContentSize().height / 2;
+        attackItem1->setPosition(Vec2(x, y));
+
+        auto attackLabel = Label::createWithSystemFont("Boss1", "fonts/Marker Felt.ttf", 24);
+        attackLabel->setColor(Color3B::WHITE);
+        attackLabel->setPosition(Vec2(attackItem1->getContentSize().width / 2, attackItem1->getContentSize().height / 2));
+        attackItem1->addChild(attackLabel);
+    }
+
+    auto attackItem2 = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
+        CC_CALLBACK_1(SecondScene::menuBuildCallback, this));
+    if (attackItem2 == nullptr ||
+        attackItem2->getContentSize().width <= 0 ||
+        attackItem2->getContentSize().height <= 0)
+
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        double x = origin.x + visibleSize.width - attackItem2->getContentSize().width *1.5;
+        double y = origin.y + attackItem2->getContentSize().height / 2;
+        attackItem2->setPosition(Vec2(x, y));
+
+        auto attackLabel = Label::createWithSystemFont("Boss2", "fonts/Marker Felt.ttf", 24);
+        attackLabel->setColor(Color3B::WHITE);
+        attackLabel->setPosition(Vec2(attackItem2->getContentSize().width / 2, attackItem2->getContentSize().height / 2));
+        attackItem2->addChild(attackLabel);
+    }
+
+    auto menu = Menu::create(backItem, buildItem, attackItem1,attackItem2, nullptr);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
+    
     //101-257 建筑菜单
     buildPanel = Node::create();
 
@@ -106,7 +146,6 @@ bool SecondScene::init()
     buildPanel->setPosition(Vec2(buildPanelX, buildPanelY));
     buildPanel->setVisible(false);
     buildItem->addChild(buildPanel, 1);
-
 
     auto panelBg = Sprite::create("btn_long.png");
     if (panelBg == nullptr) {
