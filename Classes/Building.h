@@ -85,9 +85,10 @@ public:
 	int getHp() {
 		return _hp;
 	}
-
-	virtual int getNum(int i)const { return 0; }
-
+	//兵营相关
+	virtual int getArmy(int i)const { return 0; }
+	virtual int getArmySize(int i)const { return 0; }
+	virtual void updateNum(int i){ return; }
 
 	// 新增：库存相关接口
 	int getCurrentStock() const { return currentSize; }   // 获取当前库存
