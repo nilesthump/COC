@@ -100,7 +100,7 @@ bool SecondScene::init()
     {
         problemLoading("'btn_normal.png' and 'btn_pressed.png'");
     }
-    else
+    else 
     {
         double x = origin.x + visibleSize.width- attackItem1->getContentSize().width/2;
         double y = origin.y + attackItem1->getContentSize().height / 2;

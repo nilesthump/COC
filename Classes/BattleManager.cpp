@@ -11,7 +11,7 @@ void BattleManager::AddUnit(std::unique_ptr<BattleUnit> unit, bool is_attacker)
 	if (is_attacker)
 	{
 		attackers_.push_back(raw);
-		heroes_placed_++;
+		heroes_deployed++;
 		if (!battle_active_)
 		{
 			battle_active_ = true;
@@ -36,6 +36,15 @@ void BattleManager::AddUnit(std::unique_ptr<BattleUnit> unit, bool is_attacker)
 	{
 		raw->OnBattleStart();
 	}
+}
+
+//初始化时传入英雄及其数量
+void BattleManager::SetInitialUnits(const std::map<UnitType, int>& units)
+{
+	unit_counts_ = units;
+	total_heroes_ = 0;
+	for (auto const& unit : units)
+		total_heroes_ += unit.second;
 }
 
 //获取敌人的列表
@@ -111,7 +120,7 @@ BattleResult BattleManager::EvaluateBattleResult()
 	}
 
 	//正确的胜负判断
-	if (!attackers_alive && heroes_placed_ == total_heroes_)
+	if (!attackers_alive && heroes_deployed == total_heroes_)
 	{
 		return BattleResult::DEFENDERS_WIN;
 	}

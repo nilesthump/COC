@@ -19,7 +19,6 @@ AttackerData AttackerData::CreateBarbarianData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::ANY;
-	data.resource_type = ResourceType::ELIXIR;
 
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
@@ -62,7 +61,6 @@ AttackerData AttackerData::CreateArcherData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::ANY;
-	data.resource_type = ResourceType::ELIXIR;
 
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
@@ -106,7 +104,6 @@ AttackerData AttackerData::CreateGiantData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::DEFENSES;
-	data.resource_type = ResourceType::ELIXIR;
 
 	data.housing_space = 5;
 	data.attack_interval = 2.0;     // 2s
@@ -150,8 +147,6 @@ AttackerData AttackerData::CreateGoblinData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.preferred_target = TargetPriority::RESOURCES;
-	data.resource_type = ResourceType::ELIXIR;
-
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
 	data.attack_distance = 0.4;		// 0.4格
@@ -195,7 +190,6 @@ AttackerData AttackerData::CreateBomberData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SPLASH;
 	data.preferred_target = TargetPriority::WALLS;
-	data.resource_type = ResourceType::ELIXIR;
 
 	data.housing_space = 2;
 	data.attack_interval = 0.0;     //! 爆炸一次会杀死自己不需要间隔

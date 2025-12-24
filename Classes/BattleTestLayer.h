@@ -5,6 +5,7 @@
 #include "BattleManager.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
+#include "UnitSelectionPanel4Battle.h"
 #include <memory>
 #include <vector>
 
@@ -22,7 +23,6 @@ private:
 
 	// 坐标显示
 	cocos2d::Label* coordinates_label_ = nullptr;		// 显示所有单位坐标的标签
-	std::vector<std::pair<int, cocos2d::Vec2>> barbarian_positions_;		// 存储每个Barbarian的ID和网格坐标
 	int next_barbarian_id_ = 1;			
 
 	// 倒计时显示
@@ -42,6 +42,9 @@ private:
 	//结果显示，这个标志位防止update()每一帧都弹出结算界面
 	bool result_layer_shown_ = false;
 
+	//单位选择面板
+	UnitSelectionPanel* unit_selection_panel_ = nullptr;
+	UnitType current_selected_unit_ = UnitType::NONE;
 public:
 	static cocos2d::Scene* createScene();
 
@@ -52,17 +55,19 @@ public:
 
 	//初始化
 	void setupBattle();
+	void setupUnitSelectionPanel();
 
-	//置逻辑
+	//放置逻辑
 	void placeDefender();
-	void placeBarbarianAt(float gridX, float gridY);
-	void updateCoordinatesDisplay();
+	void placeUnitAt(float gridX, float gridY);
+	BattleUnit* createUnitByType(UnitType type, int id);
 
 	//触摸事件
 	virtual bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 	virtual void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
 	virtual void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
 	virtual void onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event);
+	void resetClickState();
 
 	//鼠标滚轮事件
 	void onMouseScroll(cocos2d::EventMouse* event);

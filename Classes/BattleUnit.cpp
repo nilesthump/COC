@@ -59,7 +59,7 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 	}
 
 	//2.寻找目标
-	if (navigation_ && (!target_ || !target_->IsAlive()))
+	if (navigation_ )
 	{
 		target_ = navigation_->FindTarget(this, enemies);
 		has_target_in_range_ = false;
@@ -71,7 +71,7 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 		navigation_->CalculateMove(this, target_, deltaTime);
 	}
 
-	//  4. 先做“是否进入攻击范围”的判定
+	//4.先做“是否进入攻击范围”的判定
 	bool in_range = false;
 	if (navigation_ && target_)
 	{
@@ -83,14 +83,13 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 		}
 	}
 
-	//  5. 攻击：消耗预约
+	//5. 攻击：消耗预约
 	if (behavior_ && target_ && in_range &&
 		has_target_in_range_ &&
 		state_.CanAttack())
 	{
 		if (behavior_->CanAttack(this, target_))
 		{
-			CCLOG("i am d");
 			float damage = behavior_->CalculateDamage(this, target_);
 			target_->TakeDamage(damage, this);
 			behavior_->OnAttack(this, target_);
@@ -434,7 +433,6 @@ void BattleUnit::SetPositionAttacker(float x, float y)
 
 void BattleUnit::SetPositionDefender(float x, float y)
 {
-	
 	//这里采用建筑的放置规则，主要处理图标大小适配和中心2*2 3*3偏移问题
 	auto building = building_.get();
 	state_.SetPosition(x, y);
