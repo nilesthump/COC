@@ -594,7 +594,8 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
             return;
         }
 
-        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());//!!!改为附近坐标
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
         float gridCellSizeX = grid_manager_->getGridCellSizeX();
         float gridCellSizeY = grid_manager_->getGridCellSizeY();
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
@@ -630,7 +631,8 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         }
     }
     else if (isMovingBuilding) {
-        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());       
+        //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
         Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
         bool inDiamond = isInDiamond(diamondPos);
 
@@ -701,6 +703,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         Vec2 screenPos = touch->getLocation();
         // 将屏幕坐标转换为相对于背景精灵的本地坐标
         Vec2 localPos = background_sprite_->convertToNodeSpace(screenPos);
+        //Vec2 localPos = ConvertTest::convertScreenToGrid(screenPos, background_sprite_, buildPanel);
 
         // 获取网格单元格大小并进行向上取整
         float gridCellSizeX = grid_manager_->getGridCellSizeX();
@@ -881,6 +884,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
     else if (isMovingBuilding) {
 
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
         Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
         bool inDiamond = isInDiamond(diamondPos);
 
