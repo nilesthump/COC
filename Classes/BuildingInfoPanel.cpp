@@ -37,6 +37,27 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     touchListener->setSwallowTouches(true);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, mask);*/
 
+    //兵营的额外训练面板
+    if (dynamic_cast<ArmyCamp*>(building))
+    {
+        armyExtraPanel = Node::create();
+        armyExtraPanel->setPosition(Vec2::ZERO);     
+        this->addChild(armyExtraPanel, 100);
+
+        auto armybg = Sprite::create("btn_flat.png");
+        if (!armybg) {
+            return false;
+        }
+        float bgWidth = armybg->getContentSize().width;
+        float bgHeight = armybg->getContentSize().height;
+        armybg->setPosition(Vec2(bgWidth / 2, bgHeight / 2));
+        armyExtraPanel->addChild(armybg,100);
+
+
+    }
+
+ 
+
     // 1. 面板主体
     auto panelBg = Sprite::create("btn_long.png"); // 面板背景图
     if (!panelBg) {
