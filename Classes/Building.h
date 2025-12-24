@@ -10,7 +10,7 @@ protected:
     int _hp;                  // 血量
     int level;
     float _generateSpeed;     // 生产速度
-    std::string _textureName; // 纹理名称（用于区分不同等级圣水收集器）
+    std::string _textureName; // 纹理名称
     cocos2d::Sprite* _sprite; // 图像精灵
     float x, y;               //世界坐标
     float size = 3.0f;        //尺寸
