@@ -8,13 +8,21 @@ class ArmyCamp : public Building
 protected:
     bool initSprite(const std::string& textureName)override;
 
-    int army[5];//代表五个兵种
+    int army[6];//代表六个兵种
+    int size[6] = { 1,1,5,1,2,5 };
 public:
     // 静态创建函数（Cocos推荐方式）
     bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)override;
 
-    int getNum(int i)const override {
+    int getArmy(int i)const override {
         return army[i];
+    }
+    int getArmySize(int i)const override {
+        return size[i];
+    }
+    void updateNum(int i) override {
+        army[i]+=1;
+        currentSize +=size[i];
     }
     void produceToStock(int gold);                          // 生产金币到库存（带上限）
     int collectStock();                                     // 收集库存（清空并返回数量）
