@@ -1,6 +1,6 @@
 //战斗配置单例，管理一次完整的战斗会话
 #pragma once
-#include "BattleTypes.h"
+#include "BattleSnapshot.h"
 #include <string>
 
 class CombatSessionManager
@@ -12,19 +12,15 @@ public:
         return &instance;
     }
 
-    // 兵力配置
-    UnitInventory attackerArmy;
-
-    // 地图建筑布局（包含所有防御、资源、建筑）
-    std::vector<BuildingSnapshot> mapBuildings;
+    BattleStartParams battle_start_params;
 
     // 环境配置
     std::string mapBackgroundPath;
 
     void reset()
     {
-        attackerArmy.clear();
-        mapBuildings.clear();
+        battle_start_params.attackerInventory.clear();
+        battle_start_params.buildings.clear();
         mapBackgroundPath = "normal(winter).jpg";
     }
 

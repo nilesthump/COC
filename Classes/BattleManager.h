@@ -20,7 +20,7 @@
 #define BATTLEMANAGER_H
 #include "BattleUnit.h"
 #include "UnitFactory.h"
-#include "BattleTypes.h"
+#include "BattleSnapshot.h"
 #include <vector>
 #include <memory>
 #include <map>

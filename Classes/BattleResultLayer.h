@@ -1,5 +1,5 @@
 #include "cocos2d.h"
-#include "BattleTypes.h"
+#include "UnitEnums.h"
 
 class BattleResultLayer : public cocos2d::LayerColor
 {
