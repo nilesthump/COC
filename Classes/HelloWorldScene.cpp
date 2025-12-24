@@ -314,16 +314,22 @@ bool HelloWorld::init()
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
         loginLabel->setString("LOGOUT");
 
-        // Show delete account button only when logged in with username/password
-        if (deleteAccountItem != nullptr && !session->getCurrentUsername().empty())
+        // Show delete account button,welcome label and change password button only when logged in with username/password
+        std::string username = session->getCurrentUsername();
+        if (deleteAccountItem != nullptr)
         {
-            deleteAccountItem->setVisible(true);
-            deleteAccountItem->setEnabled(true);
+            deleteAccountItem->setVisible(username.empty() ? false : true);
+            deleteAccountItem->setEnabled(username.empty() ? false : true);
         }
-        else if (deleteAccountItem != nullptr)
+        if (welcomeLabel != nullptr) 
         {
-            deleteAccountItem->setVisible(false);
-            deleteAccountItem->setEnabled(false);
+            welcomeLabel->setString(username.empty() ? "Welcome!" : "Welcome " + username + "!");
+            welcomeLabel->setVisible(true);
+        }
+        if (changePasswordItem != nullptr)
+        {
+            changePasswordItem->setVisible(username.empty() ? false : true);
+            changePasswordItem->setEnabled(username.empty() ? false : true);
         }
     }
     else
@@ -463,17 +469,6 @@ bool HelloWorld::init()
 
         sqlite3_close(db);
     }
-
-    // 根据全局登录状态初始化welcomeLabel
-    auto Session = SessionManager::getInstance();
-    if (Session->getIsLoggedIn()) {
-        std::string username = Session->getCurrentUsername();
-        if (welcomeLabel != nullptr) {
-            welcomeLabel->setString(username.empty() ? "Welcome!" : "Welcome " + username + "!");
-            welcomeLabel->setVisible(true);
-        }
-    }
-
     return true;
 }
 
