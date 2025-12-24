@@ -8,14 +8,6 @@ BuildingComponent::BuildingComponent(int tileW, int tileH)
 {
 }
 
-Vec2 BuildingComponent::GetCenterOffset() const
-{
-    return Vec2(
-        (tile_w_ % 2 == 0) ? 0.5f : 0.0f,
-        (tile_h_ % 2 == 0) ? 0.5f : 0.0f
-    );
-}
-
 void BuildingComponent::AttachTo(Node* parent)
 {
     root_ = Node::create();
@@ -24,15 +16,14 @@ void BuildingComponent::AttachTo(Node* parent)
 
     preview_ = DrawNode::create();
     root_->addChild(preview_, -1);
-    
 }
 
 void BuildingComponent::SetGridPosition(float gridX, float gridY, Sprite* background)
 {
-    Vec2 pos = Vec2(gridX, gridY) + GetCenterOffset();
-    Vec2 local = ConvertTest::convertGridToLocal(pos.x, pos.y, background);
+    // 直接使用传入的坐标，不要再 + GetCenterOffset()
+    // 因为 b.logicalPos 已经是对的了
+    Vec2 local = ConvertTest::convertGridToLocal(gridX, gridY, background);
     root_->setPosition(local);
-    
 }
 
 void BuildingComponent::AttachSprite(Sprite* sprite)
@@ -76,21 +67,22 @@ void BuildingComponent::ShowPreview(bool valid)
     if (!preview_) return;
     preview_->clear();
 
-    Color4F color = valid
-        ? Color4F(0, 1, 0, 0.35f)
-        : Color4F(1, 0, 0, 0.35f);
+    Color4F color = valid ? Color4F(0, 1, 0, 0.35f) : Color4F(1, 0, 0, 0.35f);
 
-    // 注意：这里用的是像素尺寸
-    float w = tile_w_ * 56.0f;
-    float h = tile_h_ * 42.0f;
+    // 计算菱形的四个顶点（基于 root_ 中心点）
+    float halfW = (tile_w_ * 56.0f) / 2.0f;
+    float halfH = (tile_h_ * 42.0f) / 2.0f;
 
-    Vec2 origin(-w / 2, -h / 2);
+    // 定义菱形的四个角点
+    Vec2 vertices[4] = {
+        Vec2(0, halfH),   // 顶点
+        Vec2(halfW, 0),   // 右点
+        Vec2(0, -halfH),  // 底点
+        Vec2(-halfW, 0)   // 左点
+    };
 
-    preview_->drawSolidRect(
-        origin,
-        origin + Vec2(w, h),
-        color
-    );
+    // 画一个实心的多边形（菱形）
+    preview_->drawSolidPoly(vertices, 4, color);
 }
 
 void BuildingComponent::HidePreview()

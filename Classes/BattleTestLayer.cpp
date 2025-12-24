@@ -34,10 +34,11 @@ bool BattleTestLayer::init()
 	// --- 测试用：模拟从主界面传入的数据 ---
 	auto config = CombatSessionManager::getInstance();
 	config->reset();
-	config->attackerArmy[UnitType::BARBARIAN] = 10;
-	config->attackerArmy[UnitType::ARCHER] = 5;
-	config->mapBuildings.push_back({ BuildingType::CANNON, 1, Vec2(10, 10) });
-	config->mapBuildings.push_back({ BuildingType::ARCHER_TOWER, 1, Vec2(20, 30) });
+	config->battle_start_params.attackerInventory[UnitType::BARBARIAN] = 10;
+	config->battle_start_params.attackerInventory[UnitType::ARCHER] = 5;
+	//! 传入的数据必须保证2*2的在0.5,0.5；单数的在整数上，直接传入logicPos！
+	config->battle_start_params.buildings.push_back({ BuildingType::CANNON, 1, Vec2(10, 10) });
+	config->battle_start_params.buildings.push_back({ BuildingType::ARCHER_TOWER, 1, Vec2(20, 30) });
 	// ------------------------------------
 
 	if (!Layer::init())
@@ -66,7 +67,7 @@ bool BattleTestLayer::init()
 	auto mouseListener = EventListenerMouse::create();
 	mouseListener->onMouseScroll = CC_CALLBACK_1(BattleTestLayer::onMouseScroll, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
-
+	index_system_ = std::make_unique<IndexSystem>(50);
 	setupBattle();
 
 	this->scheduleUpdate();
@@ -242,10 +243,10 @@ void BattleTestLayer::setupBattle()
 
 		//5.初始化战斗管理器
 		battle_manager_ = std::make_unique<BattleManager>();
-		battle_manager_->SetInitialUnits(config->attackerArmy);
+		battle_manager_->SetInitialUnits(config->battle_start_params.attackerInventory);
 
 		// 初始化面板数字
-		for (auto const& pair : config->attackerArmy)
+		for (auto const& pair : config->battle_start_params.attackerInventory)
 		{
 			unit_selection_panel_->updateUnitCount(pair.first, pair.second);
 		}
@@ -284,7 +285,11 @@ void BattleTestLayer::setupBattle()
 void BattleTestLayer::placeDefender()
 {
 	auto config = CombatSessionManager::getInstance();
-	for (const auto& b : config->mapBuildings)
+	if (index_system_)
+	{
+		index_system_->Clear();
+	}
+	for (const auto& b : config->battle_start_params.buildings)
 	{
 		BattleUnit* unit = nullptr;
 
@@ -297,18 +302,30 @@ void BattleTestLayer::placeDefender()
 		case BuildingType::ARCHER_TOWER:
 			unit = UnitFactory::CreateArcherTower(b.level, game_world_, background_sprite_);
 			break;
-		case BuildingType::TOWN_HALL:
-			// unit = UnitFactory::CreateTownHall(...); // 如果你有这个函数
-			break;
 		case BuildingType::GOLD_MINE:
 			// unit = UnitFactory::CreateResourceBuilding(...);
+			break;
+		case BuildingType::WALL:
+			/*unit = UnitFactory::CreateWall(b.level, game_world_, background_sprite_);*/
 			break;
 		}
 
 		if (unit)
 		{
-			unit->SetPositionDefender(b.gridPos.x, b.gridPos.y);
+			unit->SetPositionDefender(b.logicalPos.x, b.logicalPos.y);
 			battle_manager_->AddUnit(std::unique_ptr<BattleUnit>(unit), false);
+			
+			int w = unit->GetState().GetTileWidth();
+			int h = unit->GetState().GetTileHeight();
+
+			// 判断是否是城墙
+			GridStatus status = (b.type == BuildingType::WALL) ? GridStatus::WALL : GridStatus::BLOCKED;
+
+			// 写入网格系统
+			if (index_system_)
+			{
+				index_system_->MarkOccupiedByLogicalPos(b.logicalPos.x, b.logicalPos.y, w, h, status);
+			}
 		}
 	}
 }
