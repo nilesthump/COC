@@ -2,11 +2,9 @@
 #include "SecondScene.h"
 #include "BattleTestLayer.h"
 #include "SQLiteTest.h"
+#include "SessionManager.h"
 
 USING_NS_CC;
-
-// Initialize static login status variable
-bool HelloWorld::isLoggedIn = false;
 
 Scene* HelloWorld::createScene()
 {
@@ -274,7 +272,8 @@ bool HelloWorld::init()
     registerResultLabel = nullptr;
 
     // Initially hide and disable secondSceneItem and battleTestItem
-    if (isLoggedIn)
+    auto session = SessionManager::getInstance();
+    if (session->getIsLoggedIn())
     {
         // Logged in state
         if (secondSceneItem != nullptr)
@@ -316,7 +315,7 @@ bool HelloWorld::init()
         loginLabel->setString("LOGOUT");
 
         // Show delete account button only when logged in with username/password
-        if (deleteAccountItem != nullptr && !currentLoggedInUser.empty())
+        if (deleteAccountItem != nullptr && !session->getCurrentUsername().empty())
         {
             deleteAccountItem->setVisible(true);
             deleteAccountItem->setEnabled(true);
@@ -465,6 +464,16 @@ bool HelloWorld::init()
         sqlite3_close(db);
     }
 
+    // 根据全局登录状态初始化welcomeLabel
+    auto Session = SessionManager::getInstance();
+    if (Session->getIsLoggedIn()) {
+        std::string username = Session->getCurrentUsername();
+        if (welcomeLabel != nullptr) {
+            welcomeLabel->setString(username.empty() ? "Welcome!" : "Welcome " + username + "!");
+            welcomeLabel->setVisible(true);
+        }
+    }
+
     return true;
 }
 
@@ -574,7 +583,9 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
     }
 
     // Delete account from SQLite database
-    if (!currentLoggedInUser.empty())
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+    if (!username.empty())
     {
         bool deleteSuccess = false;
         sqlite3* db;
@@ -600,7 +611,7 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
             if (rc == SQLITE_OK)
             {
                 // Bind username parameter
-                sqlite3_bind_text(stmt, 1, currentLoggedInUser.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
 
                 // Execute the query
                 if (sqlite3_step(stmt) == SQLITE_DONE)
@@ -695,8 +706,8 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
             }
 
             // Update login status
-            isLoggedIn = false;
-            currentLoggedInUser.clear();
+            auto session = SessionManager::getInstance();
+            session->logout();
 
             // Hide welcome label
             if (welcomeLabel != nullptr)
@@ -1225,8 +1236,8 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
         }
 
         // Update login status
-        isLoggedIn = true;
-        currentLoggedInUser = username;
+        auto session = SessionManager::getInstance();
+        session->login(username);
 
         // Update welcome label
         if (welcomeLabel != nullptr)
@@ -1470,7 +1481,8 @@ void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
 
             if (rc == SQLITE_OK)
             {
-                sqlite3_bind_text(stmt, 1, currentLoggedInUser.c_str(), -1, SQLITE_TRANSIENT);
+                auto session = SessionManager::getInstance();
+                sqlite3_bind_text(stmt, 1, session->getCurrentUsername().c_str(), -1, SQLITE_TRANSIENT);
                 if (sqlite3_step(stmt) == SQLITE_ROW)
                 {
                     const char* oldPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
@@ -1533,7 +1545,8 @@ void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
             {
                 // Bind parameters
                 sqlite3_bind_text(stmt, 1, newPassword.c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_text(stmt, 2, currentLoggedInUser.c_str(), -1, SQLITE_TRANSIENT);
+                auto session = SessionManager::getInstance();
+                sqlite3_bind_text(stmt, 2, session->getCurrentUsername().c_str(), -1, SQLITE_TRANSIENT);
 
                 // Execute the statement
                 if (sqlite3_step(stmt) == SQLITE_DONE)
@@ -1600,7 +1613,8 @@ void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
                     battleTestItem->setVisible(true);
                     battleTestItem->setEnabled(true);
                 }
-                if (deleteAccountItem != nullptr && currentLoggedInUser != "")
+                auto session = SessionManager::getInstance();
+                if (deleteAccountItem != nullptr && session->getCurrentUsername() != "")
                 {
                     deleteAccountItem->setVisible(true);
                     deleteAccountItem->setEnabled(true);
@@ -1690,7 +1704,8 @@ void HelloWorld::menuCancelChangePasswordCallback(cocos2d::Ref* pSender)
         battleTestItem->setVisible(true);
         battleTestItem->setEnabled(true);
     }
-    if (deleteAccountItem != nullptr && currentLoggedInUser != "")
+    auto session = SessionManager::getInstance();
+    if (deleteAccountItem != nullptr && session->getCurrentUsername() != "")
     {
         deleteAccountItem->setVisible(true);
         deleteAccountItem->setEnabled(true);
@@ -1990,8 +2005,8 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     }
 
     // Update login status
-    isLoggedIn = false;
-    currentLoggedInUser.clear();
+    auto session = SessionManager::getInstance();
+    session->logout();
 
     // Hide welcome label
     if (welcomeLabel != nullptr)
@@ -2020,7 +2035,8 @@ void HelloWorld::menuCancelLogoutCallback(cocos2d::Ref* pSender)
         battleTestItem->setVisible(true);
         battleTestItem->setEnabled(true);
     }
-    if (deleteAccountItem != nullptr && currentLoggedInUser != "")
+    auto session = SessionManager::getInstance();
+    if (deleteAccountItem != nullptr && session->getCurrentUsername() != "")
     {
         deleteAccountItem->setVisible(true);
         deleteAccountItem->setEnabled(true);
@@ -2260,7 +2276,8 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
         }
     }
     // Update login status - guest login doesn't set currentLoggedInUser
-    isLoggedIn = true;
+    auto session = SessionManager::getInstance();
+    session->login(""); // Guest login uses empty username
 
     // Update welcome label for guest login
     if (welcomeLabel != nullptr)

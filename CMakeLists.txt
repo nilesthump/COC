@@ -56,6 +56,7 @@ list(APPEND GAME_SOURCE
      Classes/BattleTestLayer.cpp
      Classes/UnitState.cpp
      Classes/SQLiteTest.cpp
+     Classes/SessionManager.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -85,6 +86,7 @@ list(APPEND GAME_HEADER
      Classes/DefenderNormalBehavior.h
      Classes/BattleTestLayer.h
      Classes/SQLiteTest.h
+     Classes/SessionManager.h
      )
 
 if(ANDROID)
