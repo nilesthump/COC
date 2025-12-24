@@ -2,7 +2,7 @@
 
 std::string AttackerNormalBehavior::GetBehaviorType() const
 {
-	return "AttackerNormal";
+	return "AttackerNormalBehavior";
 }
 
 bool AttackerNormalBehavior::CanAttack(BattleUnit* attacker, BattleUnit* defender)

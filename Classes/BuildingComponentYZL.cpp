@@ -6,7 +6,6 @@ USING_NS_CC;
 BuildingComponent::BuildingComponent(int tileW, int tileH)
     : tile_w_(tileW), tile_h_(tileH)
 {
-    CCLOG("BuildingComponent created: %dx%d tiles", tileW, tileH);
 }
 
 Vec2 BuildingComponent::GetCenterOffset() const
@@ -25,7 +24,7 @@ void BuildingComponent::AttachTo(Node* parent)
 
     preview_ = DrawNode::create();
     root_->addChild(preview_, -1);
-    CCLOG(" BuildingComponent attached to parent");
+    
 }
 
 void BuildingComponent::SetGridPosition(float gridX, float gridY, Sprite* background)
@@ -33,8 +32,7 @@ void BuildingComponent::SetGridPosition(float gridX, float gridY, Sprite* backgr
     Vec2 pos = Vec2(gridX, gridY) + GetCenterOffset();
     Vec2 local = ConvertTest::convertGridToLocal(pos.x, pos.y, background);
     root_->setPosition(local);
-    CCLOG("Building position set: Grid(%.1f,%.1f) -> Local(%.1f,%.1f)",
-        gridX, gridY, local.x, local.y);
+    
 }
 
 void BuildingComponent::AttachSprite(Sprite* sprite)
@@ -45,24 +43,30 @@ void BuildingComponent::AttachSprite(Sprite* sprite)
     sprite_->setAnchorPoint(Vec2(0.5f, 0.5f));
     sprite_->setPosition(Vec2::ZERO);
     root_->addChild(sprite_);
-    CCLOG(" Sprite attached: size %.1fx%.1f",
-        sprite_->getContentSize().width,
-        sprite_->getContentSize().height);
+    
 }
 
 void BuildingComponent::FitSpriteToFootprint()
 {
     if (!sprite_) return;
 
+    // 目标占地尺寸（像素）
     float targetW = tile_w_ * 56.0f;
     float targetH = tile_h_ * 42.0f;
 
-    sprite_->setScale(
-        targetW / sprite_->getContentSize().width,
-        targetH / sprite_->getContentSize().height
-    );
-    CCLOG(" Sprite fitted: target %.1fx%.1f",
-        targetW, targetH);
+    // 图片原始尺寸
+    float spriteW = sprite_->getContentSize().width;
+    float spriteH = sprite_->getContentSize().height;
+
+    // 计算两个方向的缩放比例
+    float scaleX = targetW / spriteW;
+    float scaleY = targetH / spriteH;
+
+    // 使用较小的缩放比例，保持图片不变形
+    float finalScale = std::min(scaleX, scaleY);
+
+    sprite_->setScale(finalScale);
+
 }
 
 // ====== 预览占地（先写好） ======

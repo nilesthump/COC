@@ -135,3 +135,23 @@ CombatType UnitState::GetCombatType() const
 {
     return base_data_ptr_ ? base_data_ptr_->combat_type : CombatType::MELEE;
 }
+
+int UnitState::GetTileWidth() const
+{
+    return base_data_ptr_ ? base_data_ptr_->GetTileWidth() : 1;
+}
+
+int UnitState::GetTileHeight() const
+{
+    return base_data_ptr_ ? base_data_ptr_->GetTileHeight() : 1;
+}
+
+TargetPriority UnitState::GetPreferredTarget() const
+{
+    return base_data_ptr_ ? base_data_ptr_->GetPreferredTarget() : TargetPriority::ANY;
+}
+
+bool UnitState::IsResourceBuilding()const
+{
+    return base_data_ptr_ ? base_data_ptr_->IsResourceBuilding() : false;
+}

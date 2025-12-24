@@ -15,30 +15,8 @@
 //? NOTE ：一些和UI相关，视觉音效等还没实现
 //? NOTE ：角色不同等级对应的属性都不同(先用基础方式）
 //? NOTE ：实验室等级和大本营等级的约束是不是可以不在这里体现，而是在主scene体现
-
-//目标优先级枚举
-enum class TargetPriority
-{
-	ANY,           // 任何目标
-	DEFENSES,      // 防御建筑优先
-	RESOURCES,     // 资源建筑优先
-	WALLS,         // 城墙优先
-	TROOPS         // 部队优先（以后再实现）
-};
-
 struct AttackerData : public BaseUnitData
-{
-	// std::string id;         // 已在基类
-	// std::string name;       // 已在基类
-	// int level;              // 已在基类
-	// int health;             // 已在基类
-	// int damage;             // 已在基类
-	// float attack_interval; // 已在基类
-	// float attack_distance; // 已在基类
-	// AttackType attack_type; // 已在基类
-	// UnitType unit_type;     // 已在基类
-	// float move_speed;      // 已在基类
-	
+{	
 	TargetPriority preferred_target; // 优先目标
 	int housing_space;             // 占用兵营人口数
 
@@ -83,6 +61,8 @@ struct AttackerData : public BaseUnitData
 	}
 
 	virtual bool IsAttacker() const override { return true; }
+	TargetPriority GetPreferredTarget() const override { return preferred_target; }
+	int GetHousingSpace() const override { return housing_space; }
 
 	static AttackerData CreateBarbarianData(int level = 1);	//野蛮人
 	static AttackerData CreateArcherData(int level = 1);	//弓箭手

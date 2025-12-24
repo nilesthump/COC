@@ -23,14 +23,13 @@
 #ifndef UNITFACTORY_H
 #define UNITFACTORY_H
 #include "BattleUnit.h"
-#include "AttackerNormalBehavior.h"
-#include "DefenderNormalBehavior.h"
-#include "BarbarianNavigation.h"
-#include "ArcherNavigation.h"
-#include "CannonNavigation.h"
-#include "ArcherTowerNavigation.h"
 #include "AttackerData.h"
 #include "DefenderData.h"
+#include "AttackerNavigation.h"
+#include "DefenderNavigation.h"
+#include "AttackerNormalBehavior.h"
+#include "DefenderNormalBehavior.h"
+#include "StaticBuildingBehavior.h"
 #include "cocos2d.h" 
 
 namespace cocos2d
@@ -46,6 +45,7 @@ public:
     static BattleUnit* CreateArcher(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
     static BattleUnit* CreateCannon(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
     static BattleUnit* CreateArcherTower(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
+    static BattleUnit* CreateGoldMine(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
 
 };
 

@@ -89,6 +89,10 @@ public:
 	UnitTargetType GetUnitTargetType()const;		//获取自身类型（空中/地面）
 	AttackType GetAttackType() const;   //攻击类型（单体/范围/连锁）
 	CombatType GetCombatType() const;   //近战/远程
+	int GetTileWidth()const;
+	int GetTileHeight()const;
+	TargetPriority GetPreferredTarget()const;
+	bool IsResourceBuilding()const;
 };
 
 #endif
