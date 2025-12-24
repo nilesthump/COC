@@ -61,12 +61,12 @@ public:
         y = newPos.y;
     }
     //获取网格坐标
-    float getXX(cocos2d::Sprite* background_sprite_) {
-        Vec2 you = ConvertTest::convertLocalToGrid(Vec2(x, y), background_sprite_);
+    float getXX() {
+        Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
         return you.x;
     }
-    float getYY(cocos2d::Sprite* background_sprite_) {
-        Vec2 you = ConvertTest::convertLocalToGrid(Vec2(x, y), background_sprite_);
+    float getYY() {
+        Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
         return you.y;
     }
     //获取世界坐标

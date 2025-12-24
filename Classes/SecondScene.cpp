@@ -7,7 +7,7 @@
 #include<ctime>
 
 // 初始化全局变量
-int MAXGOLD = 10000, MAXELIXIR = 5000;
+int MAXGOLD = 10000, MAXELIXIR = 5000;//最大储量还未写
 int g_elixirCount = 750,g_goldCount = 750;
 int g_gemCount = 15;
 
@@ -152,9 +152,9 @@ bool SecondScene::init()
         }
     );
     if (goldMineBtn) {
-        goldMineBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.5 / 2 - 20));
+        goldMineBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 / 2 - 20));
     }
-    goldMineBtn->setScale(0.7f);
+    goldMineBtn->setScale(0.6f);
 
     // 2.创建圣水收集器按钮
     elixirCollectorBtn = MenuItemImage::create(
@@ -184,9 +184,9 @@ bool SecondScene::init()
         }
     );
     if (elixirCollectorBtn) {
-        elixirCollectorBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.7 * 1.5 - 20));
+        elixirCollectorBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 1.5 - 20));
     }
-    elixirCollectorBtn->setScale(0.7f);
+    elixirCollectorBtn->setScale(0.6f);
 
     // 3.创建存钱罐按钮
     goldStorageBtn = MenuItemImage::create(
@@ -215,9 +215,9 @@ bool SecondScene::init()
         }
     );
     if (goldStorageBtn) {
-        goldStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.7 * 2.5 - 20));
+        goldStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 2.5 - 20));
     }
-    goldStorageBtn->setScale(0.7f);
+    goldStorageBtn->setScale(0.6f);
 
     // 4.创建圣水瓶按钮
     elixirStorageBtn = MenuItemImage::create(
@@ -246,11 +246,73 @@ bool SecondScene::init()
         }
     );
     if (elixirStorageBtn) {
-        elixirStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.7 * 3.5 - 20));
+        elixirStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 3.5 - 20));
     }
-    elixirStorageBtn->setScale(0.7f);
+    elixirStorageBtn->setScale(0.6f);
 
-    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn, nullptr);
+    // 5.创建兵营按钮
+    armyCampBtn = MenuItemImage::create(
+        "ArmyCampLv1.png",
+        "ArmyCampLv1.png",
+        [=](Ref* pSender) {
+            if (!isDragging) {
+                log("armyCamp ");
+                isDragging = true;
+                draggingItem = armyCampBtn;
+                dragStartPosition = armyCampBtn->getPosition();
+
+                auto armyCampPreview = ElixirStorage::create("ArmyCampLv1.png"); // 预览用圣水瓶纹理
+                if (armyCampPreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    armyCampPreview->setOpacity(150);
+                    Vec2 my = Vec2(armyCampPreview->getX(), armyCampPreview->getY());
+                    Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                    armyCampPreview->setMinePosition(you);
+
+                    // 添加到背景精灵，并保存到按钮的UserData
+                    background_sprite_->addChild(armyCampPreview, 10);
+                    armyCampBtn->setUserData(armyCampPreview);
+                }
+            }
+        }
+    );
+    if (armyCampBtn) {
+        armyCampBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 4.5 - 20));
+    }
+    armyCampBtn->setScale(0.6f);
+
+    // 6.创建城墙按钮
+    wallsBtn = MenuItemImage::create(
+        "WallsLv1.png",
+        "WallsLv1.png",
+        [=](Ref* pSender) {
+            if (!isDragging) {
+                log("walls ");
+                isDragging = true;
+                draggingItem = wallsBtn;
+                dragStartPosition = wallsBtn->getPosition();
+
+                auto wallsPreview = Walls::create("WallsLv1.png"); // 预览用圣水瓶纹理
+                if (wallsPreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    wallsPreview->setOpacity(150);
+                    Vec2 my = Vec2(wallsPreview->getX(), wallsPreview->getY());
+                    Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                    wallsPreview->setMinePosition(you);
+
+                    // 添加到背景精灵，并保存到按钮的UserData
+                    background_sprite_->addChild(wallsPreview, 10);
+                    wallsBtn->setUserData(wallsPreview);
+                }
+            }
+        }
+    );
+    if (wallsBtn) {
+        wallsBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 5.5 - 20));
+    }
+    wallsBtn->setScale(0.6f);
+
+    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn,armyCampBtn, wallsBtn, nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
 
@@ -629,6 +691,20 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
                 dragElixirStoragePreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
+        //兵营预览
+        else if (draggingItem == armyCampBtn) {
+            ArmyCamp* dragArmyCampPreview = static_cast<ArmyCamp*>(userData);
+            if (dragArmyCampPreview) {
+                dragArmyCampPreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
+        //城墙预览
+        else if (draggingItem == wallsBtn) {
+            Walls* dragWallsPreview = static_cast<Walls*>(userData);
+            if (dragWallsPreview) {
+                dragWallsPreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
     }
     else if (isMovingBuilding) {
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());       
@@ -741,6 +817,21 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 draggingItem->setUserData(nullptr);
             }
         }
+        else if (draggingItem == armyCampBtn) {
+            ArmyCamp* dragArmyCampPreview = static_cast<ArmyCamp*>(draggingItem->getUserData());
+            if (dragArmyCampPreview) {
+                dragArmyCampPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == wallsBtn) {
+            Walls* dragWallsPreview = static_cast<Walls*>(draggingItem->getUserData());
+            if (dragWallsPreview) {
+                dragWallsPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+
 
         // 2. 检查放置区域有效性
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
@@ -786,11 +877,27 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     }
                 }
                 else if (draggingItem == elixirStorageBtn) {
-                    auto failElixirStorage = ElixirStorage::create("GoldStorageLv1.png");
+                    auto failElixirStorage = ElixirStorage::create("ElixirStorageLv1.png");
                     if (failElixirStorage) {
                         failElixirStorage->setPosition(snappedPos);
                         background_sprite_->addChild(failElixirStorage, 15);
                         failElixirStorage->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == armyCampBtn) {
+                    auto failArmyCamp = ElixirStorage::create("ArmyCampLv1.png");
+                    if (failArmyCamp) {
+                        failArmyCamp->setPosition(snappedPos);
+                        background_sprite_->addChild(failArmyCamp, 15);
+                        failArmyCamp->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == wallsBtn) {
+                    auto failwallsCamp = Walls::create("WallsLv1.png");
+                    if (failwallsCamp) {
+                        failwallsCamp->setPosition(snappedPos);
+                        background_sprite_->addChild(failwallsCamp, 15);
+                        failwallsCamp->playFailBlinkAndRemove();
                     }
                 }
                 return; // 阻止放置
@@ -840,6 +947,28 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     placedElixirStorage->playSuccessBlink();
                 }
             }
+            else if (draggingItem == armyCampBtn) {
+                // 创建兵营
+                auto placedArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
+                if (placedArmyCamp) {
+                    // 更新
+                    placedArmyCamp->updatePosition(snappedPos);
+                    background_sprite_->addChild(placedArmyCamp, 15);
+                    placedBuildings.push_back(placedArmyCamp);
+                    placedArmyCamp->playSuccessBlink();
+                }
+            }
+            else if (draggingItem == wallsBtn) {
+                // 创建兵营
+                auto placedWalls = ArmyCamp::create("WallsLv1.png");
+                if (placedWalls) {
+                    // 更新
+                    placedWalls->updatePosition(snappedPos);
+                    background_sprite_->addChild(placedWalls, 15);
+                    placedBuildings.push_back(placedWalls);
+                    placedWalls->playSuccessBlink();
+                }
+            }
         }
         // 无效区域：创建对应建筑并执行失败反馈
         else {         
@@ -873,6 +1002,22 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     failElixirStorage->setPosition(snappedPos);
                     background_sprite_->addChild(failElixirStorage, 15);
                     failElixirStorage->playFailBlinkAndRemove();
+                }
+            }
+            else if (draggingItem == armyCampBtn) {
+                auto failArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
+                if (failArmyCamp) {
+                    failArmyCamp->setPosition(snappedPos);
+                    background_sprite_->addChild(failArmyCamp, 15);
+                    failArmyCamp->playFailBlinkAndRemove();
+                }
+            }
+            else if (draggingItem == wallsBtn) {
+                auto failWalls = Walls ::create("WallsLv1.png");
+                if (failWalls) {
+                    failWalls->setPosition(snappedPos);
+                    background_sprite_->addChild(failWalls, 15);
+                    failWalls->playFailBlinkAndRemove();
                 }
             }
         }
@@ -936,6 +1081,20 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
             ElixirStorage* dragElixirStoragePreview = static_cast<ElixirStorage*>(draggingItem->getUserData());
             if (dragElixirStoragePreview) {
                 dragElixirStoragePreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == armyCampBtn) {
+            ArmyCamp* dragArmyCampPreview = static_cast<ArmyCamp*>(draggingItem->getUserData());
+            if (dragArmyCampPreview) {
+                dragArmyCampPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == wallsBtn) {
+            Walls* dragWallsPreview = static_cast<Walls*>(draggingItem->getUserData());
+            if (dragWallsPreview) {
+                dragWallsPreview->removeFromParentAndCleanup(true);
                 draggingItem->setUserData(nullptr);
             }
         }
@@ -1071,6 +1230,12 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
         sprite = static_cast<ElixirStorage*>(building)->getSprite();
+    }
+    else if (dynamic_cast<ArmyCamp*>(building)) {
+        sprite = static_cast<ArmyCamp*>(building)->getSprite();
+    }
+    else if (dynamic_cast<Walls*>(building)) {
+        sprite = static_cast<Walls*>(building)->getSprite();
     }
 
     if (!sprite) return false;

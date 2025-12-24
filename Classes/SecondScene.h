@@ -8,6 +8,8 @@
 #include "GoldStorage.h"
 #include "ElixirCollector.h"
 #include "ElixirStorage.h"
+#include "ArmyCamp.h"
+#include "Walls.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
 
@@ -90,6 +92,8 @@ private:
 	cocos2d::MenuItemImage* elixirCollectorBtn;
 	cocos2d::MenuItemImage* goldStorageBtn;
 	cocos2d::MenuItemImage* elixirStorageBtn;
+	cocos2d::MenuItemImage* armyCampBtn;
+	cocos2d::MenuItemImage* wallsBtn;
 
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置

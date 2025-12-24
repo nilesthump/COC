@@ -1,6 +1,4 @@
 #include "BuildingInfoPanel.h"
-#include "GoldMine.h"
-#include "ElixirCollector.h"
 #include "SecondScene.h" // 用于访问全局变量 g_goldCount 等
 
 using namespace cocos2d;
@@ -63,6 +61,12 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     else if (dynamic_cast<ElixirStorage*>(building)) {
         type = "ElixirStorage";
     }
+    else if (dynamic_cast<ArmyCamp*>(building)) {
+        type = "ArmyCamp";
+    }
+    else if (dynamic_cast<Walls*>(building)) {
+        type = "Walls";
+    }
     _titleLabel = Label::createWithTTF(
         StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
         "fonts/Marker Felt.ttf", 24
@@ -79,7 +83,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     panelBg->addChild(_hpLabel);
     
     // 4. 资源信息显示
-    // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源、存钱罐和圣水瓶显示的是容量，同时只有前两者有收集按钮
+    // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源和生产速度，有收集按钮
+    // 存钱罐和圣水瓶显示的是容量，无收集按钮
+    //兵营待定，城墙不需要显示
     if (dynamic_cast<GoldMine*>(building)) {
         _speedLabel = Label::createWithTTF(
             StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
@@ -130,7 +136,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 
     //5.网格坐标
     _positionLabel = Label::createWithTTF(
-        StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(background_sprite_), building->getYY(background_sprite_)),
+        StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()),
         "fonts/Marker Felt.ttf", 24
     );
     _positionLabel->setPosition(bgWidth / 2, bgHeight - 190);
@@ -206,14 +212,22 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<ElixirStorage*>(building)) {
         type = "ElixirStorage";
     }
+    else if (dynamic_cast<ArmyCamp*>(building)) {
+        type = "ArmyCamp";
+    }
+    else if (dynamic_cast<Walls*>(building)) {
+        type = "Walls";
+    }
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(background_sprite_), building->getYY(background_sprite_)));
+    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()));
     // 添加资源数量更新
     if (dynamic_cast<GoldMine*>(building)) {
+        _speedLabel ->setString(StringUtils::format("gengrateSpeed: %.1f/s", building->getSpeed()));
         _resourceLabel->setString(StringUtils::format("Gold: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
+        _speedLabel->setString(StringUtils::format("gengrateSpeed: %.1f/s", building->getSpeed()));
         _resourceLabel->setString(StringUtils::format("Elixir: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
@@ -222,6 +236,7 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<ElixirStorage*>(building)) {
         _resourceLabel->setString(StringUtils::format("ElixirVolum: %d", building->getMaxStock()));
     }
+
 }
 
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
@@ -264,6 +279,12 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         }
         else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
             newTexture = StringUtils::format("ElixirStorageLv%d.png", _targetBuilding->getLv());
+        }
+        else if (dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+            newTexture = StringUtils::format("ArmyCampLv%d.png", _targetBuilding->getLv());
+        }
+        else if (dynamic_cast<Walls*>(_targetBuilding)) {
+            newTexture = StringUtils::format("WallsLv%d.png", _targetBuilding->getLv());
         }
         // 调用 更新纹理
         _targetBuilding->updateTexture(newTexture);

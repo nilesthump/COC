@@ -81,6 +81,25 @@ public:
         return local_pos;
     }
 
+    //FHT添加坐标转化??
+    static Vec2 myConvertLocalToGrid(const Vec2& localPos)
+    {
+        float diamond_center_x = (LEFT_X + RIGHT_X) / 2.0f;
+        float diamond_center_y = (TOP_Y + BOTTOM_Y) / 2.0f;        
+        Vec2 t1 = Vec2(localPos.x - diamond_center_x, localPos.y - diamond_center_y);//t1是相对于菱形中心的像素点坐标
+        Vec2 t2 = Vec2(t1.x + HORIZONTAL_SPACING * 24.5, t1.y);//t2是对于左侧红点中心的像素点坐标
+
+        float L = std::sqrt(t2.x * t2.x + t2.y * t2.y);//长度
+        float sin = t2.y / L;
+        float cos = t2.x / L;
+
+        float x1 = L * (0.6 * cos - 0.8 * sin);
+        float y1 = L * (0.8 * cos + 0.6 * sin);
+
+        Vec2 result = Vec2((x1 + 28.0) / 56.0, (y1 + 21.0) / 28.0);
+        return result;
+    }
+
     // ============================================
     // 核心转换：game_world本地坐标 → 网格坐标
     // ============================================
