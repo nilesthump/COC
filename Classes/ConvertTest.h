@@ -96,7 +96,7 @@ public:
         float x1 = L * (0.6 * cos - 0.8 * sin);
         float y1 = L * (0.8 * cos + 0.6 * sin);
 
-        Vec2 result = Vec2((x1 + 28.0) / 56.0, (y1 + 21.0) / 28.0);
+        Vec2 result = Vec2((x1 + 17.5) / 35.0, (y1 + 17.5) / 35.0);
         return result;
     }
 
