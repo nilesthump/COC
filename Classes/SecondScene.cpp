@@ -147,9 +147,9 @@ bool SecondScene::init()
     buildPanel->setVisible(false);
     buildItem->addChild(buildPanel, 1);
 
-    auto panelBg = Sprite::create("btn_long.png");
+    auto panelBg = Sprite::create("3.png");
     if (panelBg == nullptr) {
-        problemLoading("'btn_long.png'");
+        problemLoading("'3.png'");
     }
     else {
         double panelBgX = panelBg->getContentSize().width / 2;

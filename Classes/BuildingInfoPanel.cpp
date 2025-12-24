@@ -44,7 +44,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         armyExtraPanel->setPosition(Vec2::ZERO);
         this->addChild(armyExtraPanel, 100);
 
-        auto armybg = Sprite::create("btn_flat.png");
+        auto armybg = Sprite::create("2.png");
         if (!armybg) {
             return false;
         }
@@ -161,7 +161,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
  
 
     // 1. 面板主体
-    auto panelBg = Sprite::create("btn_long.png"); // 面板背景图
+    auto panelBg = Sprite::create("3.png"); // 面板背景图
     if (!panelBg) {
         return false;
     }
@@ -195,6 +195,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         "fonts/Marker Felt.ttf", 24
     );
     _titleLabel->setPosition(bgWidth / 2, bgHeight - 30);
+    _titleLabel->setColor(Color3B::BLACK);
     panelBg->addChild(_titleLabel);
 
     // 3. 血量信息
@@ -203,6 +204,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         "fonts/Marker Felt.ttf", 24
     );
     _hpLabel->setPosition(bgWidth / 2, bgHeight - 70);
+    _hpLabel->setColor(Color3B::GREEN);
     panelBg->addChild(_hpLabel);
     
     //4.网格坐标
@@ -224,6 +226,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
+        _speedLabel->setColor(Color3B::YELLOW);
         panelBg->addChild(_speedLabel);
 
         _resourceLabel = Label::createWithTTF(
@@ -231,6 +234,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );  
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::YELLOW);
         panelBg->addChild(_resourceLabel);
 
     }
@@ -240,6 +244,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
+        _speedLabel->setColor(Color3B::BLUE);
         panelBg->addChild(_speedLabel);
 
         _resourceLabel = Label::createWithTTF(
@@ -247,6 +252,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLUE);
         panelBg->addChild(_resourceLabel);
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
@@ -255,6 +261,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::YELLOW);
         panelBg->addChild(_resourceLabel);
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
@@ -263,6 +270,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLUE);
         panelBg->addChild(_resourceLabel);
     }
     else if (dynamic_cast<ArmyCamp*>(building)) {
@@ -271,6 +279,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLACK);
         panelBg->addChild(_resourceLabel);
 
         _barbarian = Label::createWithTTF(
@@ -278,6 +287,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _barbarian->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
+        _barbarian->setColor(Color3B::BLACK);
         panelBg->addChild(_barbarian);
 
         _archer = Label::createWithTTF(
@@ -285,6 +295,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _archer->setPosition(bgWidth / 2, bgHeight - 230); // 调整位置在坐标下方
+        _archer->setColor(Color3B::BLACK);
         panelBg->addChild(_archer);
 
         _giant = Label::createWithTTF(
@@ -292,6 +303,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _giant->setPosition(bgWidth / 2, bgHeight - 270); // 调整位置在坐标下方
+        _giant->setColor(Color3B::BLACK);
         panelBg->addChild(_giant);
 
         _goblin = Label::createWithTTF(
@@ -299,6 +311,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _goblin->setPosition(bgWidth / 2, bgHeight - 310); // 调整位置在坐标下方
+        _goblin->setColor(Color3B::BLACK);
         panelBg->addChild(_goblin);
 
         _bomber = Label::createWithTTF(
@@ -306,6 +319,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _bomber->setPosition(bgWidth / 2, bgHeight - 350); // 调整位置在坐标下方
+        _bomber->setColor(Color3B::BLACK);
         panelBg->addChild(_bomber);
 
         _balloon = Label::createWithTTF(
@@ -313,6 +327,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _balloon->setPosition(bgWidth / 2, bgHeight - 390); // 调整位置在坐标下方
+        _balloon->setColor(Color3B::BLACK);
         panelBg->addChild(_balloon);
     }
 
@@ -326,7 +341,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     //设置文字提示
     if (_targetBuilding->getLv() < 15) {
         auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
-        upGradeLabel->setColor(Color3B::WHITE);
+        upGradeLabel->setColor(Color3B::YELLOW);
         upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _upgradeBtn->addChild(upGradeLabel);
     }
