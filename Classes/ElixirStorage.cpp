@@ -1,4 +1,4 @@
-#include "GoldMine.h"
+#include "ElixirStorage.h"
 
 using namespace cocos2d;
 
@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-GoldMine* GoldMine::create(const std::string& textureName, int hp,int lv, float goldSpeed, float x0, float y0,int max, int current)
+ElixirStorage* ElixirStorage::create(const std::string& textureName, int hp, int lv, float elixirSpeed, float x0, float y0, int max, int current)
 {
-    GoldMine* mine = new (std::nothrow) GoldMine();
-    if (mine && mine->init(textureName, hp,lv, goldSpeed, x0, y0,max,current))
+    ElixirStorage* mine = new (std::nothrow) ElixirStorage();
+    if (mine && mine->init(textureName, hp, lv, elixirSpeed, x0, y0, max, current))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ GoldMine* GoldMine::create(const std::string& textureName, int hp,int lv, float 
     return nullptr;
 }
 
-bool GoldMine::init(const std::string& textureName, int hp,int lv, float generateSpeed, float x0, float y0,int max, int current)
+bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)
 {
     if (!Node::init())
     {
@@ -51,12 +51,12 @@ bool GoldMine::init(const std::string& textureName, int hp,int lv, float generat
     return true;
 }
 
-// 生产金币到库存（核心：判断上限）
-void GoldMine::produceToStock(int gold)
+// 生产圣水到库存（核心：判断上限）
+void ElixirStorage::produceToStock(int elixir)
 {
-    if (currentSize + gold <= maxSize)
+    if (currentSize + elixir <= maxSize)
     {
-        currentSize += gold;
+        currentSize += elixir;
     }
     else
     {
@@ -64,20 +64,20 @@ void GoldMine::produceToStock(int gold)
     }
 }
 
-// 收集库存（玩家点击金矿时调用）
-int GoldMine::collectStock()
+// 收集库存（玩家点击圣水收集器时调用）
+int ElixirStorage::collectStock()
 {
     int collected = currentSize;
     currentSize = 0; // 清空库存
     return collected;
 }
 
-bool GoldMine::initSprite(const std::string& textureName)
+bool ElixirStorage::initSprite(const std::string& textureName)
 {
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'GoldMineLv1.png'");
+        problemLoading("'goldMineLv1.png'");
         return false;
     }
 
@@ -88,4 +88,3 @@ bool GoldMine::initSprite(const std::string& textureName)
 
     return true;
 }
-

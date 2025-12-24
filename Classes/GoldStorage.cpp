@@ -1,4 +1,4 @@
-#include "GoldMine.h"
+#include "GoldStorage.h"
 
 using namespace cocos2d;
 
@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-GoldMine* GoldMine::create(const std::string& textureName, int hp,int lv, float goldSpeed, float x0, float y0,int max, int current)
+GoldStorage* GoldStorage::create(const std::string& textureName, int hp, int lv, float goldSpeed, float x0, float y0, int max, int current)
 {
-    GoldMine* mine = new (std::nothrow) GoldMine();
-    if (mine && mine->init(textureName, hp,lv, goldSpeed, x0, y0,max,current))
+    GoldStorage* mine = new (std::nothrow) GoldStorage();
+    if (mine && mine->init(textureName, hp, lv, goldSpeed, x0, y0, max, current))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ GoldMine* GoldMine::create(const std::string& textureName, int hp,int lv, float 
     return nullptr;
 }
 
-bool GoldMine::init(const std::string& textureName, int hp,int lv, float generateSpeed, float x0, float y0,int max, int current)
+bool GoldStorage::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)
 {
     if (!Node::init())
     {
@@ -52,7 +52,7 @@ bool GoldMine::init(const std::string& textureName, int hp,int lv, float generat
 }
 
 // 生产金币到库存（核心：判断上限）
-void GoldMine::produceToStock(int gold)
+void GoldStorage::produceToStock(int gold)
 {
     if (currentSize + gold <= maxSize)
     {
@@ -65,19 +65,19 @@ void GoldMine::produceToStock(int gold)
 }
 
 // 收集库存（玩家点击金矿时调用）
-int GoldMine::collectStock()
+int GoldStorage::collectStock()
 {
     int collected = currentSize;
     currentSize = 0; // 清空库存
     return collected;
 }
 
-bool GoldMine::initSprite(const std::string& textureName)
+bool GoldStorage::initSprite(const std::string& textureName)
 {
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'GoldMineLv1.png'");
+        problemLoading("'GoldStorageLv1.png'");
         return false;
     }
 

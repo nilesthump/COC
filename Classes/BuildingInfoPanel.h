@@ -22,8 +22,14 @@ protected:
     void onUpgradeClicked(cocos2d::Ref* sender);
 
 private:
+    cocos2d::Node* armyExtraPanel; // 改为Node类型，方便添加子元素
+   
     Building* _targetBuilding; // 当前选中的建筑
     cocos2d::Sprite* temp;
+
+    cocos2d::MenuItemImage* archerBtn;
+    cocos2d::Menu* menu;
+
     // UI元素
     cocos2d::Label* _titleLabel;
     cocos2d::Label* _hpLabel;

@@ -10,7 +10,7 @@ protected:
     int _hp;                  // 血量
     int level;
     float _generateSpeed;     // 生产速度
-    std::string _textureName; // 纹理名称（用于区分不同等级圣水收集器）
+    std::string _textureName; // 纹理名称
     cocos2d::Sprite* _sprite; // 图像精灵
     float x, y;               //世界坐标
     float size = 3.0f;        //尺寸
@@ -29,22 +29,44 @@ public:
     void changeY(float t) {
         y = t;
     }
-    //更新元素
+    //升级
     void updateLv() {
         level++;
     }
+    void updateHp() {
+        _hp = _hp + 50 * level;
+    }
+    void updateSpeed() {
+        _generateSpeed = _generateSpeed * level;
+    }
+    void updateSize() {
+        maxSize = maxSize + maxSize * level;
+    }
+    void updateTexture(const std::string& newTextureName) {
+        if (_sprite) {
+            // 尝试加载新纹理
+            auto newTexture = Director::getInstance()->getTextureCache()->addImage(newTextureName);
+            if (newTexture) {
+                _sprite->setTexture(newTexture);
+            }
+            else {
+                return;
+            }
+        }
+    }
+    //更新元素
     void updatePosition(const cocos2d::Vec2& newPos) {
         this->setPosition(newPos);
         x = newPos.x;
         y = newPos.y;
     }
     //获取网格坐标
-    float getXX(cocos2d::Sprite* background_sprite_) {
-        Vec2 you = ConvertTest::convertLocalToGrid(Vec2(x, y), background_sprite_);
+    float getXX() {
+        Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
         return you.x;
     }
-    float getYY(cocos2d::Sprite* background_sprite_) {
-        Vec2 you = ConvertTest::convertLocalToGrid(Vec2(x, y), background_sprite_);
+    float getYY() {
+        Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
         return you.y;
     }
     //获取世界坐标
@@ -79,6 +101,8 @@ public:
     void playSuccessBlink() { this->runAction(cocos2d::Blink::create(1.0f, 2)); }
     // 视觉反馈：红色闪烁+销毁（失败放置）
     void playFailBlinkAndRemove();
+    // 视觉反馈：红色闪烁
+    void playFailBlink();
 
     float getSpeed() const { return _generateSpeed; }
 };
