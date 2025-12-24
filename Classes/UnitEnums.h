@@ -16,3 +16,12 @@ enum class ResourceType { NONE, GOLD, ELIXIR, DARK_ELIXIR };//资源使用枚举
 
 // 战斗结果
 enum class BattleResult { NONE, ATTACKERS_WIN, DEFENDERS_WIN, TIME_UP };
+
+//每一个索引格子，格子！的状态
+enum class GridStatus
+{
+    FREE = 0,      // 可通行，可放置
+    BLOCKED = 1,   // 建筑占用，不可通行
+    WALL = 2,      // 城墙，特殊阻挡
+    FORBIDDEN = 3  // 边缘草坪，可通行，不可放置建筑
+};

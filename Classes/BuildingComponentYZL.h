@@ -2,6 +2,11 @@
 //它只做三件事：
 //占多少格（tile_w / tile_h）
 //图片如何对齐占地（自动 scale + 居中）
+//(1) IndexSystem (逻辑层)：只管占坑
+//它通过 round 把逻辑中心变成索引区间。
+//(2) BuildingComponent(表现层)：只管显示
+//它不需要再关心奇偶，因为它接收的就是中心点。
+
 #ifndef BUILDING_COMPONENT_H
 #define BUILDING_COMPONENT_H
 
@@ -11,10 +16,6 @@ class BuildingComponent
 {
 public:
     BuildingComponent(int tileW, int tileH);
-
-    // === 核心接口 ===
-    //中心偏移
-    cocos2d::Vec2 GetCenterOffset() const;
 
     //root（node）代表建筑逻辑载体，不关心实际sprite多大
     void AttachTo(cocos2d::Node* parent);

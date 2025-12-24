@@ -34,10 +34,10 @@ bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float genera
     x = x0;
     y = y0;
     level = lv;
-    maxSize = max;
-    currentSize = current;
+    maxSize = max;//maxSize为兵营容量
+    currentSize = current;//现存量
     this->setPosition(Vec2(x0, y0));
-
+    std::fill(army, army + 6, 0);
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))
     {

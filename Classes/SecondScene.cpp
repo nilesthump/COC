@@ -147,9 +147,9 @@ bool SecondScene::init()
     buildPanel->setVisible(false);
     buildItem->addChild(buildPanel, 1);
 
-    auto panelBg = Sprite::create("btn_long.png");
+    auto panelBg = Sprite::create("3.png");
     if (panelBg == nullptr) {
-        problemLoading("'btn_long.png'");
+        problemLoading("'3.png'");
     }
     else {
         double panelBgX = panelBg->getContentSize().width / 2;
@@ -404,21 +404,21 @@ bool SecondScene::init()
 
     Vec2 diamond_center_absolute = Vec2(diamond_center_x, diamond_center_y);
     Vec2 diamond_center = diamond_center_absolute - Vec2(
-        background_sprite_->getContentSize().width / 2.0f,
-        background_sprite_->getContentSize().height / 2.0f
+        background_sprite_->getContentSize().width / 2.0f+28.0,
+        background_sprite_->getContentSize().height / 2.0f-42.0*4
     );
     // 创建菱形网格管理器
-    grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 44);
+    grid_manager_ = DiamondGridManager::create(diamond_center, diamond_width, diamond_height, 50);
     this->addChild(grid_manager_);
 
     // 绘制菱形网格
     grids_ = grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
 
     // 创建坐标显示标签
-    coordinate_label_ = Label::createWithTTF("坐标: ", "fonts/STZhongSong_Bold.ttf", 20);
-    coordinate_label_->setColor(Color3B::YELLOW);
-    coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
-    this->addChild(coordinate_label_, 2);
+    //coordinate_label_ = Label::createWithTTF("坐标: ", "fonts/STZhongSong_Bold.ttf", 20);
+    //coordinate_label_->setColor(Color3B::YELLOW);
+    //coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
+    //this->addChild(coordinate_label_, 2);
   
     // 创建圣水图标和标签
     elixirIcon = Sprite::create("btn_normal.png"); // 实际项目中应该替换为正确的圣水图标资源名

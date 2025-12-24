@@ -44,7 +44,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         armyExtraPanel->setPosition(Vec2::ZERO);
         this->addChild(armyExtraPanel, 100);
 
-        auto armybg = Sprite::create("btn_flat.png");
+        auto armybg = Sprite::create("2.png");
         if (!armybg) {
             return false;
         }
@@ -55,23 +55,105 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 
  
         
-        // 添加士兵图像按钮
-    // 参数分别为：正常状态图片、选中状态图片、点击回调（暂时为空）
-        archerBtn = MenuItemImage::create(
-            "ArcherLv1.png",  
-            "ArcherLv1.png", 
-            [](cocos2d::Ref* sender) {
-                // 暂时为空，后续实现点击功能
+        // 添加士兵图像按钮115125
+        barbarianBtn = MenuItemImage::create(
+            "Barbarian.png",
+            "Barbarian.png",
+            [this](cocos2d::Ref* sender) {
+                if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+                    // 检查是否还有容量
+                    if (armyCamp->getCurrentStock()+ armyCamp->getArmySize(0) <= armyCamp->getMaxStock()) {
+                        armyCamp->updateNum(0); // 野蛮人数量+1
+                        this->updateInfo(_targetBuilding, temp); // 更新显示
+                    }
+                }
             }
         );
-        // 设置士兵按钮位置（相对于armyExtraPanel）
-        archerBtn->setScale(2.0f);
-        archerBtn->setPosition(archerBtn->getContentSize().width*2, archerBtn->getContentSize().height*3); // 可根据需要调整位置
+        barbarianBtn->setScale(0.3f);
+        barbarianBtn->setPosition(100, barbarianBtn->getContentSize().height * 0.3); // 可根据需要调整位置     
 
+        archerBtn = MenuItemImage::create(
+            "Archer.png",  
+            "Archer.png", 
+            [this](cocos2d::Ref* sender) {
+                if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+                    // 检查是否还有容量
+                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(1) <= armyCamp->getMaxStock()) {
+                        armyCamp->updateNum(1); 
+                        this->updateInfo(_targetBuilding, temp); // 更新显示
+                    }
+                }
+            }
+        );
+        archerBtn->setScale(0.3f);
+        archerBtn->setPosition(250, archerBtn->getContentSize().height*0.32); // 可根据需要调整位置
 
+        giantBtn = MenuItemImage::create(
+            "Giant.png",
+            "Giant.png",
+            [this](cocos2d::Ref* sender) {
+                if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+                    // 检查是否还有容量
+                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(2) <= armyCamp->getMaxStock()) {
+                        armyCamp->updateNum(2); 
+                        this->updateInfo(_targetBuilding, temp); // 更新显示
+                    }
+                }
+            }
+        );
+        giantBtn->setScale(0.3f);
+        giantBtn->setPosition(400, giantBtn->getContentSize().height * 0.3); // 可根据需要调整位置
+
+        goblinBtn = MenuItemImage::create(
+            "Goblin.png",
+            "Goblin.png",
+            [this](cocos2d::Ref* sender) {
+                if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+                    // 检查是否还有容量
+                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(3) <= armyCamp->getMaxStock()) {
+                        armyCamp->updateNum(3);
+                        this->updateInfo(_targetBuilding, temp); // 更新显示
+                    }
+                }
+            }
+        );
+        goblinBtn->setScale(0.3f);
+        goblinBtn->setPosition(550, archerBtn->getContentSize().height * 0.3); // 可根据需要调整位置
+
+        bomberBtn = MenuItemImage::create(
+            "Bomber.png",
+            "Bomber.png",
+            [this](cocos2d::Ref* sender) {
+                if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+                    // 检查是否还有容量
+                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(4) <= armyCamp->getMaxStock()) {
+                        armyCamp->updateNum(4); 
+                        this->updateInfo(_targetBuilding, temp); // 更新显示
+                    }
+                }
+            }
+        );
+        bomberBtn->setScale(0.3f);
+        bomberBtn->setPosition(700, archerBtn->getContentSize().height * 0.32); // 可根据需要调整位置
+
+        balloonBtn = MenuItemImage::create(
+            "Balloon.png",
+            "Balloon.png",
+            [this](cocos2d::Ref* sender) {
+                if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
+                    // 检查是否还有容量
+                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(5) <= armyCamp->getMaxStock()) {
+                        armyCamp->updateNum(5);
+                        this->updateInfo(_targetBuilding, temp); // 更新显示
+                    }
+                }
+            }
+        );
+        balloonBtn->setScale(0.3f);
+        balloonBtn->setPosition(850, archerBtn->getContentSize().height * 0.35); // 可根据需要调整位置
 
         // 创建菜单
-        menu = cocos2d::Menu::create(archerBtn, nullptr);
+        menu = cocos2d::Menu::create(barbarianBtn, archerBtn, giantBtn, goblinBtn, bomberBtn,balloonBtn, nullptr);
         menu->setPosition(0, 0); // 菜单位置相对于父节点（armyExtraPanel）
         armyExtraPanel->addChild(menu);
     }
@@ -79,7 +161,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
  
 
     // 1. 面板主体
-    auto panelBg = Sprite::create("btn_long.png"); // 面板背景图
+    auto panelBg = Sprite::create("3.png"); // 面板背景图
     if (!panelBg) {
         return false;
     }
@@ -113,6 +195,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         "fonts/Marker Felt.ttf", 24
     );
     _titleLabel->setPosition(bgWidth / 2, bgHeight - 30);
+    _titleLabel->setColor(Color3B::BLACK);
     panelBg->addChild(_titleLabel);
 
     // 3. 血量信息
@@ -121,9 +204,19 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         "fonts/Marker Felt.ttf", 24
     );
     _hpLabel->setPosition(bgWidth / 2, bgHeight - 70);
+    _hpLabel->setColor(Color3B::GREEN);
     panelBg->addChild(_hpLabel);
     
-    // 4. 资源信息显示
+    //4.网格坐标
+    _positionLabel = Label::createWithTTF(
+        StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()),
+        "fonts/Marker Felt.ttf", 24
+    );
+    _positionLabel->setPosition(bgWidth / 2, bgHeight - 110);
+    panelBg->addChild(_positionLabel);
+
+
+    // 5. 资源信息显示
     // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源和生产速度，有收集按钮
     // 存钱罐和圣水瓶显示的是容量，无收集按钮
     //兵营待定，城墙不需要显示
@@ -132,14 +225,16 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
-        _speedLabel->setPosition(bgWidth / 2, bgHeight - 110);
+        _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
+        _speedLabel->setColor(Color3B::YELLOW);
         panelBg->addChild(_speedLabel);
 
         _resourceLabel = Label::createWithTTF(
             StringUtils::format("Gold: %d", building->getCurrentStock()), 
             "fonts/Marker Felt.ttf", 24
         );  
-        _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::YELLOW);
         panelBg->addChild(_resourceLabel);
 
     }
@@ -148,14 +243,16 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
-        _speedLabel->setPosition(bgWidth / 2, bgHeight - 110);
+        _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
+        _speedLabel->setColor(Color3B::BLUE);
         panelBg->addChild(_speedLabel);
 
         _resourceLabel = Label::createWithTTF(
             StringUtils::format("Elixir: %d", building->getCurrentStock()),
             "fonts/Marker Felt.ttf", 24
         );
-        _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLUE);
         panelBg->addChild(_resourceLabel);
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
@@ -164,6 +261,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::YELLOW);
         panelBg->addChild(_resourceLabel);
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
@@ -172,17 +270,68 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLUE);
         panelBg->addChild(_resourceLabel);
     }
+    else if (dynamic_cast<ArmyCamp*>(building)) {
+        _resourceLabel = Label::createWithTTF(
+            StringUtils::format("armyNum/maxNum: %d/%d", building->getCurrentStock(), building->getMaxStock()),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLACK);
+        panelBg->addChild(_resourceLabel);
 
-    //5.网格坐标
-    _positionLabel = Label::createWithTTF(
-        StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()),
-        "fonts/Marker Felt.ttf", 24
-    );
-    _positionLabel->setPosition(bgWidth / 2, bgHeight - 190);
-    panelBg->addChild(_positionLabel);
+        _barbarian = Label::createWithTTF(
+            StringUtils::format("barbarianNum: %d", building->getArmy(0)),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _barbarian->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
+        _barbarian->setColor(Color3B::BLACK);
+        panelBg->addChild(_barbarian);
 
+        _archer = Label::createWithTTF(
+            StringUtils::format("archerNum: %d", building->getArmy(1)),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _archer->setPosition(bgWidth / 2, bgHeight - 230); // 调整位置在坐标下方
+        _archer->setColor(Color3B::BLACK);
+        panelBg->addChild(_archer);
+
+        _giant = Label::createWithTTF(
+            StringUtils::format("giantNum: %d", building->getArmy(2)),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _giant->setPosition(bgWidth / 2, bgHeight - 270); // 调整位置在坐标下方
+        _giant->setColor(Color3B::BLACK);
+        panelBg->addChild(_giant);
+
+        _goblin = Label::createWithTTF(
+            StringUtils::format("goblinNum: %d", building->getArmy(3)),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _goblin->setPosition(bgWidth / 2, bgHeight - 310); // 调整位置在坐标下方
+        _goblin->setColor(Color3B::BLACK);
+        panelBg->addChild(_goblin);
+
+        _bomber = Label::createWithTTF(
+            StringUtils::format("bomberNum: %d", building->getArmy(4)),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _bomber->setPosition(bgWidth / 2, bgHeight - 350); // 调整位置在坐标下方
+        _bomber->setColor(Color3B::BLACK);
+        panelBg->addChild(_bomber);
+
+        _balloon = Label::createWithTTF(
+            StringUtils::format("balloonNum: %d", building->getArmy(5)),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _balloon->setPosition(bgWidth / 2, bgHeight - 390); // 调整位置在坐标下方
+        _balloon->setColor(Color3B::BLACK);
+        panelBg->addChild(_balloon);
+    }
+
+    
     // 6. 升级按钮,最高等级15
     _upgradeBtn = MenuItemImage::create(
         "btn_disabled.png",  // 正常状态图
@@ -192,7 +341,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     //设置文字提示
     if (_targetBuilding->getLv() < 15) {
         auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
-        upGradeLabel->setColor(Color3B::WHITE);
+        upGradeLabel->setColor(Color3B::YELLOW);
         upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _upgradeBtn->addChild(upGradeLabel);
     }
@@ -277,7 +426,15 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<ElixirStorage*>(building)) {
         _resourceLabel->setString(StringUtils::format("ElixirVolum: %d", building->getMaxStock()));
     }
-
+    else if (dynamic_cast<ArmyCamp*>(building)) {
+        _resourceLabel->setString(StringUtils::format("armyNum/maxNum: %d/%d", building->getCurrentStock(), building->getMaxStock()));
+        _barbarian->setString(StringUtils::format("barbarianNum: %d", building->getArmy(0)));
+        _archer->setString(StringUtils::format("archerNum: %d", building->getArmy(1)));
+        _giant->setString(StringUtils::format("giantNum: %d", building->getArmy(2)));
+        _goblin->setString(StringUtils::format("goblinNum: %d", building->getArmy(3)));
+        _bomber->setString(StringUtils::format("bomberNum: %d", building->getArmy(4)));
+        _balloon->setString(StringUtils::format("balloonNum: %d", building->getArmy(5)));
+    }
 }
 
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {

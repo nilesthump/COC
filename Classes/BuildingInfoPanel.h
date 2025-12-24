@@ -28,6 +28,11 @@ private:
     cocos2d::Sprite* temp;
 
     cocos2d::MenuItemImage* archerBtn;
+    cocos2d::MenuItemImage* barbarianBtn;
+    cocos2d::MenuItemImage* giantBtn;
+    cocos2d::MenuItemImage* goblinBtn;
+    cocos2d::MenuItemImage* bomberBtn;
+    cocos2d::MenuItemImage* balloonBtn;
     cocos2d::Menu* menu;
 
     // UIÔªËØ
@@ -39,6 +44,13 @@ private:
     cocos2d::Label* _resourceLabel;
     cocos2d::MenuItemImage* _upgradeBtn;
     cocos2d::MenuItemImage* _collectBtn;
+    //±øÖÖ
+    cocos2d::Label* _barbarian;
+    cocos2d::Label* _archer;
+    cocos2d::Label* _giant;
+    cocos2d::Label* _goblin;
+    cocos2d::Label* _bomber;
+    cocos2d::Label* _balloon;
 };
 
 #endif // __BUILDING_INFO_PANEL_H__

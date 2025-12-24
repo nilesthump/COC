@@ -6,6 +6,7 @@
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
 #include "UnitSelectionPanel4Battle.h"
+#include "IndexSystem.h"
 #include <memory>
 #include <vector>
 
@@ -16,6 +17,7 @@ private:
 	std::unique_ptr<BattleManager> battle_manager_;
 	DiamondGridManager* grid_manager_ = nullptr;
 	ZoomScrollManager* zoom_manager_ = nullptr;
+	std::unique_ptr<IndexSystem> index_system_;
 
 	// 视觉元素
 	cocos2d::Sprite* background_sprite_ = nullptr;

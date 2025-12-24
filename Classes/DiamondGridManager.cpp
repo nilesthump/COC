@@ -112,7 +112,7 @@ bool DiamondGridManager::isInDiamond(const Vec2& diamondPos)
     int grid_y = static_cast<int>(floor(diamondPos.y / grid_cell_size_y_ + 0.5f));
 
     // 检查网格坐标的绝对值和是否在22以内
-    return (fabs(grid_x) + fabs(grid_y) <= 21);
+    return (fabs(grid_x) + fabs(grid_y) <= 22);
 }
 
 std::vector<std::vector<cocos2d::Vec2>>* DiamondGridManager::drawDiamondGrid(Sprite* backgroundSprite, float cellSize)

@@ -250,9 +250,9 @@ void UnitSelectionPanel::addUnitIcon( const std::string& iconPath,const std::str
         // 关键修复：添加图标后，根据 CombatSessionManager 的初始数据立即更新一次 UI 状态
         auto config = CombatSessionManager::getInstance();
         int initialCount = 0;
-        if (config->attackerArmy.count(type))
+        if (config->battle_start_params.attackerInventory.count(type))
         {
-            initialCount = config->attackerArmy[type];
+            initialCount = config->battle_start_params.attackerInventory[type];
         }
         button->setCount(initialCount); // 这里会自动触发红色变灰逻辑
 
