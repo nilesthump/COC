@@ -23,6 +23,7 @@
 #include "BattleTypes.h"
 #include <vector>
 #include <memory>
+#include <map>
 
 class BattleManager
 {
@@ -32,29 +33,38 @@ private:
     std::vector<BattleUnit*> defenders_;
     bool battle_active_;
     int total_heroes_;
-    int heroes_placed_;
+    int heroes_deployed;
+    std::map<UnitType, int> unit_counts_; // 存储每种英雄的剩余数量
     float battle_time_elapsed_;     //战斗已进行时间
     const float MAX_BATTLE_TIME_ = 180.0f;
 
     BattleResult battle_result_;
 
 public:
-    BattleManager() : battle_active_(false) ,total_heroes_(0),battle_time_elapsed_(0.0f),heroes_placed_(0),battle_result_(BattleResult::NONE){}
+    BattleManager() : battle_active_(false) ,total_heroes_(0),battle_time_elapsed_(0.0f),heroes_deployed(0),battle_result_(BattleResult::NONE){}
 
     //添加单位
     void AddUnit(std::unique_ptr<BattleUnit> unit, bool is_attacker);
 
-    //设置总英雄数量
-    void SetTotalHeroes(int count) { total_heroes_ = count; }
-    
-    //是否可以再放英雄
-    bool CanDeployAttacker() const
+    //初始化时传入英雄及其数量
+    void SetInitialUnits(const std::map<UnitType, int>& units);
+
+    // 检查特定英雄是否还能放置，对于个体
+    bool CanDeployUnit(UnitType type)
     {
-        return heroes_placed_ < total_heroes_;
+        return unit_counts_[type] > 0;
     }
 
+    // 减少计数
+    void decrementUnitCount(UnitType type)
+    {
+        if (unit_counts_[type] > 0) unit_counts_[type]--;
+    }
+
+    int getRemainingUnitCount(UnitType type) { return unit_counts_[type]; }
+    
     //获取放置了多少英雄/攻击者
-    int GetHeroesPlaced()const { return heroes_placed_; }
+    int GetHeroesPlaced()const { return heroes_deployed; }
 
     //获取英雄总数
     int GetMaxHeros()const { return total_heroes_; }

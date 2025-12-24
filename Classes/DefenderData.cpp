@@ -82,3 +82,19 @@ DefenderData DefenderData::CreateArcherTowerData(int level)
 
     return data;
 }
+
+//! 资源建筑初设定，还没导入数据
+DefenderData DefenderData::CreateGoldMineData(int level)
+{
+    DefenderData data;
+    data.id = "gold_mine";
+    data.name = "金矿";
+    data.level = level;
+    data.is_resource_building = true; // 关键标记
+    data.tile_width = 3;
+    data.tile_height = 3;
+    data.health = 400 + (level * 50);
+    data.damage = 0; // 不反击
+    data.gold_reward = 100 * level; // 假设摧毁给这么多钱
+    return data;
+}
