@@ -206,8 +206,34 @@ bool HelloWorld::init()
         deleteAccountItem->addChild(deleteAccountLabel);
     }
 
+    // Create change password button
+    changePasswordItem = MenuItemImage::create(
+        "btn_normal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(HelloWorld::menuChangePasswordCallback, this));
+
+    if (changePasswordItem == nullptr ||
+        changePasswordItem->getContentSize().width <= 0 ||
+        changePasswordItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        // Position at the same height as login/logout button, to the right
+        double x = origin.x + visibleSize.width / 2 + 200; // Right of login/logout button
+        double y = origin.y + visibleSize.height / 4;
+        changePasswordItem->setPosition(Vec2(x, y));
+
+        auto changePasswordLabel = Label::createWithSystemFont("CHANGE PASSWORD", "fonts/Marker Felt.ttf", 24);
+        changePasswordLabel->setColor(Color3B::WHITE);
+        changePasswordLabel->setPosition(Vec2(changePasswordItem->getContentSize().width / 2,
+            changePasswordItem->getContentSize().height / 2));
+        changePasswordItem->addChild(changePasswordLabel);
+    }
+
     auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem,
-        guestLoginItem, loginItem, registerItem, deleteAccountItem, NULL);
+        guestLoginItem, loginItem, registerItem, deleteAccountItem, changePasswordItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -216,6 +242,7 @@ bool HelloWorld::init()
     registerLayer = nullptr;
     logoutConfirmLayer = nullptr;
     deleteAccountConfirmLayer = nullptr;
+    changePasswordLayer = nullptr;
 
     // Initialize login specific edit boxes
     loginUsernameEditBox = nullptr;
@@ -227,6 +254,12 @@ bool HelloWorld::init()
     confirmPasswordEditBox = nullptr;
     confirmItem = nullptr;
     registerConfirmItem = nullptr;
+
+    // Initialize change password specific edit boxes
+    newPasswordEditBox = nullptr;
+    confirmNewPasswordEditBox = nullptr;
+    changePasswordConfirmItem = nullptr;
+    cancelChangePasswordItem = nullptr;
 
     confirmLogoutItem = nullptr;
     cancelLogoutItem = nullptr;
@@ -339,11 +372,17 @@ bool HelloWorld::init()
         loginItem->setEnabled(true);
         loginLabel->setVisible(true);
 
-        // Hide delete account button when not logged in
+        // Hide delete account and change password buttons when not logged in
         if (deleteAccountItem != nullptr)
         {
             deleteAccountItem->setVisible(false);
             deleteAccountItem->setEnabled(false);
+        }
+
+        if (changePasswordItem != nullptr)
+        {
+            changePasswordItem->setVisible(false);
+            changePasswordItem->setEnabled(false);
         }
     }
     /////////////////////////////
@@ -608,7 +647,7 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
             loginItem->setEnabled(true);
             loginLabel->setVisible(true);
 
-            // Hide and disable secondSceneItem, battleTestItem, and deleteAccountItem
+            // Hide and disable secondSceneItem, battleTestItem, deleteAccountItem, and changePasswordItem
             if (secondSceneItem != nullptr)
             {
                 secondSceneItem->setVisible(false);
@@ -625,6 +664,12 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
             {
                 deleteAccountItem->setVisible(false);
                 deleteAccountItem->setEnabled(false);
+            }
+
+            if (changePasswordItem != nullptr)
+            {
+                changePasswordItem->setVisible(false);
+                changePasswordItem->setEnabled(false);
             }
 
             // Show guest login and register buttons
@@ -1193,6 +1238,13 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
         // Change login button to logout button
         loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
         loginLabel->setString("LOGOUT");
+
+        // Show change password button next to logout button (symmetric position)
+        if (changePasswordItem != nullptr)
+        {
+            changePasswordItem->setVisible(true);
+            changePasswordItem->setEnabled(true);
+        }
     }
     else
     {
@@ -1211,6 +1263,451 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
             });
         auto sequence = Sequence::create(delay, removeLabel, nullptr);
         errorLabel->runAction(sequence);
+    }
+}
+
+void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // Create a semi-transparent background layer
+    if (changePasswordLayer == nullptr)
+    {
+        changePasswordLayer = LayerColor::create(Color4B(0, 0, 0, 180));
+        this->addChild(changePasswordLayer, 10);
+
+        // Create new password label
+        auto newPasswordLabel = Label::createWithSystemFont("New Password:", "fonts/Marker Felt.ttf", 20);
+        newPasswordLabel->setColor(Color3B::WHITE);
+        newPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
+            origin.y + visibleSize.height / 2 + 50));
+        changePasswordLayer->addChild(newPasswordLabel);
+
+        // Create new password edit box
+        newPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        newPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 + 50));
+        newPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        newPasswordEditBox->setPlaceholderFontSize(20);
+        newPasswordEditBox->setPlaceHolder("Enter new password");
+        newPasswordEditBox->setFontName("fonts/Marker Felt.ttf");
+        newPasswordEditBox->setFontSize(20);
+        newPasswordEditBox->setFontColor(Color3B::WHITE);
+        newPasswordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        newPasswordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        newPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        newPasswordEditBox->setDelegate(this);
+        changePasswordLayer->addChild(newPasswordEditBox);
+
+        // Create confirm new password label
+        auto confirmNewPasswordLabel = Label::createWithSystemFont("Confirm Password:", "fonts/Marker Felt.ttf", 20);
+        confirmNewPasswordLabel->setColor(Color3B::WHITE);
+        confirmNewPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 240,
+            origin.y + visibleSize.height / 2 - 20));
+        changePasswordLayer->addChild(confirmNewPasswordLabel);
+
+        // Create confirm new password edit box
+        confirmNewPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        confirmNewPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 - 20));
+        confirmNewPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        confirmNewPasswordEditBox->setPlaceholderFontSize(20);
+        confirmNewPasswordEditBox->setPlaceHolder("Confirm new password");
+        confirmNewPasswordEditBox->setFontName("fonts/Marker Felt.ttf");
+        confirmNewPasswordEditBox->setFontSize(20);
+        confirmNewPasswordEditBox->setFontColor(Color3B::WHITE);
+        confirmNewPasswordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        confirmNewPasswordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        confirmNewPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::DONE);
+        confirmNewPasswordEditBox->setDelegate(this);
+        changePasswordLayer->addChild(confirmNewPasswordEditBox);
+
+        // Clear input fields when first creating change password layer
+        if (newPasswordEditBox != nullptr)
+        {
+            newPasswordEditBox->setText("");
+        }
+        if (confirmNewPasswordEditBox != nullptr)
+        {
+            confirmNewPasswordEditBox->setText("");
+        }
+
+        // Create confirm button
+        changePasswordConfirmItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuChangePasswordConfirmCallback, this));
+
+        // Create cancel button
+        cancelChangePasswordItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuCancelChangePasswordCallback, this));
+
+        if (changePasswordConfirmItem != nullptr &&
+            changePasswordConfirmItem->getContentSize().width > 0 &&
+            changePasswordConfirmItem->getContentSize().height > 0 &&
+            cancelChangePasswordItem != nullptr &&
+            cancelChangePasswordItem->getContentSize().width > 0 &&
+            cancelChangePasswordItem->getContentSize().height > 0)
+        {
+            // Set confirm button position (left of center)
+            double confirmX = origin.x + visibleSize.width / 2 - 120;
+            double buttonY = origin.y + visibleSize.height / 2 - 90;
+            changePasswordConfirmItem->setPosition(Vec2(confirmX, buttonY));
+
+            // Set cancel button position (right of center, symmetric to confirm button)
+            double cancelX = origin.x + visibleSize.width / 2 + 120;
+            cancelChangePasswordItem->setPosition(Vec2(cancelX, buttonY));
+
+            // Add label to confirm button
+            auto confirmLabel = Label::createWithSystemFont("Confirm Change", "fonts/Marker Felt.ttf", 24);
+            confirmLabel->setColor(Color3B::WHITE);
+            confirmLabel->setPosition(Vec2(changePasswordConfirmItem->getContentSize().width / 2,
+                changePasswordConfirmItem->getContentSize().height / 2));
+            changePasswordConfirmItem->addChild(confirmLabel);
+
+            // Add label to cancel button
+            auto cancelLabel = Label::createWithSystemFont("Cancel", "fonts/Marker Felt.ttf", 24);
+            cancelLabel->setColor(Color3B::WHITE);
+            cancelLabel->setPosition(Vec2(cancelChangePasswordItem->getContentSize().width / 2,
+                cancelChangePasswordItem->getContentSize().height / 2));
+            cancelChangePasswordItem->addChild(cancelLabel);
+
+            // Create a menu with both buttons
+            auto changePasswordMenu = Menu::create(changePasswordConfirmItem, cancelChangePasswordItem, NULL);
+            changePasswordMenu->setPosition(Vec2::ZERO);
+            changePasswordLayer->addChild(changePasswordMenu);
+        }
+    }
+    else
+    {
+        // Show the existing change password layer if it was already created
+        changePasswordLayer->setVisible(true);
+        // Clear input fields when re-showing the layer
+        if (newPasswordEditBox != nullptr)
+        {
+            newPasswordEditBox->setText("");
+        }
+        if (confirmNewPasswordEditBox != nullptr)
+        {
+            confirmNewPasswordEditBox->setText("");
+        }
+    }
+
+    // Hide change password button and logout button
+    if (changePasswordItem != nullptr)
+    {
+        changePasswordItem->setVisible(false);
+        changePasswordItem->setEnabled(false);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(false);
+        loginItem->setEnabled(false);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(false);
+        }
+    }
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(false);
+        deleteAccountItem->setEnabled(false);
+    }
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(false);
+        secondSceneItem->setEnabled(false);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(false);
+        battleTestItem->setEnabled(false);
+    }
+}
+
+void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
+{
+    // Get input values
+    std::string newPassword = newPasswordEditBox->getText();
+    std::string confirmNewPassword = confirmNewPasswordEditBox->getText();
+    bool passwordChanged = false;
+
+    // Validate password length (6-16 characters)
+    if (newPassword.length() < 6 || newPassword.length() > 16)
+    {
+        // Show error message
+        auto errorLabel = Label::createWithSystemFont("Password length must be 6-16 characters", "fonts/Marker Felt.ttf", 18);
+        errorLabel->setColor(Color3B::RED);
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+        changePasswordLayer->addChild(errorLabel);
+
+        // Remove error message after 2 seconds
+        auto delay = DelayTime::create(2.0f);
+        auto removeLabel = CallFunc::create([errorLabel]() {
+            errorLabel->removeFromParentAndCleanup(true);
+            });
+        auto sequence = Sequence::create(delay, removeLabel, nullptr);
+        errorLabel->runAction(sequence);
+        return;
+    }
+
+    // Check if new password is the same as old password
+    {
+        sqlite3* db;
+        int rc = sqlite3_open("users.db", &db);
+        bool samePassword = false;
+
+        if (rc == SQLITE_OK)
+        {
+            const char* sql = "SELECT password FROM users WHERE username = ?;";
+            sqlite3_stmt* stmt;
+            rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+            if (rc == SQLITE_OK)
+            {
+                sqlite3_bind_text(stmt, 1, currentLoggedInUser.c_str(), -1, SQLITE_TRANSIENT);
+                if (sqlite3_step(stmt) == SQLITE_ROW)
+                {
+                    const char* oldPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                    if (oldPassword != nullptr)
+                    {
+                        samePassword = (newPassword == std::string(oldPassword));
+                    }
+                }
+                sqlite3_finalize(stmt);
+            }
+            sqlite3_close(db);
+        }
+
+        if (samePassword)
+        {
+            // Show error message
+            auto errorLabel = Label::createWithSystemFont("New password cannot be the same as old password", "fonts/Marker Felt.ttf", 18);
+            errorLabel->setColor(Color3B::RED);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            changePasswordLayer->addChild(errorLabel);
+
+            // Remove error message after 2 seconds
+            auto delay = DelayTime::create(2.0f);
+            auto removeLabel = CallFunc::create([errorLabel]() {
+                errorLabel->removeFromParentAndCleanup(true);
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            errorLabel->runAction(sequence);
+            return;
+        }
+    }
+
+    // Check if passwords match
+    if (newPassword == confirmNewPassword)
+    {
+        // Update password in SQLite database
+        sqlite3* db;
+        int rc = sqlite3_open("users.db", &db);
+
+        if (rc == SQLITE_OK)
+        {
+            // Start a transaction
+            rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+            if (rc != SQLITE_OK)
+            {
+                CCLOG("Error starting transaction: %s", sqlite3_errmsg(db));
+                sqlite3_close(db);
+                return;
+            }
+
+            // Prepare SQL statement to update password
+            const char* sql = "UPDATE users SET password = ? WHERE username = ?;";
+            sqlite3_stmt* stmt;
+
+            rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+            if (rc == SQLITE_OK)
+            {
+                // Bind parameters
+                sqlite3_bind_text(stmt, 1, newPassword.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(stmt, 2, currentLoggedInUser.c_str(), -1, SQLITE_TRANSIENT);
+
+                // Execute the statement
+                if (sqlite3_step(stmt) == SQLITE_DONE)
+                {
+                    CCLOG("Password updated successfully");
+                    passwordChanged = true;
+                }
+                else
+                {
+                    CCLOG("Error updating password: %s", sqlite3_errmsg(db));
+                }
+
+                sqlite3_finalize(stmt);
+            }
+            else
+            {
+                CCLOG("Error preparing SQL statement: %s", sqlite3_errmsg(db));
+            }
+
+            // Commit or rollback transaction based on result
+            if (passwordChanged)
+            {
+                sqlite3_exec(db, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
+            }
+            else
+            {
+                sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
+            }
+
+            sqlite3_close(db);
+        }
+        else
+        {
+            CCLOG("Error opening database: %s", sqlite3_errmsg(db));
+        }
+
+        if (passwordChanged)
+        {
+            // Show success message
+            auto successLabel = Label::createWithSystemFont("Password changed successfully", "fonts/Marker Felt.ttf", 18);
+            successLabel->setColor(Color3B::GREEN);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            successLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            changePasswordLayer->addChild(successLabel);
+
+            // Remove success message after 2 seconds
+            auto delay = DelayTime::create(1.0f);
+            auto removeLabel = CallFunc::create([successLabel, this]() {
+                successLabel->removeFromParentAndCleanup(true);
+                if (changePasswordLayer != nullptr)
+                {
+                    changePasswordLayer->setVisible(false);
+                }
+
+                // Show all scene buttons that were hidden
+                if (secondSceneItem != nullptr)
+                {
+                    secondSceneItem->setVisible(true);
+                    secondSceneItem->setEnabled(true);
+                }
+                if (battleTestItem != nullptr)
+                {
+                    battleTestItem->setVisible(true);
+                    battleTestItem->setEnabled(true);
+                }
+                if (deleteAccountItem != nullptr && currentLoggedInUser != "")
+                {
+                    deleteAccountItem->setVisible(true);
+                    deleteAccountItem->setEnabled(true);
+                }
+                if (loginItem != nullptr)
+                {
+                    loginItem->setVisible(true);
+                    loginItem->setEnabled(true);
+                    if (loginLabel != nullptr)
+                    {
+                        loginLabel->setVisible(true);
+                    }
+                }
+                if (changePasswordItem != nullptr)
+                {
+                    changePasswordItem->setVisible(true);
+                    changePasswordItem->setEnabled(true);
+                }
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            successLabel->runAction(sequence);
+        }
+        else
+        {
+            // Show error message
+            auto errorLabel = Label::createWithSystemFont("Failed to change password", "fonts/Marker Felt.ttf", 18);
+            errorLabel->setColor(Color3B::RED);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            changePasswordLayer->addChild(errorLabel);
+
+            // Remove error message after 2 seconds
+            auto delay = DelayTime::create(2.0f);
+            auto removeLabel = CallFunc::create([errorLabel]() {
+                errorLabel->removeFromParentAndCleanup(true);
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            errorLabel->runAction(sequence);
+        }
+    }
+    else
+    {
+        // Show error message
+        auto errorLabel = Label::createWithSystemFont("Passwords do not match", "fonts/Marker Felt.ttf", 18);
+        errorLabel->setColor(Color3B::RED);
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+        changePasswordLayer->addChild(errorLabel);
+
+        // Remove error message after 2 seconds
+        auto delay = DelayTime::create(2.0f);
+        auto removeLabel = CallFunc::create([errorLabel]() {
+            errorLabel->removeFromParentAndCleanup(true);
+            });
+        auto sequence = Sequence::create(delay, removeLabel, nullptr);
+        errorLabel->runAction(sequence);
+    }
+}
+
+void HelloWorld::menuCancelChangePasswordCallback(cocos2d::Ref* pSender)
+{
+    // Hide change password layer
+    if (changePasswordLayer != nullptr)
+    {
+        changePasswordLayer->setVisible(false);
+        // Clear input fields
+        if (newPasswordEditBox != nullptr)
+        {
+            newPasswordEditBox->setText("");
+        }
+        if (confirmNewPasswordEditBox != nullptr)
+        {
+            confirmNewPasswordEditBox->setText("");
+        }
+    }
+
+    // Show all scene buttons that were hidden
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(true);
+        secondSceneItem->setEnabled(true);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(true);
+        battleTestItem->setEnabled(true);
+    }
+    if (deleteAccountItem != nullptr && currentLoggedInUser != "")
+    {
+        deleteAccountItem->setVisible(true);
+        deleteAccountItem->setEnabled(true);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
+        if (loginLabel != nullptr)
+        {
+            loginLabel->setVisible(true);
+        }
+    }
+    if (changePasswordItem != nullptr)
+    {
+        changePasswordItem->setVisible(true);
+        changePasswordItem->setEnabled(true);
     }
 }
 
@@ -1445,7 +1942,7 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     loginItem->setVisible(true);
     loginItem->setEnabled(true);
     loginLabel->setVisible(true);
-    // Hide and disable secondSceneItem, battleTestItem, and deleteAccountItem
+    // Hide and disable secondSceneItem, battleTestItem, deleteAccountItem, and changePasswordItem
     if (secondSceneItem != nullptr)
     {
         secondSceneItem->setVisible(false);
@@ -1462,6 +1959,12 @@ void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
     {
         deleteAccountItem->setVisible(false);
         deleteAccountItem->setEnabled(false);
+    }
+
+    if (changePasswordItem != nullptr)
+    {
+        changePasswordItem->setVisible(false);
+        changePasswordItem->setEnabled(false);
     }
 
     // Show guest login and register buttons

@@ -35,6 +35,11 @@ public:
     void menuRegisterConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelRegisterCallback(cocos2d::Ref* pSender);
 
+    // Add change password related callback functions
+    void menuChangePasswordCallback(cocos2d::Ref* pSender);
+    void menuChangePasswordConfirmCallback(cocos2d::Ref* pSender);
+    void menuCancelChangePasswordCallback(cocos2d::Ref* pSender);
+
     void menuGuestLoginCallback(cocos2d::Ref* pSender);
 
     // EditBox delegate functions
@@ -63,6 +68,11 @@ private:
     cocos2d::MenuItemImage* confirmDeleteItem;
     cocos2d::MenuItemImage* cancelDeleteItem;
 
+    // Change password specific menu items
+    cocos2d::MenuItemImage* changePasswordItem;
+    cocos2d::MenuItemImage* changePasswordConfirmItem;
+    cocos2d::MenuItemImage* cancelChangePasswordItem;
+
     // Login specific edit boxes
     cocos2d::ui::EditBox* loginUsernameEditBox;
     cocos2d::ui::EditBox* loginPasswordEditBox;
@@ -72,10 +82,15 @@ private:
     cocos2d::ui::EditBox* registerPasswordEditBox;
     cocos2d::ui::EditBox* confirmPasswordEditBox;
 
+    // Change password specific edit boxes
+    cocos2d::ui::EditBox* newPasswordEditBox;
+    cocos2d::ui::EditBox* confirmNewPasswordEditBox;
+
     cocos2d::LayerColor* loginLayer;
     cocos2d::LayerColor* registerLayer;
     cocos2d::LayerColor* logoutConfirmLayer;
     cocos2d::LayerColor* deleteAccountConfirmLayer;
+    cocos2d::LayerColor* changePasswordLayer;
 
     cocos2d::Label* usernameLabel;
     cocos2d::Label* passwordLabel;
