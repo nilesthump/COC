@@ -83,14 +83,28 @@ bool SecondScene::init()
         background_sprite_->addChild(townHall, 15);
         placedBuildings.push_back(townHall);
 
-        // 可选：调整缩放（如果精灵尺寸不合适）
-        townHall->setScale(0.5f);
-
         maxGoldVolum = townHall->getMaxGoldNum();
         maxElixirVolum = townHall->getMaxElixirNum();
         maxLevel = townHall->getLv();
     }
 
+    //建筑小屋
+    auto builderHut1 = BuilderHut::create("BuilderHut.png");
+    if (builderHut1)
+    {
+        builderHut1->updatePosition(Vec2(1600, 1373));
+        background_sprite_->addChild(builderHut1, 15);
+        placedBuildings.push_back(builderHut1);
+       
+    }
+    auto builderHut2 = BuilderHut::create("BuilderHut.png");
+    if (builderHut2) {
+        builderHut2->updatePosition(Vec2(2200, 1373));
+        background_sprite_->addChild(builderHut2, 15);
+        placedBuildings.push_back(builderHut2);
+    }
+
+    
     //53-100 总按钮部分
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));

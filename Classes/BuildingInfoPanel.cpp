@@ -55,6 +55,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
                     if (armyCamp->getCurrentStock()+ armyCamp->getArmySize(0) <= armyCamp->getMaxStock()) {
+                        this->playBlinkAnimation(barbarianBtn);
                         armyCamp->updateNum(0); // 野蛮人数量+1
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
@@ -71,6 +72,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
                     if (armyCamp->getCurrentStock() + armyCamp->getArmySize(1) <= armyCamp->getMaxStock()) {
+                        this->playBlinkAnimation(archerBtn);
                         armyCamp->updateNum(1); 
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
@@ -87,6 +89,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
                     if (armyCamp->getCurrentStock() + armyCamp->getArmySize(2) <= armyCamp->getMaxStock()) {
+                        this->playBlinkAnimation(giantBtn);
                         armyCamp->updateNum(2); 
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
@@ -103,6 +106,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
                     if (armyCamp->getCurrentStock() + armyCamp->getArmySize(3) <= armyCamp->getMaxStock()) {
+                        this->playBlinkAnimation(goblinBtn);
                         armyCamp->updateNum(3);
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
@@ -119,6 +123,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
                     if (armyCamp->getCurrentStock() + armyCamp->getArmySize(4) <= armyCamp->getMaxStock()) {
+                        this->playBlinkAnimation(bomberBtn);
                         armyCamp->updateNum(4); 
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
@@ -135,6 +140,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
                     if (armyCamp->getCurrentStock() + armyCamp->getArmySize(5) <= armyCamp->getMaxStock()) {
+                        this->playBlinkAnimation(balloonBtn);
                         armyCamp->updateNum(5);
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
@@ -551,17 +557,35 @@ void BuildingInfoPanel::showSoldierInfo(int lv){
         bool isVisible = soldierNode->isVisible();
         soldierNode->setVisible(!isVisible);
         });
+#if 0
+    AttackerData Data[6] = {
+        AttackerData::CreateBarbarianData(lv),
+        AttackerData::CreateArcherData(lv),
+        AttackerData::CreateGiantData(lv),
+        AttackerData::CreateGoblinData(lv),
+        AttackerData::CreateBomberData(lv),
+        AttackerData::CreateBomberData(lv)
+    };
 
-    std::string name[6] = { "barbarian","archer","giant","goblin","bomber","balloon" };
     int baseL = 150, baseH = 30;
     for (int i = 0; i < 6; i++) {
         id[i] = Label::createWithTTF(
-            StringUtils::format("%s", name[i]), 
+            StringUtils::format("%s Lv: %d", Data[i].id,lv),
             "fonts/Marker Felt.ttf", 24);
-        id[i]->setPosition(Vec2(baseL * i, soldierData->getContentSize().height - baseH * i));
+        id[i]->setPosition(Vec2(baseL * (i + 1), soldierData->getContentSize().height - baseH));
         soldierData->addChild(id[i]);
+
+        atk[i] = Label::createWithTTF(
+            StringUtils::format("Atk: %d", Data[i].damage),
+            "fonts/Marker Felt.ttf", 24);
+        atk[i]->setPosition(Vec2(baseL * (i + 1), soldierData->getContentSize().height - baseH * 2));
+        soldierData->addChild(atk[i]);
+
+        hp[i] = Label::createWithTTF(
+            StringUtils::format("Hp: %d", Data[i].health),
+            "fonts/Marker Felt.ttf", 24);
+        hp[i]->setPosition(Vec2(baseL * (i + 1), soldierData->getContentSize().height - baseH * 3 ));
+        soldierData->addChild(hp[i]);
     }
-
-
-
+#endif
 }
