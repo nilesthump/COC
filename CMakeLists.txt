@@ -42,8 +42,8 @@ list(APPEND GAME_SOURCE
      Classes/BarracksPopup.cpp
      Classes/BomberBehavior.cpp
      Classes/GoblinBehavior.cpp
-     Classes/ArcherNavigation.cpp
-     Classes/BarbarianNavigation.cpp
+     #Classes/ArcherNavigation.cpp
+     #Classes/BarbarianNavigation.cpp
      Classes/BomberNavigation.cpp
      Classes/GiantNavigation.cpp
      Classes/GoblinNavigation.cpp
@@ -57,6 +57,8 @@ list(APPEND GAME_SOURCE
      Classes/UnitState.cpp
      Classes/SQLiteTest.cpp
      Classes/SessionManager.cpp
+     Classes/SQLiteManager.cpp
+     Classes/WebSocketManager.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -74,8 +76,8 @@ list(APPEND GAME_HEADER
      Classes/UnitBehavior.h
      Classes/BomberBehavior.h
      Classes/GoblinBehavior.h
-     Classes/ArcherNavigation.h
-     Classes/BarbarianNavigation.h
+     #Classes/ArcherNavigation.h
+     #Classes/BarbarianNavigation.h
      Classes/BomberNavigation.h
      Classes/GiantNavigation.h
      Classes/GoblinNavigation.h
@@ -87,6 +89,8 @@ list(APPEND GAME_HEADER
      Classes/BattleTestLayer.h
      Classes/SQLiteTest.h
      Classes/SessionManager.h
+     Classes/SQLiteManager.h
+     Classes/WebSocketManager.h
      )
 
 if(ANDROID)
