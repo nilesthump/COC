@@ -10,8 +10,11 @@
 #include "ElixirStorage.h"
 #include "ArmyCamp.h"
 #include "Walls.h"
+#include "TownHall.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
+
+USING_NS_CC;
 
 class SecondScene :public cocos2d::Scene
 {
@@ -115,5 +118,6 @@ extern int g_elixirCount;
 extern int g_goldCount;
 //宝石
 extern int g_gemCount;
+extern int maxLevel, maxGoldVolum, maxElixirVolum;
 #endif
 

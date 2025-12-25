@@ -7,7 +7,7 @@
 #include<ctime>
 
 // 初始化全局变量
-int MAXGOLD = 10000, MAXELIXIR = 5000;//最大储量还未写
+int maxLevel,maxGoldVolum,maxElixirVolum;
 int g_elixirCount = 750,g_goldCount = 750;
 int g_gemCount = 15;
 
@@ -35,8 +35,6 @@ bool SecondScene::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     // 初始化产金相关变量
-    baseGoldRate = 0; 
-    baseElixirRate = 0;
     g_goldCount = 750; // 确保金币计数初始化为0
     g_elixirCount = 750;
     g_gemCount = 15;
@@ -48,6 +46,50 @@ bool SecondScene::init()
     // 初始化建筑移动相关变量
     isMovingBuilding = false;
     movingBuilding = nullptr;
+
+    //游戏背景
+    auto label = Label::createWithTTF("Your Clan!!!", "fonts/Marker Felt.ttf", 36);
+    if (label == nullptr)
+    {
+        problemLoading("'fonts/Marker Felt.ttf'");
+    }
+    else
+    {
+        label->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height - label->getContentSize().height));
+        this->addChild(label, 1);
+    }
+    background_sprite_ = Sprite::create("normal(winter).jpg");
+    if (background_sprite_ == nullptr)
+    {
+        problemLoading("'normal(winter).jpg'");
+    }
+    else
+    {
+        // position the sprite on the center of the screen
+        background_sprite_->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+        float scale = visibleSize.width / background_sprite_->getContentSize().width * 1.5f;
+        background_sprite_->setScale(scale);
+        // add the sprite as a child to this layer
+        this->addChild(background_sprite_, 0);
+    }
+
+
+    // 大本营
+    auto townHall = TownHall::create("TownHallLv1.png");
+    if (townHall)
+    {
+        townHall->updatePosition(Vec2(1918,1373));
+        background_sprite_->addChild(townHall, 15);
+        placedBuildings.push_back(townHall);
+
+        // 可选：调整缩放（如果精灵尺寸不合适）
+        townHall->setScale(0.5f);
+
+        maxGoldVolum = townHall->getMaxGoldNum();
+        maxElixirVolum = townHall->getMaxElixirNum();
+        maxLevel = townHall->getLv();
+    }
 
     //53-100 总按钮部分
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
@@ -354,33 +396,6 @@ bool SecondScene::init()
     auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn,armyCampBtn, wallsBtn, nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
-
-    //游戏背景
-    auto label = Label::createWithTTF("Your Clan!!!", "fonts/Marker Felt.ttf", 36);
-    if (label == nullptr)
-    {
-        problemLoading("'fonts/Marker Felt.ttf'");
-    }
-    else
-    {
-        label->setPosition(Vec2(origin.x + visibleSize.width / 2,
-            origin.y + visibleSize.height - label->getContentSize().height));
-        this->addChild(label, 1);
-    }   
-    background_sprite_ = Sprite::create("normal(winter).jpg");
-    if (background_sprite_ == nullptr)
-    {
-        problemLoading("'normal(winter).jpg'");
-    }
-    else
-    {
-        // position the sprite on the center of the screen
-        background_sprite_->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-        float scale = visibleSize.width / background_sprite_->getContentSize().width * 1.5f;
-        background_sprite_->setScale(scale);
-        // add the sprite as a child to this layer
-        this->addChild(background_sprite_, 0);
-    }
 
     // 创建缩放管理器
     zoom_manager_ = ZoomScrollManager::create(background_sprite_, 0.5f, 2.0f);
@@ -932,11 +947,11 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     }
                 }
                 else if (draggingItem == wallsBtn) {
-                    auto failwallsCamp = Walls::create("WallsLv1.png");
-                    if (failwallsCamp) {
-                        failwallsCamp->setPosition(snappedPos);
-                        background_sprite_->addChild(failwallsCamp, 15);
-                        failwallsCamp->playFailBlinkAndRemove();
+                    auto failwalls = Walls::create("WallsLv1.png");
+                    if (failwalls) {
+                        failwalls->setPosition(snappedPos);
+                        background_sprite_->addChild(failwalls, 15);
+                        failwalls->playFailBlinkAndRemove();
                     }
                 }
                 return; // 阻止放置
@@ -998,7 +1013,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 }
             }
             else if (draggingItem == wallsBtn) {
-                // 创建兵营
+                // 创建城墙
                 auto placedWalls = ArmyCamp::create("WallsLv1.png");
                 if (placedWalls) {
                     // 更新

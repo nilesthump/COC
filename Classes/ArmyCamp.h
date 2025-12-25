@@ -24,6 +24,16 @@ public:
         army[i]+=1;
         currentSize +=size[i];
     }
+
+    void update()override {
+        //公有属性
+        level += 1;
+        _hp += 500;
+        _textureName = StringUtils::format("ArmyCampLv%d.png", level);
+        //私有属性
+        maxSize += 20;
+    }
+
     void produceToStock(int gold);                          // 生产金币到库存（带上限）
     int collectStock();                                     // 收集库存（清空并返回数量）
 
