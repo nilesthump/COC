@@ -6,8 +6,9 @@
 class GoldMine : public Building
 {
 protected:
-    float _generateSpeed=1.0f;//金矿生产速度
+    int _generateSpeed=1;//金矿生产速度
     int maxSize = 100,currentSize=0;//金矿最大储量和现储量
+    int cost[2] = { 100,0 };//消耗的金币和圣水数量
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
@@ -20,7 +21,7 @@ public:
         _textureName = StringUtils::format("GoldMineLv%d.png", level);
         updateTexture(_textureName);
         //私有属性
-        _generateSpeed += 1.0f;
+        _generateSpeed += 1;
         maxSize += 100;
     }
     int getSpeed()const override {
@@ -32,6 +33,9 @@ public:
     int getCurrentStock()const override {
         return currentSize;
     }
+    void clearCurrentStock() override {
+        currentSize = 0;
+    }
     void updateCurrentStock() override {
         if (currentSize + _generateSpeed <= maxSize) {
             currentSize += _generateSpeed;
@@ -39,6 +43,12 @@ public:
         else {
             currentSize = maxSize;
         }
+    }
+    int getGoldCost() const override {
+        return cost[0];
+    }
+    int getElixirCost() const override {
+        return cost[1];
     }
 
     static GoldMine* create(const std::string& textureName, int hp = 100, int lv=1, float x0=667.0f, float y0 = 2074.0f);

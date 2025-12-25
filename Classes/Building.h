@@ -25,6 +25,9 @@ public:
 	void changeY(float t) {
 		y = t;
 	}
+	//建造相关
+	virtual int getGoldCost() const { return 0; }
+	virtual int getElixirCost() const { return 0; }
 	//升级相关
 	virtual void update() { return; }
 	void updateTexture(const std::string& newTextureName) {
@@ -78,9 +81,11 @@ public:
 	virtual int getMaxGoldNum() {return 0;}
 	virtual int getMaxElixirNum() {return 0 ;}
 	//获取最大容量和现容量
-	virtual int getSpeed() const { return 0; }
-	virtual int getCurrentStock() const { return 0; }   
-	virtual int getMaxStock() const { return 0; }    
+	virtual int getSpeed() const { return 1; }
+	virtual int getCurrentStock() const { return 0; }
+	virtual void clearCurrentStock() { return; }
+	virtual int getMaxStock() const { return 0; }  
+
 	// 设置/获取位置（复用Node的position，锚点内部管理）
 	void setMinePosition(const cocos2d::Vec2& pos) { this->setPosition(pos); }
 	cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }

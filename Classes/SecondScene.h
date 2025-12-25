@@ -26,7 +26,7 @@ public:
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
 
-	void Update(float delta);
+	void update(float delta);
 
 	// Touch event handlers
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);

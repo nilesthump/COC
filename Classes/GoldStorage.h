@@ -7,6 +7,7 @@ class GoldStorage : public Building
 {
 protected:
     int addSize = 1000;//额外储量
+    int cost[2] = { 100,100 };
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
@@ -23,6 +24,12 @@ public:
     }
     int getMaxStock() const override {
         return addSize;
+    }
+    int getGoldCost() const override {
+        return cost[0];
+    }
+    int getElixirCost() const override {
+        return cost[1];
     }
 
     static GoldStorage* create(const std::string& textureName, int hp = 100, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);

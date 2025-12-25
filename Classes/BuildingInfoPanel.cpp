@@ -210,7 +210,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     //兵营待定，城墙不需要显示
     if (dynamic_cast<GoldMine*>(building)) {
         _speedLabel = Label::createWithTTF(
-            StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
+            StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
@@ -228,7 +228,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         _speedLabel = Label::createWithTTF(
-            StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
+            StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
@@ -389,12 +389,12 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     std::string type;
     if (dynamic_cast<GoldMine*>(building)) {
         type = "GoldMine";
-        _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
+        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->getSpeed()));
         _resourceLabel->setString(StringUtils::format("Gold: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         type = "ElixirCollector";
-        _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
+        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->getSpeed()));
         _resourceLabel->setString(StringUtils::format("Elixir: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
@@ -509,6 +509,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     }
     // 更新面板显示的资源数量
     if (collected > 0) {
+        _targetBuilding->clearCurrentStock();
         updateInfo(_targetBuilding,temp); // 刷新信息显示
     }
 }
