@@ -541,40 +541,33 @@ bool SecondScene::init()
     return true;
 }
 
-void SecondScene::update(float delta)
+void SecondScene::Update(float delta)
 {
     // 累计时间并每秒增加圣水数量
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
 
     // 当经过1秒时
-    if (elapsedTime >= 0.50f)
-    {     
+    if (elapsedTime >= 0.1f)
+    {
         int totalGoldRate = baseGoldRate;
         int totalElixirRate = baseElixirRate;
         // 判断建筑类型并分别累加速度
         for (auto building : placedBuildings) {
-            // 金矿：计算单座金矿的产速，先产到自己的库存（而非全局）
-            if (dynamic_cast<GoldMine*>(building)) {               
-                static_cast<GoldMine*>(building)->produceToStock(building->getSpeed()); // 产到库存
+            if (dynamic_cast<GoldMine*>(building)) {
+                building->updateCurrentStock(); // 产到库存
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                static_cast<ElixirCollector*>(building)->produceToStock(building->getSpeed()); // 产到库存
+                building->updateCurrentStock(); // 产到库存
             }
             else {
-                continue;
+                continue;//只有金矿和圣水收集器需要实时更新
             }
         }
-        // 更新标签显示
-        if (elixirLabel){
-            elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
-        }
-        if (goldLabel){
-            goldLabel->setString(StringUtils::format("%d", g_goldCount));
-        }
-        if (gemLabel) {
-            gemLabel->setString(StringUtils::format("%d", g_gemCount));
-        }
+        // 每一秒都更新标签显示
+        elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+        goldLabel->setString(StringUtils::format("%d", g_goldCount));
+        gemLabel->setString(StringUtils::format("%d", g_gemCount));
         // 重置计时器
         elapsedTime = 0.0f;
     }

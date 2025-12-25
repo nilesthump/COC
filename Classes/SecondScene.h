@@ -26,7 +26,7 @@ public:
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
 
-	void update(float delta);
+	void Update(float delta);
 
 	// Touch event handlers
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
@@ -118,6 +118,7 @@ extern int g_elixirCount;
 extern int g_goldCount;
 //宝石
 extern int g_gemCount;
+//上限
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
 #endif
 

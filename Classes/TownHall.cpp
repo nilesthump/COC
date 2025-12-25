@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float goldSpeed, float x0, float y0, int max, int current)
+TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     TownHall* mine = new (std::nothrow) TownHall();
-    if (mine && mine->init(textureName, hp, lv, goldSpeed, x0, y0, max, current))
+    if (mine && mine->init(textureName, hp, lv, x0, y0))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float
     return nullptr;
 }
 
-bool TownHall::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)
+bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -29,13 +29,10 @@ bool TownHall::init(const std::string& textureName, int hp, int lv, float genera
 
     // 初始化核心属性
     _hp = hp;
-    _generateSpeed = generateSpeed;
     _textureName = textureName;
     x = x0;
     y = y0;
     level = lv;
-    maxSize = max;
-    currentSize = current;
     this->setPosition(Vec2(x0, y0));
 
     // 初始化精灵（关键：类内管理图像）
@@ -50,8 +47,6 @@ bool TownHall::init(const std::string& textureName, int hp, int lv, float genera
 
     return true;
 }
-
-
 
 bool TownHall::initSprite(const std::string& textureName)
 {

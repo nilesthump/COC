@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-ElixirStorage* ElixirStorage::create(const std::string& textureName, int hp, int lv, float elixirSpeed, float x0, float y0, int max, int current)
+ElixirStorage* ElixirStorage::create(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     ElixirStorage* mine = new (std::nothrow) ElixirStorage();
-    if (mine && mine->init(textureName, hp, lv, elixirSpeed, x0, y0, max, current))
+    if (mine && mine->init(textureName, hp, lv, x0, y0))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ ElixirStorage* ElixirStorage::create(const std::string& textureName, int hp, int
     return nullptr;
 }
 
-bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)
+bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -29,13 +29,10 @@ bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float g
 
     // 初始化核心属性
     _hp = hp;
-    _generateSpeed = generateSpeed;
     _textureName = textureName;
     x = x0;
     y = y0;
     level = lv;
-    maxSize = max;
-    currentSize = current;
     this->setPosition(Vec2(x0, y0));
 
     // 初始化精灵（关键：类内管理图像）
@@ -51,33 +48,12 @@ bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float g
     return true;
 }
 
-// 生产圣水到库存（核心：判断上限）
-void ElixirStorage::produceToStock(int elixir)
-{
-    if (currentSize + elixir <= maxSize)
-    {
-        currentSize += elixir;
-    }
-    else
-    {
-        currentSize = maxSize; // 达到上限则填满
-    }
-}
-
-// 收集库存（玩家点击圣水收集器时调用）
-int ElixirStorage::collectStock()
-{
-    int collected = currentSize;
-    currentSize = 0; // 清空库存
-    return collected;
-}
-
 bool ElixirStorage::initSprite(const std::string& textureName)
 {
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'goldMineLv1.png'");
+        problemLoading("'ElixirStorageLv1.png'");
         return false;
     }
 

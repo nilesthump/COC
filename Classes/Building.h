@@ -6,22 +6,18 @@
 
 class Building : public cocos2d::Node {
 protected:
-	// 核心属性
+	// 公共核心属性
 	int _hp;                  // 血量
-	int level;
-	float _generateSpeed;     // 生产速度
+	int level;                // 等级
 	std::string _textureName; // 纹理名称
 	cocos2d::Sprite* _sprite; // 图像精灵
 	float x, y;               //世界坐标
 	float size = 3.0f;        //尺寸
-	int maxSize, currentSize; //最大容量，当前容量
-	// 初始化精灵（内部调用）
-	virtual bool initSprite(const std::string& textureName) = 0;
+
+	virtual bool initSprite(const std::string& textureName) = 0;// 初始化精灵（内部调用）
 public:
-
 	// 初始化函数
-	virtual bool init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int maxSize, int currentSize) = 0;
-
+	virtual bool init(const std::string& textureName, int hp, int lv, float x0, float y0) = 0;
 	//修改Building坐标
 	void changeX(float t) {
 		x = t;
@@ -29,19 +25,8 @@ public:
 	void changeY(float t) {
 		y = t;
 	}
-	//升级
-	void updateLv() {
-		level++;
-	}
-	void updateHp() {
-		_hp = _hp + 50 * level;
-	}
-	void updateSpeed() {
-		_generateSpeed = _generateSpeed * level;
-	}
-	void updateSize() {
-		maxSize = maxSize + maxSize * level;
-	}
+	//升级相关
+	virtual void update() { return; }
 	void updateTexture(const std::string& newTextureName) {
 		if (_sprite) {
 			// 尝试加载新纹理
@@ -54,22 +39,14 @@ public:
 			}
 		}
 	}
-	//更新元素
+	//更新
 	void updatePosition(const cocos2d::Vec2& newPos) {
 		this->setPosition(newPos);
 		x = newPos.x;
 		y = newPos.y;
 	}
-	//获取网格坐标
-	float getXX() {
-		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
-		return you.x;
-	}
-	float getYY() {
-		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
-		return you.y;
-	}
-	//获取世界坐标
+	virtual void updateCurrentStock() { return; }
+	//接口
 	float getX() {
 		return x;
 	}
@@ -85,6 +62,14 @@ public:
 	int getHp() {
 		return _hp;
 	}
+	float getXX() {
+		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
+		return you.x;
+	}
+	float getYY() {
+		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
+		return you.y;
+	}
 	//兵营相关
 	virtual int getArmy(int i)const { return 0; }
 	virtual int getArmySize(int i)const { return 0; }
@@ -92,15 +77,13 @@ public:
 	//大本营相关
 	virtual int getMaxGoldNum() {return 0;}
 	virtual int getMaxElixirNum() {return 0 ;}
-	virtual void update() { return; }
-	// 新增：库存相关接口
-	int getCurrentStock() const { return currentSize; }   // 获取当前库存
-	int getMaxStock() const { return maxSize; }           // 获取库存上限
-
+	//获取最大容量和现容量
+	virtual int getSpeed() const { return 0; }
+	virtual int getCurrentStock() const { return 0; }   
+	virtual int getMaxStock() const { return 0; }    
 	// 设置/获取位置（复用Node的position，锚点内部管理）
 	void setMinePosition(const cocos2d::Vec2& pos) { this->setPosition(pos); }
 	cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }
-
 	// 获取精灵（仅用于特殊操作，尽量封装在类内）
 	cocos2d::Sprite* getSprite() const { return _sprite; }
 
@@ -110,8 +93,6 @@ public:
 	void playFailBlinkAndRemove();
 	// 视觉反馈：红色闪烁
 	void playFailBlink();
-
-	float getSpeed() const { return _generateSpeed; }
 };
 
 #endif
