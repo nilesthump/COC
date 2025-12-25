@@ -4,7 +4,7 @@
 #include "cocos2d.h"
 #include "ui/UIWidget.h"
 #include "ui/UIEditBox/UIEditBox.h"
-#include "sqlite3.h"
+#include <string>
 #include "WebSocketManager.h"
 
 class HelloWorld : public cocos2d::Scene,public cocos2d::ui::EditBoxDelegate
@@ -41,13 +41,6 @@ public:
     void menuChangePasswordConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelChangePasswordCallback(cocos2d::Ref* pSender);
 
-    // WebSocket test related callback functions
-    void menuWebSocketTestCallback(cocos2d::Ref* pSender);
-    void menuConnectWebSocketCallback(cocos2d::Ref* pSender);
-    void menuSendMessageCallback(cocos2d::Ref* pSender);
-    void menuDisconnectWebSocketCallback(cocos2d::Ref* pSender);
-    void menuCancelWebSocketTestCallback(cocos2d::Ref* pSender);
-
     void menuGuestLoginCallback(cocos2d::Ref* pSender);
 
     // EditBox delegate functions
@@ -56,10 +49,26 @@ public:
     virtual void editBoxReturn(cocos2d::ui::EditBox* editBox) override;
     virtual void editBoxEditingDidEndWithAction(cocos2d::ui::EditBox* editBox,
         cocos2d::ui::EditBoxDelegate::EditBoxEndAction action) override;
+
+    void handleWebSocketMessage(const std::string& message);
+
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
+    virtual void onEnter() override;
+    virtual void onExit() override;
+
 private:
+    void setupWebSocketCallbacks();
+    void sendLoginRequest(const std::string& username, const std::string& password);
+    void sendRegisterRequest(const std::string& username, const std::string& password);
+    void sendDeleteRequest(const std::string& username);
+    void sendChangePasswordRequest(const std::string& username,
+        const std::string& oldPassword, const std::string& newPassword);
+    void sendVerifyPasswordRequest(const std::string& username, const std::string& password);
+    void sendLogoutRequest(const std::string& username);
+    void performLocalLogout();
+
     cocos2d::MenuItemImage* secondSceneItem;
     cocos2d::MenuItemImage* battleTestItem;
     cocos2d::MenuItemImage* guestLoginItem;
@@ -91,22 +100,15 @@ private:
     cocos2d::ui::EditBox* confirmPasswordEditBox;
 
     // Change password specific edit boxes
+    cocos2d::ui::EditBox* oldPasswordEditBox;
     cocos2d::ui::EditBox* newPasswordEditBox;
     cocos2d::ui::EditBox* confirmNewPasswordEditBox;
-
-    // WebSocket test edit box
-    cocos2d::ui::EditBox* webSocketMessageEditBox;
 
     cocos2d::LayerColor* loginLayer;
     cocos2d::LayerColor* registerLayer;
     cocos2d::LayerColor* logoutConfirmLayer;
     cocos2d::LayerColor* deleteAccountConfirmLayer;
     cocos2d::LayerColor* changePasswordLayer;
-    cocos2d::LayerColor* webSocketTestLayer;
-
-    cocos2d::MenuItemImage* connectWebSocketItem;
-    cocos2d::MenuItemImage* sendMessageItem;
-    cocos2d::MenuItemImage* disconnectWebSocketItem;
 
     cocos2d::Label* usernameLabel;
     cocos2d::Label* passwordLabel;
@@ -117,7 +119,26 @@ private:
     cocos2d::Label* registerResultLabel;
     cocos2d::Label* deleteAccountLabel;
     cocos2d::Label* welcomeLabel;
-    cocos2d::Label* webSocketStatusLabel;
+
+    std::string pendingAction;
+    std::string pendingUsername;
+    std::string pendingNewPassword;
+    bool isWaitingForVerifyResponse;
+
+    static const int CONNECTION_TIMEOUT_SECONDS = 30;
+    static const int RECONNECT_INTERVAL_SECONDS = 3;
+    bool _isConnecting;
+    bool _connectionTimeoutScheduled;
+    bool _isReconnecting;
+    std::string _serverUrl;
+
+    void connectionTimeoutCallback(float dt);
+    void autoConnectToServer();
+    void retryConnectionCallback(float dt);
+    void startReconnecting();
+    void stopReconnecting();
+    void attemptConnection();
+
 };
 
 #endif // __HELLOWORLD_SCENE_H__
