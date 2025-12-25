@@ -118,6 +118,7 @@ extern int g_elixirCount;
 extern int g_goldCount;
 //宝石
 extern int g_gemCount;
+//上限
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
 #endif
 

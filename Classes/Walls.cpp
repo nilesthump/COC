@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-Walls* Walls::create(const std::string& textureName, int hp, int lv, float goldSpeed, float x0, float y0, int max, int current)
+Walls* Walls::create(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     Walls* mine = new (std::nothrow) Walls();
-    if (mine && mine->init(textureName, hp, lv, goldSpeed, x0, y0, max, current))
+    if (mine && mine->init(textureName, hp, lv, x0, y0 ))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ Walls* Walls::create(const std::string& textureName, int hp, int lv, float goldS
     return nullptr;
 }
 
-bool Walls::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)
+bool Walls::init(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -29,13 +29,10 @@ bool Walls::init(const std::string& textureName, int hp, int lv, float generateS
 
     // 初始化核心属性
     _hp = hp;
-    _generateSpeed = generateSpeed;
     _textureName = textureName;
     x = x0;
     y = y0;
     level = lv;
-    maxSize = max;
-    currentSize = current;
     this->setPosition(Vec2(x0, y0));
 
     // 初始化精灵（关键：类内管理图像）
@@ -49,27 +46,6 @@ bool Walls::init(const std::string& textureName, int hp, int lv, float generateS
     _sprite->setAnchorPoint(Vec2(0.5f, 0.5f));
 
     return true;
-}
-
-// 生产金币到库存（核心：判断上限）
-void Walls::produceToStock(int gold)
-{
-    if (currentSize + gold <= maxSize)
-    {
-        currentSize += gold;
-    }
-    else
-    {
-        currentSize = maxSize; // 达到上限则填满
-    }
-}
-
-// 收集库存（玩家点击金矿时调用）
-int Walls::collectStock()
-{
-    int collected = currentSize;
-    currentSize = 0; // 清空库存
-    return collected;
 }
 
 bool Walls::initSprite(const std::string& textureName)

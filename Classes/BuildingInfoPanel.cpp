@@ -3,6 +3,7 @@
 
 using namespace cocos2d;
 
+//创建面板
 BuildingInfoPanel* BuildingInfoPanel::create(Building* building, cocos2d::Sprite* background_sprite_) {
     BuildingInfoPanel* panel = new (std::nothrow) BuildingInfoPanel();
     if (panel && panel->init(building, background_sprite_)) {
@@ -13,6 +14,7 @@ BuildingInfoPanel* BuildingInfoPanel::create(Building* building, cocos2d::Sprite
     return nullptr;
 }
 
+//面板初始化
 bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_sprite_) {
     if (!Node::init()) {
         return false;
@@ -32,16 +34,12 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         this->addChild(armyExtraPanel, 100);
 
         auto armybg = Sprite::create("2.png");
-        if (!armybg) {
-            return false;
-        }
+        if (!armybg) {return false;}
         float bgWidth = armybg->getContentSize().width;
         float bgHeight = armybg->getContentSize().height;
         armybg->setPosition(Vec2(bgWidth / 2, bgHeight / 2));
         armyExtraPanel->addChild(armybg);
 
- 
-        
         // 添加士兵图像按钮115125
         barbarianBtn = MenuItemImage::create(
             "Barbarian.png",
@@ -212,7 +210,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     //兵营待定，城墙不需要显示
     if (dynamic_cast<GoldMine*>(building)) {
         _speedLabel = Label::createWithTTF(
-            StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
+            StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
@@ -230,7 +228,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         _speedLabel = Label::createWithTTF(
-            StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()),
+            StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
@@ -361,7 +359,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         CC_CALLBACK_1(BuildingInfoPanel::onCollectClicked, this)
     );
     //设置文字提示
-    auto collectLabel = Label::createWithSystemFont("collect", "fonts/Marker Felt.ttf", 24);
+    auto collectLabel = Label::createWithSystemFont("Collect", "fonts/Marker Felt.ttf", 24);
     collectLabel->setColor(Color3B::WHITE);
     collectLabel->setPosition(Vec2(_collectBtn->getContentSize().width / 2,
         _collectBtn->getContentSize().height / 2));
@@ -387,49 +385,28 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 //需要更新的文字
 void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* background_sprite_) {
     if (!building) return;
+    //私有标签
     std::string type;
     if (dynamic_cast<GoldMine*>(building)) {
         type = "GoldMine";
-        _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
-    }
-    else if (dynamic_cast<ElixirCollector*>(building)) {
-        type = "ElixirCollector";
-        _speedLabel->setString(StringUtils::format("generateSpeed: %.1f/s", building->getSpeed()));
-    }
-    else if (dynamic_cast<GoldStorage*>(building)) {
-        type = "GoldStorage";
-    }
-    else if (dynamic_cast<ElixirStorage*>(building)) {
-        type = "ElixirStorage";
-    }
-    else if (dynamic_cast<ArmyCamp*>(building)) {
-        type = "ArmyCamp";
-    }
-    else if (dynamic_cast<Walls*>(building)) {
-        type = "Walls";
-    }
-    else if (dynamic_cast<TownHall*>(building)) {
-        type = "Townhall";
-    }
-    _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
-    _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()));
-    // 添加资源数量更新
-    if (dynamic_cast<GoldMine*>(building)) {
-        _speedLabel ->setString(StringUtils::format("gengrateSpeed: %.1f/s", building->getSpeed()));
+        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->getSpeed()));
         _resourceLabel->setString(StringUtils::format("Gold: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
-        _speedLabel->setString(StringUtils::format("gengrateSpeed: %.1f/s", building->getSpeed()));
+        type = "ElixirCollector";
+        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->getSpeed()));
         _resourceLabel->setString(StringUtils::format("Elixir: %d", building->getCurrentStock()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
+        type = "GoldStorage";
         _resourceLabel->setString(StringUtils::format("GoldVolum: %d", building->getMaxStock()));
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
+        type = "ElixirStorage";
         _resourceLabel->setString(StringUtils::format("ElixirVolum: %d", building->getMaxStock()));
     }
     else if (dynamic_cast<ArmyCamp*>(building)) {
+        type = "ArmyCamp";
         _resourceLabel->setString(StringUtils::format("armyNum/maxNum: %d/%d", building->getCurrentStock(), building->getMaxStock()));
         _barbarian->setString(StringUtils::format("barbarianNum: %d", building->getArmy(0)));
         _archer->setString(StringUtils::format("archerNum: %d", building->getArmy(1)));
@@ -438,17 +415,26 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
         _bomber->setString(StringUtils::format("bomberNum: %d", building->getArmy(4)));
         _balloon->setString(StringUtils::format("balloonNum: %d", building->getArmy(5)));
     }
-    else if(dynamic_cast<Walls*>(building)){}
+    else if (dynamic_cast<Walls*>(building)) {
+        type = "Walls";
+    }
     else if (dynamic_cast<TownHall*>(building)) {
+        type = "Townhall";
         _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()));
     }
+    //公共标签
+    _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
+    _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
+    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()));
+    
 }
 
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     if (!_targetBuilding) return;
 
+    //非大本营
     if (_targetBuilding->getLv() < maxLevel&&!dynamic_cast<TownHall*>(_targetBuilding)) {
-        // 升级所需资源（可根据建筑类型和当前等级调整）
+        // 升级所需资源
         int requiredGold = 1;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
         int requiredElixir = 1;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
 
@@ -464,38 +450,11 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         g_goldCount -= requiredGold;
         g_elixirCount -= requiredElixir;
 
-        _targetBuilding->updateLv(); // 等级提升
-        _targetBuilding->updateHp();  // 生命值提升
-        _targetBuilding->updateSpeed();  // 生成速度提升
-        _targetBuilding->updateSize();  // 最大容量提升
+        _targetBuilding->update();//建筑物升级
+        _targetBuilding->playSuccessBlink();// 播放升级成功动画
 
-        //根据新等级切换建筑外观
-        std::string newTexture;
-        if (dynamic_cast<GoldMine*>(_targetBuilding)) {
-            // 金矿纹理命名规则："goldMineLv2.png"、"goldMineLv3.png"等
-            newTexture = StringUtils::format("GoldMineLv%d.png", _targetBuilding->getLv());
-        }
-        else if (dynamic_cast<ElixirCollector*>(_targetBuilding)) {
-            // 圣水收集器纹理命名规则："elixirCollectorLv2.png"等
-            newTexture = StringUtils::format("ElixirCollectorLv%d.png", _targetBuilding->getLv());
-        }
-        else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
-            newTexture = StringUtils::format("GoldStorageLv%d.png", _targetBuilding->getLv());
-        }
-        else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
-            newTexture = StringUtils::format("ElixirStorageLv%d.png", _targetBuilding->getLv());
-        }
-        else if (dynamic_cast<ArmyCamp*>(_targetBuilding)) {
-            newTexture = StringUtils::format("ArmyCampLv%d.png", _targetBuilding->getLv());
-        }
-        else if (dynamic_cast<Walls*>(_targetBuilding)) {
-            newTexture = StringUtils::format("WallsLv%d.png", _targetBuilding->getLv());
-        }
-        // 调用 更新纹理
-        _targetBuilding->updateTexture(newTexture);
-        // 播放升级成功动画
-        _targetBuilding->playSuccessBlink();
     }
+    //大本营
     else if (dynamic_cast<TownHall*>(_targetBuilding) && _targetBuilding->getLv() < 15) {
         // 升级所需资源
         int requiredGold = 100;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
@@ -512,20 +471,14 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         g_goldCount -= requiredGold;
         g_elixirCount -= requiredElixir;
 
-        _targetBuilding->updateLv(); // 等级提升
-        _targetBuilding->updateHp();  // 生命值提升
-        _targetBuilding->update();  // 最大容量提升
+        _targetBuilding->update();//建筑物升级
+        
         //更新全局变量
         maxGoldVolum = _targetBuilding->getMaxGoldNum();
         maxElixirVolum = _targetBuilding->getMaxElixirNum();
         maxLevel = _targetBuilding->getLv();
 
-        std::string newTexture = StringUtils::format("TownHallLv%d.png", _targetBuilding->getLv());
-        // 调用 更新纹理
-        _targetBuilding->updateTexture(newTexture);
-        // 播放升级成功动画
-        _targetBuilding->playSuccessBlink();
-  
+        _targetBuilding->playSuccessBlink();// 播放升级成功动画
     }
     // 更新信息面板显示
     updateInfo(_targetBuilding, temp);
@@ -537,20 +490,26 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     int collected = 0;
     // 判断建筑类型并执行对应收集逻辑
     if (auto goldMine = dynamic_cast<GoldMine*>(_targetBuilding)) {
-        collected = goldMine->collectStock();
-        if (collected > 0) {
+        collected = goldMine->getCurrentStock();
+        if (collected > 0&&collected+ g_goldCount<=maxGoldVolum) {
             g_goldCount += collected;
+        }
+        else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
+            g_goldCount = maxGoldVolum;
         }
     }
     else if (auto elixirCollector = dynamic_cast<ElixirCollector*>(_targetBuilding)) {
-        collected = elixirCollector->collectStock();
-        if (collected > 0) {
+        collected = elixirCollector->getCurrentStock();
+        if (collected > 0 && collected + g_goldCount <= maxElixirVolum) {
             g_elixirCount += collected;
         }
+        else if (collected > 0 && collected + g_goldCount > maxElixirVolum) {
+            g_elixirCount = maxElixirVolum;
+        }
     }
-
     // 更新面板显示的资源数量
     if (collected > 0) {
+        _targetBuilding->clearCurrentStock();
         updateInfo(_targetBuilding,temp); // 刷新信息显示
     }
 }

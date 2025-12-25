@@ -204,6 +204,13 @@ bool SecondScene::init()
         "GoldMineLv1.png",
         "GoldMineLv1.png",
         [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            GoldMine* tempMine = GoldMine::create("GoldMineLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost||g_elixirCount< elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
             if (!isDragging) {
                 log("goldMine ");
                 isDragging = true;
@@ -242,6 +249,13 @@ bool SecondScene::init()
         "ElixirCollectorLv1.png",
         "ElixirCollectorLv1.png",
         [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            ElixirCollector* tempMine = ElixirCollector::create("ElixirCollectorLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
             if (!isDragging) {
                 log("ElixirCollectorLv1 ");
                 isDragging = true;
@@ -274,6 +288,13 @@ bool SecondScene::init()
         "GoldStorageLv1.png",
         "GoldStorageLv1.png",
         [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            GoldStorage* tempMine = GoldStorage::create("GoldStorageLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
             if (!isDragging) {
                 log("goldStorage ");
                 isDragging = true;
@@ -305,6 +326,13 @@ bool SecondScene::init()
         "ElixirStorageLv1.png",
         "ElixirStorageLv1.png",
         [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            ElixirStorage* tempMine = ElixirStorage::create("ElixirStorageLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
             if (!isDragging) {
                 log("elixirStorage ");
                 isDragging = true;
@@ -336,13 +364,20 @@ bool SecondScene::init()
         "ArmyCampLv1.png",
         "ArmyCampLv1.png",
         [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            ArmyCamp* tempMine = ArmyCamp::create("ArmyCampLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
             if (!isDragging) {
                 log("armyCamp ");
                 isDragging = true;
                 draggingItem = armyCampBtn;
                 dragStartPosition = armyCampBtn->getPosition();
 
-                auto armyCampPreview = ElixirStorage::create("ArmyCampLv1.png"); // 预览用圣水瓶纹理
+                auto armyCampPreview = ArmyCamp::create("ArmyCampLv1.png"); // 预览用圣水瓶纹理
                 if (armyCampPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     armyCampPreview->setOpacity(150);
@@ -367,6 +402,13 @@ bool SecondScene::init()
         "WallsLv1.png",
         "WallsLv1.png",
         [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            Walls* tempMine = Walls::create("WallsLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
             if (!isDragging) {
                 log("walls ");
                 isDragging = true;
@@ -548,33 +590,26 @@ void SecondScene::update(float delta)
     elapsedTime += delta;
 
     // 当经过1秒时
-    if (elapsedTime >= 0.50f)
-    {     
+    if (elapsedTime >= 1.0f)
+    {
         int totalGoldRate = baseGoldRate;
         int totalElixirRate = baseElixirRate;
         // 判断建筑类型并分别累加速度
         for (auto building : placedBuildings) {
-            // 金矿：计算单座金矿的产速，先产到自己的库存（而非全局）
-            if (dynamic_cast<GoldMine*>(building)) {               
-                static_cast<GoldMine*>(building)->produceToStock(building->getSpeed()); // 产到库存
+            if (dynamic_cast<GoldMine*>(building)) {
+                building->updateCurrentStock(); // 产到库存
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                static_cast<ElixirCollector*>(building)->produceToStock(building->getSpeed()); // 产到库存
+                building->updateCurrentStock(); // 产到库存
             }
             else {
-                continue;
+                continue;//只有金矿和圣水收集器需要实时更新
             }
         }
-        // 更新标签显示
-        if (elixirLabel){
-            elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
-        }
-        if (goldLabel){
-            goldLabel->setString(StringUtils::format("%d", g_goldCount));
-        }
-        if (gemLabel) {
-            gemLabel->setString(StringUtils::format("%d", g_gemCount));
-        }
+        // 每一秒都更新标签显示
+        elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+        goldLabel->setString(StringUtils::format("%d", g_goldCount));
+        gemLabel->setString(StringUtils::format("%d", g_gemCount));
         // 重置计时器
         elapsedTime = 0.0f;
     }
@@ -841,53 +876,17 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         Vec2 snappedPos = Vec2(snappedX, snappedY);
-
+#if 0
         // 1. 移除预览对象
-        if (draggingItem == goldMineBtn) {
-            GoldMine* dragMinePreview = static_cast<GoldMine*>(draggingItem->getUserData());
-            if (dragMinePreview) {
-                dragMinePreview->removeFromParentAndCleanup(true);
-                draggingItem->setUserData(nullptr);
-            }
-        }
-        else if (draggingItem == elixirCollectorBtn) {
+        if (draggingItem == elixirCollectorBtn) {
             ElixirCollector* dragElixirPreview = static_cast<ElixirCollector*>(draggingItem->getUserData());
             if (dragElixirPreview) {
                 dragElixirPreview->removeFromParentAndCleanup(true);
                 draggingItem->setUserData(nullptr);
             }
         }
-        else if (draggingItem == goldStorageBtn) {
-            GoldStorage* dragGoldStoragePreview = static_cast<GoldStorage*>(draggingItem->getUserData());
-            if (dragGoldStoragePreview) {
-                dragGoldStoragePreview->removeFromParentAndCleanup(true);
-                draggingItem->setUserData(nullptr);
-            }
-        }
-        else if (draggingItem == elixirStorageBtn) {
-            ElixirStorage* dragElixirStoragePreview = static_cast<ElixirStorage*>(draggingItem->getUserData());
-            if (dragElixirStoragePreview) {
-                dragElixirStoragePreview->removeFromParentAndCleanup(true);
-                draggingItem->setUserData(nullptr);
-            }
-        }
-        else if (draggingItem == armyCampBtn) {
-            ArmyCamp* dragArmyCampPreview = static_cast<ArmyCamp*>(draggingItem->getUserData());
-            if (dragArmyCampPreview) {
-                dragArmyCampPreview->removeFromParentAndCleanup(true);
-                draggingItem->setUserData(nullptr);
-            }
-        }
-        else if (draggingItem == wallsBtn) {
-            Walls* dragWallsPreview = static_cast<Walls*>(draggingItem->getUserData());
-            if (dragWallsPreview) {
-                dragWallsPreview->removeFromParentAndCleanup(true);
-                draggingItem->setUserData(nullptr);
-            }
-        }
-
-
-        // 2. 检查放置区域有效性
+#endif
+        // 检查放置区域有效性
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
         // 在有效区域
         if (isInDiamond(diamondPos)) {
@@ -905,7 +904,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             if (isColliding) {
                 // 碰撞处理：播放失败动画
                 log("放置位置与其他建筑冲突！");
-                // 这里可以添加显示提示信息的逻辑——难道都会生成1级建筑？
+                // 这里可以添加显示提示信息的逻辑
                 if (draggingItem == goldMineBtn) {
                     auto failGoldMine = GoldMine::create("GoldMineLv1.png");
                     if (failGoldMine) {
@@ -959,68 +958,158 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             // 如果没有碰撞，继续执行放置逻辑           
             if (draggingItem == goldMineBtn) {
                 // 创建金矿
-                auto placedGoldMine = GoldMine::create("GoldMineLv1.png");
-                if (placedGoldMine) {
-                    // 更新
-                    placedGoldMine->updatePosition(snappedPos);
-                    background_sprite_->addChild(placedGoldMine, 15);
-                    placedBuildings.push_back(placedGoldMine);
-                    placedGoldMine->playSuccessBlink();
-                }
+                int goldCost = static_cast<GoldMine*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost= static_cast<GoldMine*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost&& g_elixirCount>=elixirCost) {
+                    //除旧
+                    GoldMine* dragMinePreview = static_cast<GoldMine*>(draggingItem->getUserData());
+                    if (dragMinePreview) {
+                        dragMinePreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedGoldMine = GoldMine::create("GoldMineLv1.png");
+                    if (placedGoldMine) {
+                        // 更新
+                        placedGoldMine->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedGoldMine, 15);
+                        placedBuildings.push_back(placedGoldMine);
+                        placedGoldMine->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
+                }              
             }
             else if (draggingItem == elixirCollectorBtn) {
                 // 创建圣水收集器
-                auto placedElixir = ElixirCollector::create("ElixirCollectorLv1.png"); // 替换为你的圣水收集器纹理名
-                if (placedElixir) {
-                    // 更新
-                    placedElixir->updatePosition(snappedPos);
-                    background_sprite_->addChild(placedElixir, 15);
-                    placedBuildings.push_back(placedElixir);
-                    placedElixir->playSuccessBlink();
+                int goldCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    ElixirCollector* dragElixirCollectorPreview = static_cast<ElixirCollector*>(draggingItem->getUserData());
+                    if (dragElixirCollectorPreview) {
+                        dragElixirCollectorPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedElixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
+                    if (placedElixirCollector) {
+                        // 更新
+                        placedElixirCollector->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedElixirCollector, 15);
+                        placedBuildings.push_back(placedElixirCollector);
+                        placedElixirCollector->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
                 }
             }
             else if (draggingItem == goldStorageBtn) {
                 // 创建存钱罐
-                auto placedGoldStorage = GoldStorage::create("GoldStorageLv1.png"); 
-                if (placedGoldStorage) {
-                    // 更新
-                    placedGoldStorage->updatePosition(snappedPos);
-                    background_sprite_->addChild(placedGoldStorage, 15);
-                    placedBuildings.push_back(placedGoldStorage);
-                    placedGoldStorage->playSuccessBlink();
+                int goldCost = static_cast<GoldStorage*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<GoldStorage*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    GoldStorage* dragGoldStoragePreview = static_cast<GoldStorage*>(draggingItem->getUserData());
+                    if (dragGoldStoragePreview) {
+                        dragGoldStoragePreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedGoldStorage = GoldStorage::create("GoldStorageLv1.png");
+                    if (placedGoldStorage) {
+                        // 更新
+                        placedGoldStorage->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedGoldStorage, 15);
+                        placedBuildings.push_back(placedGoldStorage);
+                        placedGoldStorage->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
                 }
             }
             else if (draggingItem == elixirStorageBtn) {
                 // 创建圣水瓶
-                auto placedElixirStorage = ElixirStorage::create("ElixirStorageLv1.png"); 
-                if (placedElixirStorage) {
-                    // 更新
-                    placedElixirStorage->updatePosition(snappedPos);
-                    background_sprite_->addChild(placedElixirStorage, 15);
-                    placedBuildings.push_back(placedElixirStorage);
-                    placedElixirStorage->playSuccessBlink();
+                int goldCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    ElixirStorage* draElixirStoragePreview = static_cast<ElixirStorage*>(draggingItem->getUserData());
+                    if (draElixirStoragePreview) {
+                        draElixirStoragePreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedElixirStorage = ElixirStorage::create("ElixirStorageLv1.png");
+                    if (placedElixirStorage) {
+                        // 更新
+                        placedElixirStorage->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedElixirStorage, 15);
+                        placedBuildings.push_back(placedElixirStorage);
+                        placedElixirStorage->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
                 }
             }
             else if (draggingItem == armyCampBtn) {
                 // 创建兵营
-                auto placedArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
-                if (placedArmyCamp) {
-                    // 更新
-                    placedArmyCamp->updatePosition(snappedPos);
-                    background_sprite_->addChild(placedArmyCamp, 15);
-                    placedBuildings.push_back(placedArmyCamp);
-                    placedArmyCamp->playSuccessBlink();
+                int goldCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    ArmyCamp* dragArmyCampPreview = static_cast<ArmyCamp*>(draggingItem->getUserData());
+                    if (dragArmyCampPreview) {
+                        dragArmyCampPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
+                    if (placedArmyCamp) {
+                        // 更新
+                        placedArmyCamp->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedArmyCamp, 15);
+                        placedBuildings.push_back(placedArmyCamp);
+                        placedArmyCamp->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
                 }
             }
             else if (draggingItem == wallsBtn) {
                 // 创建城墙
-                auto placedWalls = ArmyCamp::create("WallsLv1.png");
-                if (placedWalls) {
-                    // 更新
-                    placedWalls->updatePosition(snappedPos);
-                    background_sprite_->addChild(placedWalls, 15);
-                    placedBuildings.push_back(placedWalls);
-                    placedWalls->playSuccessBlink();
+                int goldCost = static_cast<Walls*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<Walls*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    Walls* dragWallsPreview = static_cast<Walls*>(draggingItem->getUserData());
+                    if (dragWallsPreview) {
+                        dragWallsPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedWalls = Walls::create("WallsLv1.png");
+                    if (placedWalls) {
+                        // 更新
+                        placedWalls->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedWalls, 15);
+                        placedBuildings.push_back(placedWalls);
+                        placedWalls->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
                 }
             }
         }

@@ -6,24 +6,34 @@
 class ElixirStorage : public Building
 {
 protected:
+    int addSize = 1000;
+    int cost[2] = { 100,100 };
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
-    bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float generateSpeed, float x0, float y0, int max, int current)override;
-
-    void produceToStock(int elixir);                          // 生产到库存（带上限）
-    int collectStock();                                     // 收集库存（清空并返回数量）
+    bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
     void update()override {
         //公有属性
         level += 1;
         _hp += 500;
         _textureName = StringUtils::format("ElixirStorageLv%d.png", level);
+        updateTexture(_textureName);
         //私有属性
-        maxSize += 1000;    
+        addSize += 1000;    
+        //全局属性需要增加
+    }
+    int getMaxStock() const override {
+        return addSize;
+    }
+    int getGoldCost() const override {
+        return cost[0];
+    }
+    int getElixirCost() const override {
+        return cost[1];
     }
 
-    static ElixirStorage* create(const std::string& textureName, int hp = 100, int lv = 1, float goldSpeed = 0.0f, float x0 = 667.0f, float y0 = 2074.0f, int max = 5000, int current = 0);
+    static ElixirStorage* create(const std::string& textureName, int hp = 100, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
 };
 
 #endif
