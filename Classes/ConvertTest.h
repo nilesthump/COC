@@ -58,10 +58,6 @@ public:
         // 向左移动3格 = -3 * HORIZONTAL_SPACING
         // 所以新的左角X偏移 = -21.75 - 3 = -24.75
 
-        // 对于Y轴，50x50比44x44高6格，所以上下各增加3格
-        // 原始Y偏移是4.68，现在需要上移3格 = +3 * VERTICAL_SPACING / 2
-        // 新的Y偏移 = 4.68 + 3 = 7.68
-
         // 根据DiamondGridManager的偏移量计算左角
         //! 整体网格调整在这里，如果整体偏右把-24.75调小，偏左调大；如果整体偏上把7.68调小，偏下调大
         Vec2 left_corner = diamond_center + Vec2(
