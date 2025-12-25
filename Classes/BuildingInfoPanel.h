@@ -14,10 +14,10 @@ public:
 
     // 更新面板信息（如升级后调用）
     void updateInfo(Building* building, cocos2d::Sprite* background_sprite_);
-
-    // 在protected部分添加回调声明
-    void onCollectClicked(cocos2d::Ref * sender);
 protected:
+    // 在protected部分添加回调声明
+    void onCollectClicked(cocos2d::Ref* sender);
+    void showSoldierInfo(int lv);
     // 按钮回调
     void onUpgradeClicked(cocos2d::Ref* sender);
 
@@ -27,8 +27,8 @@ private:
     Building* _targetBuilding; // 当前选中的建筑
     cocos2d::Sprite* temp;
 
-    cocos2d::MenuItemImage* archerBtn;
     cocos2d::MenuItemImage* barbarianBtn;
+    cocos2d::MenuItemImage* archerBtn;
     cocos2d::MenuItemImage* giantBtn;
     cocos2d::MenuItemImage* goblinBtn;
     cocos2d::MenuItemImage* bomberBtn;
@@ -51,6 +51,12 @@ private:
     cocos2d::Label* _goblin;
     cocos2d::Label* _bomber;
     cocos2d::Label* _balloon;
+    //信息面板
+    cocos2d::MenuItemImage* soldierInfoBtn;
+    cocos2d::Node* soldierNode;
+    cocos2d::Label* id[6];
+    cocos2d::Label* hp[6];
+    cocos2d::Label* atk[6];
 };
 
 #endif // __BUILDING_INFO_PANEL_H__
