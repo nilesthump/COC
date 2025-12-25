@@ -4,7 +4,10 @@
 SessionManager* SessionManager::instance = nullptr;
 
 // 私有构造函数，初始化登录状态为false，当前用户名为空
-SessionManager::SessionManager() : isLoggedIn(false), currentUsername("") {}
+SessionManager::SessionManager() : 
+    isLoggedIn(false),
+    currentUsername(""), 
+    loginType(LoginType::NONE) {}
 
 // 获取单例实例
 SessionManager* SessionManager::getInstance() 
@@ -27,10 +30,11 @@ void SessionManager::destroyInstance()
 }
 
 // 登录，设置登录状态为true，保存当前用户名
-void SessionManager::login(const std::string& username) 
+void SessionManager::login(const std::string& username, LoginType type)
 {
     isLoggedIn = true;
     currentUsername = username;
+    loginType = type;
 }
 
 // 登出，设置登录状态为false，清空当前用户名
@@ -38,6 +42,7 @@ void SessionManager::logout()
 {
     isLoggedIn = false;
     currentUsername = "";
+    loginType = LoginType::NONE;
 }
 
 // 检查是否登录
@@ -50,4 +55,19 @@ bool SessionManager::getIsLoggedIn() const
 std::string SessionManager::getCurrentUsername() const 
 {
     return currentUsername;
+}
+
+LoginType SessionManager::getLoginType() const
+{
+    return loginType;
+}
+
+bool SessionManager::isAccountLogin() const
+{
+    return isLoggedIn && loginType == LoginType::ACCOUNT;
+}
+
+bool SessionManager::isGuestLogin() const
+{
+    return isLoggedIn && loginType == LoginType::GUEST;
 }
