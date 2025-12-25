@@ -3,7 +3,8 @@
 #include "BattleTestLayer.h"
 #include "SQLiteTest.h"
 #include "SessionManager.h"
-#include "SQLiteManager.h"
+#include "WebSocketManager.h"
+#include "json/document.h"
 
 USING_NS_CC;
 
@@ -231,35 +232,9 @@ bool HelloWorld::init()
         changePasswordItem->addChild(changePasswordLabel);
     }
 
-    // Create WebSocket test button
-    auto webSocketTestItem = MenuItemImage::create(
-        "btn_normal.png",
-        "btn_pressed.png",
-        CC_CALLBACK_1(HelloWorld::menuWebSocketTestCallback, this));
-
-    if (webSocketTestItem == nullptr ||
-        webSocketTestItem->getContentSize().width <= 0 ||
-        webSocketTestItem->getContentSize().height <= 0)
-    {
-        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
-    }
-    else
-    {
-        // Position at bottom right corner
-        double x = origin.x + visibleSize.width - webSocketTestItem->getContentSize().width / 2 - 20;
-        double y = origin.y + webSocketTestItem->getContentSize().height / 2 + 20;
-        webSocketTestItem->setPosition(Vec2(x, y));
-
-        auto webSocketTestLabel = Label::createWithSystemFont("WEBSOCKET TEST", "fonts/Marker Felt.ttf", 18);
-        webSocketTestLabel->setColor(Color3B::WHITE);
-        webSocketTestLabel->setPosition(Vec2(webSocketTestItem->getContentSize().width / 2,
-            webSocketTestItem->getContentSize().height / 2));
-        webSocketTestItem->addChild(webSocketTestLabel);
-    }
-
     auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem,
         guestLoginItem, loginItem, registerItem, deleteAccountItem, 
-        changePasswordItem, webSocketTestItem, NULL);
+        changePasswordItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -282,6 +257,7 @@ bool HelloWorld::init()
     registerConfirmItem = nullptr;
 
     // Initialize change password specific edit boxes
+    oldPasswordEditBox = nullptr;
     newPasswordEditBox = nullptr;
     confirmNewPasswordEditBox = nullptr;
     changePasswordConfirmItem = nullptr;
@@ -293,21 +269,17 @@ bool HelloWorld::init()
     confirmDeleteItem = nullptr;
     cancelDeleteItem = nullptr;
 
-    connectWebSocketItem = nullptr;
-    sendMessageItem = nullptr;
-    disconnectWebSocketItem = nullptr;
-
     usernameLabel = nullptr;
     passwordLabel = nullptr;
 
     confirmPasswordLabel = nullptr;
     registerResultLabel = nullptr;
-    webSocketStatusLabel = nullptr;
 
-    // Initialize WebSocket test specific edit boxes
-    webSocketMessageEditBox = nullptr;
-
-    webSocketTestLayer = nullptr;
+    // Initialize auto-connection state
+    _isConnecting = false;
+    _connectionTimeoutScheduled = false;
+    _isReconnecting = false;
+    _serverUrl = "ws://100.80.250.106:8080";
 
     // Initially hide and disable secondSceneItem and battleTestItem
     auto session = SessionManager::getInstance();
@@ -432,22 +404,6 @@ bool HelloWorld::init()
     // 3. add your codes below...
     // add a label shows "Hello World"
     // create and initialize a label
-#if 0
-    auto label = Label::createWithTTF("Hello Mimi--From yzlgai", "fonts/Marker Felt.ttf", 36);
-    if (label == nullptr)
-    {
-        problemLoading("'fonts/Marker Felt.ttf'");
-    }
-    else
-    {
-        // position the label on the center of the screen
-        label->setPosition(Vec2(origin.x + visibleSize.width / 2,
-            origin.y + visibleSize.height - label->getContentSize().height));
-
-        // add the label as a child to this layer
-        this->addChild(label, 1);
-    }
-#endif
     // Create welcome label (initially hidden)
     welcomeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 36);
     if (welcomeLabel == nullptr)
@@ -481,13 +437,8 @@ bool HelloWorld::init()
         this->addChild(sprite, 0);
     }
 
-    // 初始化SQLite数据库并创建用户表
-    if (SQLiteManager::getInstance()->initDatabase("users.db")) {
-        CCLOG("数据库初始化成功");
-    }
-    else {
-        CCLOG("数据库初始化失败: %s", SQLiteManager::getInstance()->getLastError().c_str());
-    }
+    setupWebSocketCallbacks();
+
     return true;
 }
 
@@ -596,89 +547,13 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
         deleteAccountConfirmLayer->setVisible(false);
     }
 
-    // Delete account from SQLite database using SQLiteManager
+    // Get current username from session
     auto session = SessionManager::getInstance();
     std::string username = session->getCurrentUsername();
     if (!username.empty())
     {
-        bool deleteSuccess = SQLiteManager::getInstance()->deleteUser(username);
-        if (deleteSuccess)
-        {
-            CCLOG("Account deleted successfully");
-        }
-        else
-        {
-            CCLOG("Error deleting account: %s", SQLiteManager::getInstance()->getLastError().c_str());
-        }
-
-        if (deleteSuccess)
-        {
-            // Ensure login button is in login state
-            loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
-            loginLabel->setString("LOGIN");
-            // Show login button that was hidden during logout confirmation
-            loginItem->setVisible(true);
-            loginItem->setEnabled(true);
-            loginLabel->setVisible(true);
-
-            // Hide and disable secondSceneItem, battleTestItem, deleteAccountItem, and changePasswordItem
-            if (secondSceneItem != nullptr)
-            {
-                secondSceneItem->setVisible(false);
-                secondSceneItem->setEnabled(false);
-            }
-
-            if (battleTestItem != nullptr)
-            {
-                battleTestItem->setVisible(false);
-                battleTestItem->setEnabled(false);
-            }
-
-            if (deleteAccountItem != nullptr)
-            {
-                deleteAccountItem->setVisible(false);
-                deleteAccountItem->setEnabled(false);
-            }
-
-            if (changePasswordItem != nullptr)
-            {
-                changePasswordItem->setVisible(false);
-                changePasswordItem->setEnabled(false);
-            }
-
-            // Show guest login and register buttons
-            if (guestLoginItem != nullptr)
-            {
-                guestLoginItem->setVisible(true);
-                guestLoginItem->setEnabled(true);
-                // Also show the label to be extra thorough
-                if (guestLoginLabel != nullptr)
-                {
-                    guestLoginLabel->setVisible(true);
-                }
-            }
-            if (registerItem != nullptr)
-            {
-                registerItem->setVisible(true);
-                registerItem->setEnabled(true);
-                // Also show the label to be extra thorough
-                if (registerLabel != nullptr)
-                {
-                    registerLabel->setVisible(true);
-                }
-            }
-
-            // Update login status
-            auto session = SessionManager::getInstance();
-            session->logout();
-
-            // Hide welcome label
-            if (welcomeLabel != nullptr)
-            {
-                welcomeLabel->setVisible(false);
-                welcomeLabel->setString("");
-            }
-        }
+        // Send delete request via WebSocket
+        sendDeleteRequest(username);
     }
 }
 
@@ -1104,108 +979,8 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
     std::string username = loginUsernameEditBox->getText();
     std::string password = loginPasswordEditBox->getText();
 
-    // Check if username and password match any account using SQLiteManager
-    bool loginSuccess = SQLiteManager::getInstance()->loginUser(username, password);
-
-    if (loginSuccess)
-    {
-        // Hide login layer
-        if (loginLayer != nullptr)
-        {
-            loginLayer->setVisible(false);
-        }
-
-        // Show secondSceneItem and battleTestItem
-        if (secondSceneItem != nullptr)
-        {
-            secondSceneItem->setVisible(true);
-            secondSceneItem->setEnabled(true);
-        }
-
-        if (battleTestItem != nullptr)
-        {
-            battleTestItem->setVisible(true);
-            battleTestItem->setEnabled(true);
-        }
-
-        // Show delete account button for username/password login
-        if (deleteAccountItem != nullptr)
-        {
-            deleteAccountItem->setVisible(true);
-            deleteAccountItem->setEnabled(true);
-        }
-
-        // Hide guest login and register buttons
-        if (guestLoginItem != nullptr)
-        {
-            guestLoginItem->setVisible(false);
-            guestLoginItem->setEnabled(false);
-            // Also hide the label to be extra thorough
-            if (guestLoginLabel != nullptr)
-            {
-                guestLoginLabel->setVisible(false);
-            }
-        }
-        if (registerItem != nullptr)
-        {
-            registerItem->setVisible(false);
-            registerItem->setEnabled(false);
-            // Also hide the label to be extra thorough
-            if (registerLabel != nullptr)
-            {
-                registerLabel->setVisible(false);
-            }
-        }
-        if (loginItem != nullptr)
-        {
-            loginItem->setVisible(true);
-            loginItem->setEnabled(true);
-            if (loginLabel != nullptr)
-            {
-                loginLabel->setVisible(true);
-            }
-        }
-
-        // Update login status
-        auto session = SessionManager::getInstance();
-        session->login(username);
-
-        // Update welcome label
-        if (welcomeLabel != nullptr)
-        {
-            welcomeLabel->setString("Welcome " + username + "!");
-            welcomeLabel->setVisible(true);
-        }
-
-        // Change login button to logout button
-        loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
-        loginLabel->setString("LOGOUT");
-
-        // Show change password button next to logout button (symmetric position)
-        if (changePasswordItem != nullptr)
-        {
-            changePasswordItem->setVisible(true);
-            changePasswordItem->setEnabled(true);
-        }
-    }
-    else
-    {
-        // Show login error message
-        auto errorLabel = Label::createWithSystemFont("Login Failed: Invalid username or password", "fonts/Marker Felt.ttf", 18);
-        errorLabel->setColor(Color3B::RED);
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
-        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
-        loginLayer->addChild(errorLabel);
-
-        // Remove error message after 2 seconds
-        auto delay = DelayTime::create(2.0f);
-        auto removeLabel = CallFunc::create([errorLabel]() {
-            errorLabel->removeFromParentAndCleanup(true);
-            });
-        auto sequence = Sequence::create(delay, removeLabel, nullptr);
-        errorLabel->runAction(sequence);
-    }
+    // Send login request via WebSocket
+    sendLoginRequest(username, password);
 }
 
 void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
@@ -1213,23 +988,42 @@ void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    // Create a semi-transparent background layer
+
     if (changePasswordLayer == nullptr)
     {
         changePasswordLayer = LayerColor::create(Color4B(0, 0, 0, 180));
         this->addChild(changePasswordLayer, 10);
 
-        // Create new password label
+        auto oldPasswordLabel = Label::createWithSystemFont("Old Password:", "fonts/Marker Felt.ttf", 20);
+        oldPasswordLabel->setColor(Color3B::WHITE);
+        oldPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
+            origin.y + visibleSize.height / 2 + 100));
+        changePasswordLayer->addChild(oldPasswordLabel);
+
+        oldPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
+        oldPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2 + 100));
+        oldPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
+        oldPasswordEditBox->setPlaceholderFontSize(20);
+        oldPasswordEditBox->setPlaceHolder("Enter old password");
+        oldPasswordEditBox->setFontName("fonts/Marker Felt.ttf");
+        oldPasswordEditBox->setFontSize(20);
+        oldPasswordEditBox->setFontColor(Color3B::WHITE);
+        oldPasswordEditBox->setInputFlag(ui::EditBox::InputFlag::PASSWORD);
+        oldPasswordEditBox->setInputMode(ui::EditBox::InputMode::SINGLE_LINE);
+        oldPasswordEditBox->setReturnType(ui::EditBox::KeyboardReturnType::NEXT);
+        oldPasswordEditBox->setDelegate(this);
+        changePasswordLayer->addChild(oldPasswordEditBox);
+
         auto newPasswordLabel = Label::createWithSystemFont("New Password:", "fonts/Marker Felt.ttf", 20);
         newPasswordLabel->setColor(Color3B::WHITE);
         newPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200,
-            origin.y + visibleSize.height / 2 + 50));
+            origin.y + visibleSize.height / 2 + 30));
         changePasswordLayer->addChild(newPasswordLabel);
 
-        // Create new password edit box
         newPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
         newPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
-            origin.y + visibleSize.height / 2 + 50));
+            origin.y + visibleSize.height / 2 + 30));
         newPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
         newPasswordEditBox->setPlaceholderFontSize(20);
         newPasswordEditBox->setPlaceHolder("Enter new password");
@@ -1242,17 +1036,15 @@ void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
         newPasswordEditBox->setDelegate(this);
         changePasswordLayer->addChild(newPasswordEditBox);
 
-        // Create confirm new password label
         auto confirmNewPasswordLabel = Label::createWithSystemFont("Confirm Password:", "fonts/Marker Felt.ttf", 20);
         confirmNewPasswordLabel->setColor(Color3B::WHITE);
         confirmNewPasswordLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 - 240,
-            origin.y + visibleSize.height / 2 - 20));
+            origin.y + visibleSize.height / 2 - 40));
         changePasswordLayer->addChild(confirmNewPasswordLabel);
 
-        // Create confirm new password edit box
         confirmNewPasswordEditBox = ui::EditBox::create(Size(300, 40), "btn_normal.png");
         confirmNewPasswordEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2,
-            origin.y + visibleSize.height / 2 - 20));
+            origin.y + visibleSize.height / 2 - 40));
         confirmNewPasswordEditBox->setPlaceholderFontName("fonts/Marker Felt.ttf");
         confirmNewPasswordEditBox->setPlaceholderFontSize(20);
         confirmNewPasswordEditBox->setPlaceHolder("Confirm new password");
@@ -1265,7 +1057,10 @@ void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
         confirmNewPasswordEditBox->setDelegate(this);
         changePasswordLayer->addChild(confirmNewPasswordEditBox);
 
-        // Clear input fields when first creating change password layer
+        if (oldPasswordEditBox != nullptr)
+        {
+            oldPasswordEditBox->setText("");
+        }
         if (newPasswordEditBox != nullptr)
         {
             newPasswordEditBox->setText("");
@@ -1296,7 +1091,7 @@ void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
         {
             // Set confirm button position (left of center)
             double confirmX = origin.x + visibleSize.width / 2 - 120;
-            double buttonY = origin.y + visibleSize.height / 2 - 90;
+            double buttonY = origin.y + visibleSize.height / 2 - 110;
             changePasswordConfirmItem->setPosition(Vec2(confirmX, buttonY));
 
             // Set cancel button position (right of center, symmetric to confirm button)
@@ -1328,6 +1123,10 @@ void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
         // Show the existing change password layer if it was already created
         changePasswordLayer->setVisible(true);
         // Clear input fields when re-showing the layer
+        if (oldPasswordEditBox != nullptr)
+        {
+            oldPasswordEditBox->setText("");
+        }
         if (newPasswordEditBox != nullptr)
         {
             newPasswordEditBox->setText("");
@@ -1373,15 +1172,56 @@ void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
 void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
 {
     // Get input values
+    std::string oldPassword = oldPasswordEditBox->getText();
     std::string newPassword = newPasswordEditBox->getText();
     std::string confirmNewPassword = confirmNewPasswordEditBox->getText();
     bool passwordChanged = false;
 
     // Validate password length (6-16 characters)
+    if (oldPassword.empty())
+    {
+        auto errorLabel = Label::createWithSystemFont("Please enter old password", "fonts/Marker Felt.ttf", 18);
+        errorLabel->setColor(Color3B::RED);
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+        changePasswordLayer->addChild(errorLabel);
+
+        auto delay = DelayTime::create(2.0f);
+        auto removeLabel = CallFunc::create([errorLabel]() {
+            errorLabel->removeFromParentAndCleanup(true);
+            });
+        auto sequence = Sequence::create(delay, removeLabel, nullptr);
+        errorLabel->runAction(sequence);
+        return;
+    }
+
+    if (newPassword == oldPassword)
+    {
+        auto errorLabel = Label::createWithSystemFont(
+            "New password cannot be the same as old password",
+            "fonts/Marker Felt.ttf", 18);
+        errorLabel->setColor(Color3B::RED);
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+        changePasswordLayer->addChild(errorLabel);
+
+        auto delay = DelayTime::create(2.0f);
+        auto removeLabel = CallFunc::create([errorLabel]() {
+            errorLabel->removeFromParentAndCleanup(true);
+            });
+        auto sequence = Sequence::create(delay, removeLabel, nullptr);
+        errorLabel->runAction(sequence);
+        return;
+    }
+
     if (newPassword.length() < 6 || newPassword.length() > 16)
     {
         // Show error message
-        auto errorLabel = Label::createWithSystemFont("Password length must be 6-16 characters", "fonts/Marker Felt.ttf", 18);
+        auto errorLabel = Label::createWithSystemFont(
+            "Password length must be 6-16 characters",
+            "fonts/Marker Felt.ttf", 18);
         errorLabel->setColor(Color3B::RED);
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -1398,141 +1238,17 @@ void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
         return;
     }
 
-    // Check if new password is the same as old password
+    // Get the current username from session
     auto session = SessionManager::getInstance();
     std::string username = session->getCurrentUsername();
-    bool samePassword = false;
-
-    // Get the old password by logging in (this is a way to verify the existing password)
-    sqlite3* db;
-    int rc = sqlite3_open("users.db", &db);
-    if (rc == SQLITE_OK)
-    {
-        const char* sql = "SELECT password FROM users WHERE username = ?;";
-        sqlite3_stmt* stmt;
-        rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-        if (rc == SQLITE_OK)
-        {
-            sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-            if (sqlite3_step(stmt) == SQLITE_ROW)
-            {
-                const char* oldPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                if (oldPassword != nullptr)
-                {
-                    samePassword = (newPassword == std::string(oldPassword));
-                }
-            }
-            sqlite3_finalize(stmt);
-        }
-        sqlite3_close(db);
-    }
-
-    if (samePassword)
-    {
-        // Show error message
-        auto errorLabel = Label::createWithSystemFont("New password cannot be the same as old password", "fonts/Marker Felt.ttf", 18);
-        errorLabel->setColor(Color3B::RED);
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
-        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
-        changePasswordLayer->addChild(errorLabel);
-
-        // Remove error message after 2 seconds
-        auto delay = DelayTime::create(2.0f);
-        auto removeLabel = CallFunc::create([errorLabel]() {
-            errorLabel->removeFromParentAndCleanup(true);
-            });
-        auto sequence = Sequence::create(delay, removeLabel, nullptr);
-        errorLabel->runAction(sequence);
-        return;
-    }
 
     // Check if passwords match
+    // Server will verify the old password and return result
     if (newPassword == confirmNewPassword)
     {
-        // Update password using SQLiteManager
-        passwordChanged = SQLiteManager::getInstance()->changePassword(session->getCurrentUsername(), newPassword);
-        if (passwordChanged)
-        {
-            CCLOG("Password updated successfully");
-        }
-        else
-        {
-            CCLOG("Error updating password: %s", SQLiteManager::getInstance()->getLastError().c_str());
-        }
-
-        if (passwordChanged)
-        {
-            // Show success message
-            auto successLabel = Label::createWithSystemFont("Password changed successfully", "fonts/Marker Felt.ttf", 18);
-            successLabel->setColor(Color3B::GREEN);
-            auto visibleSize = Director::getInstance()->getVisibleSize();
-            Vec2 origin = Director::getInstance()->getVisibleOrigin();
-            successLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
-            changePasswordLayer->addChild(successLabel);
-
-            // Remove success message after 2 seconds
-            auto delay = DelayTime::create(1.0f);
-            auto removeLabel = CallFunc::create([successLabel, this]() {
-                successLabel->removeFromParentAndCleanup(true);
-                if (changePasswordLayer != nullptr)
-                {
-                    changePasswordLayer->setVisible(false);
-                }
-
-                // Show all scene buttons that were hidden
-                if (secondSceneItem != nullptr)
-                {
-                    secondSceneItem->setVisible(true);
-                    secondSceneItem->setEnabled(true);
-                }
-                if (battleTestItem != nullptr)
-                {
-                    battleTestItem->setVisible(true);
-                    battleTestItem->setEnabled(true);
-                }
-                auto session = SessionManager::getInstance();
-                if (deleteAccountItem != nullptr && session->getCurrentUsername() != "")
-                {
-                    deleteAccountItem->setVisible(true);
-                    deleteAccountItem->setEnabled(true);
-                }
-                if (loginItem != nullptr)
-                {
-                    loginItem->setVisible(true);
-                    loginItem->setEnabled(true);
-                    if (loginLabel != nullptr)
-                    {
-                        loginLabel->setVisible(true);
-                    }
-                }
-                if (changePasswordItem != nullptr)
-                {
-                    changePasswordItem->setVisible(true);
-                    changePasswordItem->setEnabled(true);
-                }
-                });
-            auto sequence = Sequence::create(delay, removeLabel, nullptr);
-            successLabel->runAction(sequence);
-        }
-        else
-        {
-            // Show error message
-            auto errorLabel = Label::createWithSystemFont("Failed to change password", "fonts/Marker Felt.ttf", 18);
-            errorLabel->setColor(Color3B::RED);
-            auto visibleSize = Director::getInstance()->getVisibleSize();
-            Vec2 origin = Director::getInstance()->getVisibleOrigin();
-            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
-            changePasswordLayer->addChild(errorLabel);
-
-            // Remove error message after 2 seconds
-            auto delay = DelayTime::create(2.0f);
-            auto removeLabel = CallFunc::create([errorLabel]() {
-                errorLabel->removeFromParentAndCleanup(true);
-                });
-            auto sequence = Sequence::create(delay, removeLabel, nullptr);
-            errorLabel->runAction(sequence);
-        }
+        pendingNewPassword = newPassword;
+        pendingAction = "changePassword";
+        sendVerifyPasswordRequest(username, oldPassword);
     }
     else
     {
@@ -1541,7 +1257,8 @@ void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
         errorLabel->setColor(Color3B::RED);
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
-        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, 
+            origin.y + visibleSize.height / 2 - 150));
         changePasswordLayer->addChild(errorLabel);
 
         // Remove error message after 2 seconds
@@ -1561,6 +1278,10 @@ void HelloWorld::menuCancelChangePasswordCallback(cocos2d::Ref* pSender)
     {
         changePasswordLayer->setVisible(false);
         // Clear input fields
+        if (oldPasswordEditBox != nullptr)
+        {
+            oldPasswordEditBox->setText("");
+        }
         if (newPasswordEditBox != nullptr)
         {
             newPasswordEditBox->setText("");
@@ -1822,75 +1543,52 @@ void HelloWorld::menuLogoutCallback(cocos2d::Ref* pSender)
 
 void HelloWorld::menuConfirmLogoutCallback(cocos2d::Ref* pSender)
 {
+    CCLOG("=== menuConfirmLogoutCallback called ===");
     // Hide logout confirmation layer
     if (logoutConfirmLayer != nullptr)
     {
         logoutConfirmLayer->setVisible(false);
     }
-
-    // Change logout button back to login button
-    loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
-    loginLabel->setString("LOGIN");
-    // Show login button that was hidden during logout confirmation
-    loginItem->setVisible(true);
-    loginItem->setEnabled(true);
-    loginLabel->setVisible(true);
-    // Hide and disable secondSceneItem, battleTestItem, deleteAccountItem, and changePasswordItem
-    if (secondSceneItem != nullptr)
-    {
-        secondSceneItem->setVisible(false);
-        secondSceneItem->setEnabled(false);
-    }
-
-    if (battleTestItem != nullptr)
-    {
-        battleTestItem->setVisible(false);
-        battleTestItem->setEnabled(false);
-    }
-
-    if (deleteAccountItem != nullptr)
-    {
-        deleteAccountItem->setVisible(false);
-        deleteAccountItem->setEnabled(false);
-    }
-
-    if (changePasswordItem != nullptr)
-    {
-        changePasswordItem->setVisible(false);
-        changePasswordItem->setEnabled(false);
-    }
-
-    // Show guest login and register buttons
-    if (guestLoginItem != nullptr)
-    {
-        guestLoginItem->setVisible(true);
-        guestLoginItem->setEnabled(true);
-        // Also show the label to be extra thorough
-        if (guestLoginLabel != nullptr)
-        {
-            guestLoginLabel->setVisible(true);
-        }
-    }
-    if (registerItem != nullptr)
-    {
-        registerItem->setVisible(true);
-        registerItem->setEnabled(true);
-        // Also show the label to be extra thorough
-        if (registerLabel != nullptr)
-        {
-            registerLabel->setVisible(true);
-        }
-    }
-
-    // Update login status
+    // Send logout request to server
     auto session = SessionManager::getInstance();
-    session->logout();
+    std::string username = session->getCurrentUsername();
 
-    // Hide welcome label
-    if (welcomeLabel != nullptr)
-    {
-        welcomeLabel->setVisible(false);
-        welcomeLabel->setString("");
+    bool isLoggedIn = session->getIsLoggedIn();
+
+    CCLOG("Current username: %s, isLoggedIn: %d", username.c_str(), isLoggedIn);
+
+    if (!username.empty() && isLoggedIn) {
+        // 非游客登录，发送登出请求给服务器
+
+        // 立即隐藏功能按钮，让用户感觉已经登出
+        if (secondSceneItem != nullptr) {
+            secondSceneItem->setVisible(false);
+            secondSceneItem->setEnabled(false);
+        }
+        if (battleTestItem != nullptr) {
+            battleTestItem->setVisible(false);
+            battleTestItem->setEnabled(false);
+        }
+        if (deleteAccountItem != nullptr) {
+            deleteAccountItem->setVisible(false);
+            deleteAccountItem->setEnabled(false);
+        }
+        if (changePasswordItem != nullptr) {
+            changePasswordItem->setVisible(false);
+            changePasswordItem->setEnabled(false);
+        }
+        if (welcomeLabel != nullptr) {
+            welcomeLabel->setVisible(false);
+        }
+
+        CCLOG("Sending logout request for user: %s", username.c_str());
+        sendLogoutRequest(username);
+        // UI更新将在handleWebSocketMessage中处理
+    }
+    else {
+        // 游客登录，直接更新UI
+        CCLOG("Guest login, performing local logout");
+        performLocalLogout();
     }
 }
 
@@ -1937,101 +1635,38 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
     std::string password = registerPasswordEditBox->getText();
     std::string confirmPassword = confirmPasswordEditBox->getText();
 
-    // Update registration result message
-    if (registerResultLabel != nullptr)
+    // Validate input
+    if (username.empty())
     {
-        // Check if database is full (max 3 accounts)
-        if (username.empty())
+        if (registerResultLabel != nullptr)
         {
             registerResultLabel->setString("Registration Failed: Username too short");
             registerResultLabel->setColor(Color3B::RED);
         }
-        // Validate password length (6-16 characters)
-        else if (password.length() < 6 || password.length() > 16)
+
+    }
+    else if (password.length() < 6 || password.length() > 16)
+    {
+        if (registerResultLabel != nullptr)
         {
             registerResultLabel->setString("Registration Failed: Password length 6-16 chars");
             registerResultLabel->setColor(Color3B::RED);
         }
-        // Check if password and confirm password match
-        else if (password != confirmPassword)
+
+    }
+    else if (password != confirmPassword)
+    {
+        if (registerResultLabel != nullptr)
         {
             registerResultLabel->setString("Registration Failed: Passwords do not match");
             registerResultLabel->setColor(Color3B::RED);
-        }
-        // Check if username already exists in SQLite database
-        else
-        {
-            // 使用SQLiteManager注册用户
-            if (SQLiteManager::getInstance()->registerUser(username, password)) {
-                registerResultLabel->setString("Registration Success");
-                registerResultLabel->setColor(Color3B::GREEN);
 
-                // Add a 1-second delay before hiding the register layer
-                if (registerLayer != nullptr)
-                {
-                    auto delay = DelayTime::create(1.0f);
-                    auto hideLayer = CallFunc::create([this]() {
-                        if (registerLayer != nullptr)
-                        {
-                            registerLayer->setVisible(false);
-                        }
-                        // Clear input fields after successful registration
-                        if (registerUsernameEditBox != nullptr)
-                        {
-                            registerUsernameEditBox->setText("");
-                        }
-                        if (registerPasswordEditBox != nullptr)
-                        {
-                            registerPasswordEditBox->setText("");
-                        }
-                        if (confirmPasswordEditBox != nullptr)
-                        {
-                            confirmPasswordEditBox->setText("");
-                        }
-                        // Clear registration result message
-                        if (registerResultLabel != nullptr)
-                        {
-                            registerResultLabel->setString("");
-                        }
-                        // Show login, register, and guest login buttons
-                        if (loginItem != nullptr)
-                        {
-                            loginItem->setVisible(true);
-                            loginItem->setEnabled(true);
-                            if (loginLabel != nullptr)
-                            {
-                                loginLabel->setVisible(true);
-                            }
-                        }
-                        if (registerItem != nullptr)
-                        {
-                            registerItem->setVisible(true);
-                            registerItem->setEnabled(true);
-                            if (registerLabel != nullptr)
-                            {
-                                registerLabel->setVisible(true);
-                            }
-                        }
-                        if (guestLoginItem != nullptr)
-                        {
-                            guestLoginItem->setVisible(true);
-                            guestLoginItem->setEnabled(true);
-                            if (guestLoginLabel != nullptr)
-                            {
-                                guestLoginLabel->setVisible(true);
-                            }
-                        }
-                        });
-                    auto sequence = Sequence::create(delay, hideLayer, nullptr);
-                    registerLayer->runAction(sequence);
-                }
-            }
-            else
-            {
-                registerResultLabel->setString("Registration Failed: Username already exists");
-                registerResultLabel->setColor(Color3B::RED);
-            }
         }
+    }
+    else
+    {
+        // Send register request via WebSocket
+        sendRegisterRequest(username, password);
     }
 }
 
@@ -2094,225 +1729,582 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
     }
 }
 
-// WebSocket test related callback functions implementation
-void HelloWorld::menuWebSocketTestCallback(cocos2d::Ref* pSender)
+void HelloWorld::setupWebSocketCallbacks()
 {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    auto wsManager = WebSocketManager::getInstance();
 
-    // Create semi-transparent background layer
-    if (webSocketTestLayer == nullptr)
-    {
-        webSocketTestLayer = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
-        webSocketTestLayer->setPosition(Vec2(origin.x, origin.y));
-        this->addChild(webSocketTestLayer, 10);
+    wsManager->setOnOpenCallback([this]() {
+        _isConnecting = false;
+        if (_connectionTimeoutScheduled) {
+            this->unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::connectionTimeoutCallback));
+            _connectionTimeoutScheduled = false;
+        }
+        stopReconnecting();
+        CCLOG("WebSocket connected successfully");
+        });
 
-        // Create status label
-        webSocketStatusLabel = Label::createWithSystemFont("WebSocket Status: Disconnected", "fonts/Marker Felt.ttf", 24);
-        webSocketStatusLabel->setColor(Color3B::WHITE);
-        webSocketStatusLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 100));
-        webSocketTestLayer->addChild(webSocketStatusLabel, 11);
+    wsManager->setOnMessageCallback([this](const std::string& message) {
+        handleWebSocketMessage(message);
+        });
 
-        // Create message edit box
-        Size editBoxSize = Size(400, 50);
-        webSocketMessageEditBox = ui::EditBox::create(editBoxSize, ui::Scale9Sprite::create("btn_normal.png"));
-        webSocketMessageEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 200));
-        webSocketMessageEditBox->setPlaceHolder("Enter message to send...");
-        webSocketMessageEditBox->setFontName("fonts/Marker Felt.ttf");
-        webSocketMessageEditBox->setFontSize(24);
-        webSocketMessageEditBox->setFontColor(Color3B::WHITE);
-        webSocketMessageEditBox->setPlaceholderFontColor(Color3B::GRAY);
-        webSocketMessageEditBox->setMaxLength(100);
-        webSocketTestLayer->addChild(webSocketMessageEditBox, 11);
+    wsManager->setOnErrorCallback([this](WebSocket::ErrorCode errorCode) {
+        _isConnecting = false;
+        _connectionTimeoutScheduled = false;
+        CCLOG("WebSocket error: %d, will retry...", static_cast<int>(errorCode));
+        if (!_isReconnecting) {
+            startReconnecting();
+        }
+        });
 
-        // Create connect button
-        connectWebSocketItem = MenuItemImage::create(
-            "btn_normal.png",
-            "btn_pressed.png",
-            CC_CALLBACK_1(HelloWorld::menuConnectWebSocketCallback, this));
-        connectWebSocketItem->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200, origin.y + visibleSize.height / 2));
-        auto connectLabel = Label::createWithSystemFont("CONNECT", "fonts/Marker Felt.ttf", 24);
-        connectLabel->setColor(Color3B::WHITE);
-        connectLabel->setPosition(Vec2(connectWebSocketItem->getContentSize().width / 2, connectWebSocketItem->getContentSize().height / 2));
-        connectWebSocketItem->addChild(connectLabel);
-
-        // Create send message button
-        sendMessageItem = MenuItemImage::create(
-            "btn_normal.png",
-            "btn_pressed.png",
-            CC_CALLBACK_1(HelloWorld::menuSendMessageCallback, this));
-        sendMessageItem->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-        auto sendLabel = Label::createWithSystemFont("SEND", "fonts/Marker Felt.ttf", 24);
-        sendLabel->setColor(Color3B::WHITE);
-        sendLabel->setPosition(Vec2(sendMessageItem->getContentSize().width / 2, sendMessageItem->getContentSize().height / 2));
-        sendMessageItem->addChild(sendLabel);
-
-        // Create disconnect button
-        disconnectWebSocketItem = MenuItemImage::create(
-            "btn_normal.png",
-            "btn_pressed.png",
-            CC_CALLBACK_1(HelloWorld::menuDisconnectWebSocketCallback, this));
-        disconnectWebSocketItem->setPosition(Vec2(origin.x + visibleSize.width / 2 + 200, origin.y + visibleSize.height / 2));
-        auto disconnectLabel = Label::createWithSystemFont("DISCONNECT", "fonts/Marker Felt.ttf", 24);
-        disconnectLabel->setColor(Color3B::WHITE);
-        disconnectLabel->setPosition(Vec2(disconnectWebSocketItem->getContentSize().width / 2, disconnectWebSocketItem->getContentSize().height / 2));
-        disconnectWebSocketItem->addChild(disconnectLabel);
-
-        // Create cancel button
-        auto cancelItem = MenuItemImage::create(
-            "btn_normal.png",
-            "btn_pressed.png",
-            CC_CALLBACK_1(HelloWorld::menuCancelWebSocketTestCallback, this));
-        cancelItem->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
-        auto cancelLabel = Label::createWithSystemFont("CANCEL", "fonts/Marker Felt.ttf", 24);
-        cancelLabel->setColor(Color3B::WHITE);
-        cancelLabel->setPosition(Vec2(cancelItem->getContentSize().width / 2, cancelItem->getContentSize().height / 2));
-        cancelItem->addChild(cancelLabel);
-
-        // Create menu for WebSocket test buttons
-        auto webSocketMenu = Menu::create(connectWebSocketItem, sendMessageItem, disconnectWebSocketItem, cancelItem, NULL);
-        webSocketMenu->setPosition(Vec2::ZERO);
-        webSocketTestLayer->addChild(webSocketMenu, 11);
-
-        // Set up WebSocketManager callbacks
+    wsManager->setOnCloseCallback([this]() {
+        _isConnecting = false;
+        _connectionTimeoutScheduled = false;
+        CCLOG("WebSocket disconnected, will retry...");
+        if (!_isReconnecting) {
+            startReconnecting();
+        }
+        });
+}
+    
+void HelloWorld::connectionTimeoutCallback(float dt) 
+{
+    if (_isConnecting) {
+        CCLOG("WebSocket connection timeout after %d seconds", CONNECTION_TIMEOUT_SECONDS);
         auto wsManager = WebSocketManager::getInstance();
-        wsManager->setOnOpenCallback([this]() {
-            webSocketStatusLabel->setString("WebSocket Status: Connected");
-            });
+        wsManager->disconnect();
+        _isConnecting = false;
+        _connectionTimeoutScheduled = false;
 
-        wsManager->setOnMessageCallback([this](const std::string& message) {
-            webSocketStatusLabel->setString("WebSocket Status: Received message");
-            CCLOG("WebSocket message received: %s", message.c_str());
-            });
-
-        wsManager->setOnErrorCallback([this](WebSocket::ErrorCode errorCode) {
-            webSocketStatusLabel->setString("WebSocket Status: Error");
-            CCLOG("WebSocket error: %d", static_cast<int>(errorCode));
-            });
-
-        wsManager->setOnCloseCallback([this]() {
-            webSocketStatusLabel->setString("WebSocket Status: Disconnected");
-            });
+        // 如果不是用户主动停止重连，则开始重试
+        if (!_isReconnecting) {
+            startReconnecting();
+        }
     }
-    else
-    {
-        webSocketTestLayer->setVisible(true);
+}
+
+void HelloWorld::startReconnecting() {
+    if (_isReconnecting) {
+        return;
     }
 
-    // Disable all main menu buttons
+    CCLOG("Starting auto-reconnect, will retry every %d seconds", RECONNECT_INTERVAL_SECONDS);
+    _isReconnecting = true;
+
+    // 先尝试一次连接
+    attemptConnection();
+
+    // 启动定时重试
+    this->schedule([this](float dt) {
+        retryConnectionCallback(dt);
+        }, RECONNECT_INTERVAL_SECONDS, "retryConnection");
+}
+
+void HelloWorld::stopReconnecting() {
+    if (!_isReconnecting) {
+        return;
+    }
+
+    CCLOG("Stopping auto-reconnect");
+    _isReconnecting = false;
+    this->unschedule("retryConnection");
+}
+
+void HelloWorld::retryConnectionCallback(float dt) {
+    if (_isReconnecting) {
+        attemptConnection();
+    }
+}
+
+void HelloWorld::attemptConnection() {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState == WebSocket::State::OPEN) {
+        CCLOG("Connected to server successfully, stopping reconnect");
+        stopReconnecting();
+        return;
+    }
+
+    if (_isConnecting) {
+        CCLOG("Already attempting to connect, skipping...");
+        return;
+    }
+    CCLOG("Attempting to connect to server: %s", _serverUrl.c_str());
+    _isConnecting = true;
+
+    if (wsManager->connect(_serverUrl)) {
+        this->scheduleOnce([this](float dt) {
+            connectionTimeoutCallback(dt);
+            }, CONNECTION_TIMEOUT_SECONDS, "connectionTimeout");
+        _connectionTimeoutScheduled = true;
+    }
+    else {
+        _isConnecting = false;
+        CCLOG("Failed to initiate WebSocket connection");
+    }
+}
+
+void HelloWorld::autoConnectToServer() {
+    if (_isReconnecting) {
+        CCLOG("Already reconnecting, skipping...");
+        return;
+    }
+
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState == WebSocket::State::OPEN) {
+        CCLOG("Already connected to server");
+        return;
+    }
+
+    startReconnecting();
+}
+
+void HelloWorld::onEnter() {
+    Scene::onEnter();
+    CCLOG("HelloWorld scene entering, starting auto-connect...");
+    autoConnectToServer();
+}
+
+void HelloWorld::onExit() {
+    CCLOG("HelloWorld scene exiting, keeping WebSocket connection alive for global access...");
+
+    Scene::onExit();
+}
+
+void HelloWorld::handleWebSocketMessage(const std::string& message) {
+    rapidjson::Document doc;
+    doc.Parse(message.c_str());
+
+    if (doc.HasParseError() || !doc.IsObject()) {
+        CCLOG("Failed to parse WebSocket message as JSON");
+        return;
+    }
+
+    std::string action = "";
+    bool result = false;
+    std::string responseMessage = "";
+
+    if (doc.HasMember("action") && doc["action"].IsString()) {
+        action = doc["action"].GetString();
+    }
+    if (doc.HasMember("result") && doc["result"].IsBool()) {
+        result = doc["result"].GetBool();
+    }
+    if (doc.HasMember("message") && doc["message"].IsString()) {
+        responseMessage = doc["message"].GetString();
+    }
+
+    if (action == "login") {
+        if (result) {
+            // Login success - update UI
+            if (loginLayer != nullptr) {
+                loginLayer->setVisible(false);
+            }
+
+            if (secondSceneItem != nullptr) {
+                secondSceneItem->setVisible(true);
+                secondSceneItem->setEnabled(true);
+            }
+            if (battleTestItem != nullptr) {
+                battleTestItem->setVisible(true);
+                battleTestItem->setEnabled(true);
+            }
+            if (deleteAccountItem != nullptr) {
+                deleteAccountItem->setVisible(true);
+                deleteAccountItem->setEnabled(true);
+            }
+
+            if (guestLoginItem != nullptr) {
+                guestLoginItem->setVisible(false);
+                guestLoginItem->setEnabled(false);
+                if (guestLoginLabel != nullptr) {
+                    guestLoginLabel->setVisible(false);
+                }
+            }
+            if (registerItem != nullptr) {
+                registerItem->setVisible(false);
+                registerItem->setEnabled(false);
+                if (registerLabel != nullptr) {
+                    registerLabel->setVisible(false);
+                }
+            }
+
+            auto session = SessionManager::getInstance();
+            session->login(pendingUsername, LoginType::ACCOUNT);
+
+            if (welcomeLabel != nullptr) {
+                welcomeLabel->setString("Welcome " + pendingUsername + "!");
+                welcomeLabel->setVisible(true);
+            }
+
+            if (loginItem != nullptr) {
+                loginItem->setVisible(true);
+                loginItem->setEnabled(true);
+                if (loginLabel != nullptr) {
+                    loginLabel->setVisible(true);
+                }
+            }
+
+            loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
+            loginLabel->setString("LOGOUT");
+
+            if (changePasswordItem != nullptr) {
+                changePasswordItem->setVisible(true);
+                changePasswordItem->setEnabled(true);
+            }
+        }
+        else {
+            // Login failed - show error
+            auto errorLabel = Label::createWithSystemFont("Login Failed: " + responseMessage, "fonts/Marker Felt.ttf", 18);
+            errorLabel->setColor(Color3B::RED);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            loginLayer->addChild(errorLabel);
+
+            auto delay = DelayTime::create(2.0f);
+            auto removeLabel = CallFunc::create([errorLabel]() {
+                errorLabel->removeFromParentAndCleanup(true);
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            errorLabel->runAction(sequence);
+        }
+        pendingUsername = "";
+    }
+    else if (action == "register") {
+        if (result) {
+            // Registration success
+            if (registerResultLabel != nullptr) {
+                registerResultLabel->setString("Registration Success");
+                registerResultLabel->setColor(Color3B::GREEN);
+            }
+
+            if (registerLayer != nullptr) {
+                auto delay = DelayTime::create(1.0f);
+                auto hideLayer = CallFunc::create([this]() {
+                    if (registerLayer != nullptr) {
+                        registerLayer->setVisible(false);
+                    }
+                    if (registerUsernameEditBox != nullptr) {
+                        registerUsernameEditBox->setText("");
+                    }
+                    if (registerPasswordEditBox != nullptr) {
+                        registerPasswordEditBox->setText("");
+                    }
+                    if (confirmPasswordEditBox != nullptr) {
+                        confirmPasswordEditBox->setText("");
+                    }
+                    if (registerResultLabel != nullptr) {
+                        registerResultLabel->setString("");
+                    }
+                    if (loginItem != nullptr) {
+                        loginItem->setVisible(true);
+                        loginItem->setEnabled(true);
+                        if (loginLabel != nullptr) {
+                            loginLabel->setVisible(true);
+                        }
+                    }
+                    if (registerItem != nullptr) {
+                        registerItem->setVisible(true);
+                        registerItem->setEnabled(true);
+                        if (registerLabel != nullptr) {
+                            registerLabel->setVisible(true);
+                        }
+                    }
+                    if (guestLoginItem != nullptr) {
+                        guestLoginItem->setVisible(true);
+                        guestLoginItem->setEnabled(true);
+                        if (guestLoginLabel != nullptr) {
+                            guestLoginLabel->setVisible(true);
+                        }
+                    }
+                    });
+                auto sequence = Sequence::create(delay, hideLayer, nullptr);
+                registerLayer->runAction(sequence);
+            }
+        }
+        else {
+            // Registration failed
+            if (registerResultLabel != nullptr) {
+                registerResultLabel->setString("Registration Failed: " + responseMessage);
+                registerResultLabel->setColor(Color3B::RED);
+            }
+        }
+    }
+    else if (action == "delete") {
+        if (result) {
+            // Delete success
+            CCLOG("Account deleted successfully");
+
+            if (loginItem != nullptr) {
+                loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
+                loginLabel->setString("LOGIN");
+                loginItem->setVisible(true);
+                loginItem->setEnabled(true);
+                loginLabel->setVisible(true);
+            }
+
+            if (secondSceneItem != nullptr) {
+                secondSceneItem->setVisible(false);
+                secondSceneItem->setEnabled(false);
+            }
+            if (battleTestItem != nullptr) {
+                battleTestItem->setVisible(false);
+                battleTestItem->setEnabled(false);
+            }
+            if (deleteAccountItem != nullptr) {
+                deleteAccountItem->setVisible(false);
+                deleteAccountItem->setEnabled(false);
+            }
+            if (changePasswordItem != nullptr) {
+                changePasswordItem->setVisible(false);
+                changePasswordItem->setEnabled(false);
+            }
+
+            if (guestLoginItem != nullptr) {
+                guestLoginItem->setVisible(true);
+                guestLoginItem->setEnabled(true);
+                if (guestLoginLabel != nullptr) {
+                    guestLoginLabel->setVisible(true);
+                }
+            }
+            if (registerItem != nullptr) {
+                registerItem->setVisible(true);
+                registerItem->setEnabled(true);
+                if (registerLabel != nullptr) {
+                    registerLabel->setVisible(true);
+                }
+            }
+
+            auto session = SessionManager::getInstance();
+            std::string username = session->getCurrentUsername();
+            sendLogoutRequest(username);
+            session->logout();
+
+            if (welcomeLabel != nullptr) {
+                welcomeLabel->setVisible(false);
+                welcomeLabel->setString("");
+            }
+        }
+        else {
+            CCLOG("Error deleting account: %s", responseMessage.c_str());
+        }
+    }
+    else if (action == "verifyPassword") {
+        if (result) {
+            auto session = SessionManager::getInstance();
+            std::string username = session->getCurrentUsername();
+
+            if (pendingAction == "changePassword") {
+                std::string oldPassword = oldPasswordEditBox->getText();
+                sendChangePasswordRequest(username, oldPassword, pendingNewPassword);
+
+                pendingAction = "";
+                pendingNewPassword = "";
+            }
+        }
+        else {
+            auto errorLabel = Label::createWithSystemFont("Old password is incorrect", "fonts/Marker Felt.ttf", 18);
+            errorLabel->setColor(Color3B::RED);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            changePasswordLayer->addChild(errorLabel);
+
+            auto delay = DelayTime::create(2.0f);
+            auto removeLabel = CallFunc::create([errorLabel]() {
+                errorLabel->removeFromParentAndCleanup(true);
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            errorLabel->runAction(sequence);
+
+            pendingAction = "";
+            pendingNewPassword = "";
+        }
+    }
+    else if (action == "changePassword") {
+        if (result) {
+            // Password change success
+            auto successLabel = Label::createWithSystemFont("Password changed successfully", "fonts/Marker Felt.ttf", 18);
+            successLabel->setColor(Color3B::GREEN);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            successLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            changePasswordLayer->addChild(successLabel);
+
+            auto delay = DelayTime::create(1.0f);
+            auto removeLabel = CallFunc::create([this, successLabel]() {
+                successLabel->removeFromParentAndCleanup(true);
+                if (changePasswordLayer != nullptr) {
+                    changePasswordLayer->setVisible(false);
+                }
+                if (secondSceneItem != nullptr) {
+                    secondSceneItem->setVisible(true);
+                    secondSceneItem->setEnabled(true);
+                }
+                if (battleTestItem != nullptr) {
+                    battleTestItem->setVisible(true);
+                    battleTestItem->setEnabled(true);
+                }
+                auto session = SessionManager::getInstance();
+                if (deleteAccountItem != nullptr && session->getCurrentUsername() != "") {
+                    deleteAccountItem->setVisible(true);
+                    deleteAccountItem->setEnabled(true);
+                }
+                if (loginItem != nullptr) {
+                    loginItem->setVisible(true);
+                    loginItem->setEnabled(true);
+                    if (loginLabel != nullptr) {
+                        loginLabel->setVisible(true);
+                    }
+                }
+                if (changePasswordItem != nullptr) {
+                    changePasswordItem->setVisible(true);
+                    changePasswordItem->setEnabled(true);
+                }
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            successLabel->runAction(sequence);
+        }
+        else {
+            // Password change failed
+            auto errorLabel = Label::createWithSystemFont("Failed to change password: " + responseMessage, "fonts/Marker Felt.ttf", 18);
+            errorLabel->setColor(Color3B::RED);
+            auto visibleSize = Director::getInstance()->getVisibleSize();
+            Vec2 origin = Director::getInstance()->getVisibleOrigin();
+            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+            changePasswordLayer->addChild(errorLabel);
+
+            auto delay = DelayTime::create(2.0f);
+            auto removeLabel = CallFunc::create([errorLabel]() {
+                errorLabel->removeFromParentAndCleanup(true);
+                });
+            auto sequence = Sequence::create(delay, removeLabel, nullptr);
+            errorLabel->runAction(sequence);
+        }
+    }
+    else if (action == "logout") {
+        CCLOG("=== Received logout response ===");
+        CCLOG("Result: %d, Message: %s", result, responseMessage.c_str());
+        if (result) {
+            // Logout success - update UI
+            CCLOG("Logout success, performing local logout");
+            performLocalLogout();
+        }
+        else {
+            // Logout failed
+            CCLOG("Logout failed: %s", responseMessage.c_str());
+        }
+    }
+}
+
+void HelloWorld::sendLoginRequest(const std::string& username, const std::string& password) {
+    pendingUsername = username;
+    std::string message = "{\"action\":\"login\",\"username\":\"" +
+        username + "\",\"password\":\"" + password + "\"}";
+    WebSocketManager::getInstance()->send(message);
+    CCLOG("Sending login request for user: %s", username.c_str());
+}
+
+void HelloWorld::sendRegisterRequest(const std::string& username, const std::string& password) {
+    std::string message = "{\"action\":\"register\",\"username\":\"" +
+        username + "\",\"password\":\"" + password + "\"}";
+    WebSocketManager::getInstance()->send(message);
+    CCLOG("Sending register request for user: %s", username.c_str());
+}
+
+void HelloWorld::sendDeleteRequest(const std::string& username) {
+    std::string message = "{\"action\":\"delete\",\"username\":\"" + username + "\"}";
+    WebSocketManager::getInstance()->send(message);
+    CCLOG("Sending delete request for user: %s", username.c_str());
+}
+
+void HelloWorld::sendChangePasswordRequest(const std::string& username,
+    const std::string& oldPassword, const std::string& newPassword) {
+    std::string message = "{\"action\":\"changePassword\",\"username\":\"" +
+        username + "\",\"oldPassword\":\"" + oldPassword +
+        "\",\"newPassword\":\"" + newPassword + "\"}";
+    WebSocketManager::getInstance()->send(message);
+    CCLOG("Sending change password request for user: %s", username.c_str());
+}
+
+void HelloWorld::sendVerifyPasswordRequest(const std::string& username, const std::string& password) {
+    std::string message = "{\"action\":\"verifyPassword\",\"username\":\"" +
+        username + "\",\"password\":\"" + password + "\"}";
+    WebSocketManager::getInstance()->send(message);
+    CCLOG("Sending verify password request for user: %s", username.c_str());
+}
+
+void HelloWorld::sendLogoutRequest(const std::string& username) {
+    std::string message = "{\"action\":\"logout\",\"username\":\"" + username + "\"}";
+    CCLOG("Sending logout message: %s", message.c_str());
+    WebSocketManager::getInstance()->send(message);
+    CCLOG("Logout request sent for user: %s", username.c_str());
+}
+
+void HelloWorld::performLocalLogout() {
+    // Change logout button back to login button
+    loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLoginCallback, this));
+    loginLabel->setString("LOGIN");
+    // Show login button that was hidden during logout confirmation
+    loginItem->setVisible(true);
+    loginItem->setEnabled(true);
+    loginLabel->setVisible(true);
+    // Hide and disable secondSceneItem, battleTestItem, deleteAccountItem, and changePasswordItem
     if (secondSceneItem != nullptr)
     {
         secondSceneItem->setVisible(false);
         secondSceneItem->setEnabled(false);
     }
+
     if (battleTestItem != nullptr)
     {
         battleTestItem->setVisible(false);
         battleTestItem->setEnabled(false);
     }
-    if (guestLoginItem != nullptr)
-    {
-        guestLoginItem->setVisible(false);
-        guestLoginItem->setEnabled(false);
-    }
-    if (loginItem != nullptr)
-    {
-        loginItem->setVisible(false);
-        loginItem->setEnabled(false);
-    }
-    if (registerItem != nullptr)
-    {
-        registerItem->setVisible(false);
-        registerItem->setEnabled(false);
-    }
+
     if (deleteAccountItem != nullptr)
     {
         deleteAccountItem->setVisible(false);
         deleteAccountItem->setEnabled(false);
     }
+
     if (changePasswordItem != nullptr)
     {
         changePasswordItem->setVisible(false);
         changePasswordItem->setEnabled(false);
     }
-}
 
-void HelloWorld::menuConnectWebSocketCallback(cocos2d::Ref* pSender)
-{
-    auto wsManager = WebSocketManager::getInstance();
-    wsManager->connect("ws://100.80.250.106:8080");
-}
-
-void HelloWorld::menuSendMessageCallback(cocos2d::Ref* pSender)
-{
-    if (webSocketMessageEditBox != nullptr)
+    // Show guest login and register buttons
+    if (guestLoginItem != nullptr)
     {
-        std::string message = webSocketMessageEditBox->getText();
-        if (!message.empty())
+        guestLoginItem->setVisible(true);
+        guestLoginItem->setEnabled(true);
+        if (guestLoginLabel != nullptr)
         {
-            auto wsManager = WebSocketManager::getInstance();
-            wsManager->send(message);
-            webSocketMessageEditBox->setText("");
-            webSocketStatusLabel->setString("WebSocket Status: Message sent");
+            guestLoginLabel->setVisible(true);
         }
     }
-}
-
-void HelloWorld::menuDisconnectWebSocketCallback(cocos2d::Ref* pSender)
-{
-    auto wsManager = WebSocketManager::getInstance();
-    wsManager->disconnect();
-}
-
-void HelloWorld::menuCancelWebSocketTestCallback(cocos2d::Ref* pSender)
-{
-    // Hide WebSocket test layer
-    if (webSocketTestLayer != nullptr)
+    if (registerItem != nullptr)
     {
-        webSocketTestLayer->setVisible(false);
+        registerItem->setVisible(true);
+        registerItem->setEnabled(true);
+        if (registerLabel != nullptr)
+        {
+            registerLabel->setVisible(true);
+        }
     }
 
-    // Show all main menu buttons
+    // Update login status
     auto session = SessionManager::getInstance();
-    if (session->getIsLoggedIn())
+    session->logout();
+
+    // Hide welcome label
+    if (welcomeLabel != nullptr)
     {
-        if (secondSceneItem != nullptr)
-        {
-            secondSceneItem->setVisible(true);
-            secondSceneItem->setEnabled(true);
-        }
-        if (battleTestItem != nullptr)
-        {
-            battleTestItem->setVisible(true);
-            battleTestItem->setEnabled(true);
-        }
-        if (deleteAccountItem != nullptr)
-        {
-            deleteAccountItem->setVisible(true);
-            deleteAccountItem->setEnabled(true);
-        }
-        if (changePasswordItem != nullptr)
-        {
-            changePasswordItem->setVisible(true);
-            changePasswordItem->setEnabled(true);
-        }
-    }
-    else
-    {
-        if (guestLoginItem != nullptr)
-        {
-            guestLoginItem->setVisible(true);
-            guestLoginItem->setEnabled(true);
-        }
-        if (registerItem != nullptr)
-        {
-            registerItem->setVisible(true);
-            registerItem->setEnabled(true);
-        }
-    }
-    if (loginItem != nullptr)
-    {
-        loginItem->setVisible(true);
-        loginItem->setEnabled(true);
+        welcomeLabel->setVisible(false);
+        welcomeLabel->setString("");
     }
 }

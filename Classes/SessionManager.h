@@ -3,6 +3,12 @@
 
 #include <string>
 
+enum class LoginType {
+    NONE,
+    GUEST,
+    ACCOUNT
+};
+
 class SessionManager 
 {
 private:
@@ -15,6 +21,7 @@ private:
     bool isLoggedIn;
     // 当前登录用户名
     std::string currentUsername;
+    LoginType loginType;
 
 public:
     // 获取单例实例
@@ -24,7 +31,7 @@ public:
     static void destroyInstance();
 
     // 登录
-    void login(const std::string& username);
+    void login(const std::string& username, LoginType type = LoginType::ACCOUNT);
 
     // 登出
     void logout();
@@ -34,6 +41,9 @@ public:
 
     // 获取当前登录用户名
     std::string getCurrentUsername() const;
+    LoginType getLoginType() const;
+    bool isAccountLogin() const;
+    bool isGuestLogin() const;
 };
 
 #endif // __SESSION_MANAGER_H__
