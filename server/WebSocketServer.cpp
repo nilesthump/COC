@@ -68,7 +68,7 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
             }
 
             if (client_ip[0] != '\0') {
-                std::cout << "Client connected from IP: " << client_ip << ", Port: " << 
+                std::cout << "Client connected from IP: " << client_ip << ", Port: " <<
                     client_port << std::endl;
             }
             else {
@@ -183,8 +183,8 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
             else if (action == "logout") {
                 std::string username = jsonData["username"];
 
-                std::cout << "Logout request received - client username: '" << client->username << 
-                    "', client isLoggedIn: " << client->isLoggedIn << ", requested username: '" << 
+                std::cout << "Logout request received - client username: '" << client->username <<
+                    "', client isLoggedIn: " << client->isLoggedIn << ", requested username: '" <<
                     username << "'" << std::endl;
 
                 if (client->isLoggedIn && strcmp(client->username, username.c_str()) == 0) {
@@ -205,7 +205,7 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
             }
 
             // 构建JSON响应（与客户端格式匹配）
-            std::string jsonResponse = "{\"action\":\"" + action + "\", \"result\":" + 
+            std::string jsonResponse = "{\"action\":\"" + action + "\", \"result\":" +
                 (result ? "true" : "false") + ", \"message\":\"" + message + "\"}";
 
             // 发送响应给客户端
@@ -217,7 +217,41 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
         }
 
         case LWS_CALLBACK_CLOSED:
-            std::cout << "Client disconnected" << std::endl;
+        {
+            char client_ip[128] = { 0 };
+            int client_port = 0;
+
+#ifdef _WIN32
+            SOCKET sock = lws_get_socket_fd(wsi);
+#else
+            int sock = lws_get_socket_fd(wsi);
+#endif
+
+            if (sock >= 0) {
+                struct sockaddr_storage addr;
+                socklen_t addr_len = sizeof(addr);
+                if (getpeername(sock, (struct sockaddr*)&addr, &addr_len) == 0) {
+                    if (addr.ss_family == AF_INET) {
+                        struct sockaddr_in* s = (struct sockaddr_in*)&addr;
+                        inet_ntop(AF_INET, &s->sin_addr, client_ip, sizeof(client_ip));
+                        client_port = ntohs(s->sin_port);
+                    }
+                    else if (addr.ss_family == AF_INET6) {
+                        struct sockaddr_in6* s = (struct sockaddr_in6*)&addr;
+                        inet_ntop(AF_INET6, &s->sin6_addr, client_ip, sizeof(client_ip));
+                        client_port = ntohs(s->sin6_port);
+                    }
+                }
+            }
+
+            if (client_ip[0] != '\0') {
+                std::cout << "Client disconnected from IP: " << client_ip <<
+                    ", Port: " << client_port << std::endl;
+            }
+            else {
+                std::cout << "Client disconnected" << std::endl;
+            }
+
             client->isConnected = false;
             // 如果客户端已登录，执行登出操作
             if (client->isLoggedIn && client->username[0] != '\0') {
@@ -230,13 +264,14 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
                 serverState.clients.end());
             // 注意：不要调用delete client，因为内存由libwebsockets管理
             break;
-
+        }
         default:
             break;
     }
 
     return 0;
 }
+
 
 // 协议配置
 static lws_protocols protocols[] = {
