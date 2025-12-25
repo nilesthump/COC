@@ -2240,7 +2240,7 @@ void HelloWorld::menuWebSocketTestCallback(cocos2d::Ref* pSender)
 void HelloWorld::menuConnectWebSocketCallback(cocos2d::Ref* pSender)
 {
     auto wsManager = WebSocketManager::getInstance();
-    wsManager->connect("ws://localhost:8080");
+    wsManager->connect("ws://100.80.250.106:8080");
 }
 
 void HelloWorld::menuSendMessageCallback(cocos2d::Ref* pSender)

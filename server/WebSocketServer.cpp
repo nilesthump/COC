@@ -18,7 +18,6 @@ bool initDatabase();
 struct ClientConnection {
     struct lws* wsi;
     bool isConnected;
-    std::vector<unsigned char> buffer;
 };
 
 // 服务器状态
@@ -115,7 +114,7 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
                 std::remove_if(serverState.clients.begin(), serverState.clients.end(),
                     [client](const ClientConnection* c) { return c == client; }),
                 serverState.clients.end());
-            delete client;
+            // 注意：不要调用delete client，因为内存由libwebsockets管理
             break;
 
         default:
@@ -276,12 +275,12 @@ std::map<std::string, std::string> parseJSON(const std::string& jsonStr) {
     while (pos < jsonStr.size()) {
         // 找到键的开始
         std::string::size_type keyStart = jsonStr.find('"', pos);
-        if (keyStart == std::string::npos) 
+        if (keyStart == std::string::npos)
             break;
 
         // 找到键的结束
         std::string::size_type keyEnd = jsonStr.find('"', keyStart + 1);
-        if (keyEnd == std::string::npos) 
+        if (keyEnd == std::string::npos)
             break;
 
         // 提取键
@@ -289,12 +288,12 @@ std::map<std::string, std::string> parseJSON(const std::string& jsonStr) {
 
         // 找到值的开始
         std::string::size_type valueStart = jsonStr.find('"', keyEnd + 1);
-        if (valueStart == std::string::npos) 
+        if (valueStart == std::string::npos)
             break;
 
         // 找到值的结束
         std::string::size_type valueEnd = jsonStr.find('"', valueStart + 1);
-        if (valueEnd == std::string::npos) 
+        if (valueEnd == std::string::npos)
             break;
 
         // 提取值
@@ -329,13 +328,19 @@ int main() {
     info.gid = -1;
     info.uid = -1;
 
+    // 绑定到指定IP地址（笔记本电脑的IPv4地址）
+    const char* serverAddress = "100.80.250.106";
+    info.iface = serverAddress;
+
+    std::cout << "Attempting to bind to: " << serverAddress << std::endl;
+
     struct lws_context* context = lws_create_context(&info);
     if (!context) {
         std::cerr << "Failed to create context" << std::endl;
         return -1;
     }
 
-    std::cout << "Server started on port 8080" << std::endl;
+    std::cout << "Server started on " << serverAddress << ":8080" << std::endl;
 
     // 主循环
     while (serverState.isRunning) {
