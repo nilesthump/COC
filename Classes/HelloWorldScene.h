@@ -5,6 +5,7 @@
 #include "ui/UIWidget.h"
 #include "ui/UIEditBox/UIEditBox.h"
 #include "sqlite3.h"
+#include "WebSocketManager.h"
 
 class HelloWorld : public cocos2d::Scene,public cocos2d::ui::EditBoxDelegate
 {
@@ -22,7 +23,7 @@ public:
     void menuConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelLoginCallback(cocos2d::Ref* pSender);
 
-    // 添加删除账号相关的回调函数声明
+    // 鍒犻櫎璐︽埛鐩稿叧鍥炶皟鍑芥暟
     void menuDeleteAccountCallback(cocos2d::Ref* pSender);
     void menuConfirmDeleteCallback(cocos2d::Ref* pSender);
     void menuCancelDeleteCallback(cocos2d::Ref* pSender);
@@ -35,10 +36,17 @@ public:
     void menuRegisterConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelRegisterCallback(cocos2d::Ref* pSender);
 
-    // Add change password related callback functions
+    // Change password related callback functions
     void menuChangePasswordCallback(cocos2d::Ref* pSender);
     void menuChangePasswordConfirmCallback(cocos2d::Ref* pSender);
     void menuCancelChangePasswordCallback(cocos2d::Ref* pSender);
+
+    // WebSocket test related callback functions
+    void menuWebSocketTestCallback(cocos2d::Ref* pSender);
+    void menuConnectWebSocketCallback(cocos2d::Ref* pSender);
+    void menuSendMessageCallback(cocos2d::Ref* pSender);
+    void menuDisconnectWebSocketCallback(cocos2d::Ref* pSender);
+    void menuCancelWebSocketTestCallback(cocos2d::Ref* pSender);
 
     void menuGuestLoginCallback(cocos2d::Ref* pSender);
 
@@ -86,11 +94,19 @@ private:
     cocos2d::ui::EditBox* newPasswordEditBox;
     cocos2d::ui::EditBox* confirmNewPasswordEditBox;
 
+    // WebSocket test edit box
+    cocos2d::ui::EditBox* webSocketMessageEditBox;
+
     cocos2d::LayerColor* loginLayer;
     cocos2d::LayerColor* registerLayer;
     cocos2d::LayerColor* logoutConfirmLayer;
     cocos2d::LayerColor* deleteAccountConfirmLayer;
     cocos2d::LayerColor* changePasswordLayer;
+    cocos2d::LayerColor* webSocketTestLayer;
+
+    cocos2d::MenuItemImage* connectWebSocketItem;
+    cocos2d::MenuItemImage* sendMessageItem;
+    cocos2d::MenuItemImage* disconnectWebSocketItem;
 
     cocos2d::Label* usernameLabel;
     cocos2d::Label* passwordLabel;
@@ -101,6 +117,7 @@ private:
     cocos2d::Label* registerResultLabel;
     cocos2d::Label* deleteAccountLabel;
     cocos2d::Label* welcomeLabel;
+    cocos2d::Label* webSocketStatusLabel;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

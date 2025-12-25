@@ -10,8 +10,11 @@
 #include "ElixirStorage.h"
 #include "ArmyCamp.h"
 #include "Walls.h"
+#include "TownHall.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
+
+USING_NS_CC;
 
 class SecondScene :public cocos2d::Scene
 {
@@ -47,22 +50,22 @@ public:
 
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
-	//newÅĞ¶Ï
+	//newåˆ¤æ–­
 	CREATE_FUNC(SecondScene);
 private:
-	// Ë«»÷¼ì²âÏà¹Ø
-	double _lastClickTime; // ÉÏÒ»´Îµã»÷µÄÊ±¼ä£¨Ê¹ÓÃdoubleÀàĞÍ¸ü¾«È·£©
-	cocos2d::Vec2 _lastClickPos; // ÉÏÒ»´Îµã»÷µÄÎ»ÖÃ
-	bool _isDoubleClick; // ÊÇ·ñÎªË«»÷
-	const double DOUBLE_CLICK_INTERVAL = 0.3; // Ë«»÷Ê±¼ä¼ä¸ôãĞÖµ£¨Ãë£©
+	// åŒå‡»æ£€æµ‹ç›¸å…³
+	double _lastClickTime; // ä¸Šä¸€æ¬¡ç‚¹å‡»çš„æ—¶é—´ï¼ˆä½¿ç”¨doubleç±»å‹æ›´ç²¾ç¡®ï¼‰
+	cocos2d::Vec2 _lastClickPos; // ä¸Šä¸€æ¬¡ç‚¹å‡»çš„ä½ç½®
+	bool _isDoubleClick; // æ˜¯å¦ä¸ºåŒå‡»
+	const double DOUBLE_CLICK_INTERVAL = 0.3; // åŒå‡»æ—¶é—´é—´éš”é˜ˆå€¼ï¼ˆç§’ï¼‰
 
-	//Åö×²ÅĞ¶Ï
+	//ç¢°æ’åˆ¤æ–­
 	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
 
-	Node* buildPanel;//½¨Ôì½¨ÖşÃæ°å
+	Node* buildPanel;//å»ºé€ å»ºç­‘é¢æ¿
 	Node* attackPanel;
 
-	BuildingInfoPanel* _curOpenInfoPanel = nullptr;// ½¨ÖşĞÅÏ¢Ãæ°å
+	BuildingInfoPanel* _curOpenInfoPanel = nullptr;// å»ºç­‘ä¿¡æ¯é¢æ¿
 	Building* _curOpenBuilding = nullptr;
 
 	cocos2d::Sprite* background_sprite_;
@@ -71,7 +74,7 @@ private:
 
 	cocos2d::Label* coordinate_label_;
 
-	//Ê¥Ë®¡¢½ğ±Ò¡¢±¦Ê¯
+	//åœ£æ°´ã€é‡‘å¸ã€å®çŸ³
 	cocos2d::Sprite* elixirIcon; 
 	cocos2d::Label* elixirLabel; 
 	cocos2d::Label* elixirNameLabel; 
@@ -88,7 +91,7 @@ private:
 
 	std::vector<std::vector<cocos2d::Vec2>>* grids_;
 
-	// ÍÏ×§Ïà¹Ø³ÉÔ±±äÁ¿
+	// æ‹–æ‹½ç›¸å…³æˆå‘˜å˜é‡
 	cocos2d::MenuItemImage* goldMineBtn;
 	cocos2d::MenuItemImage* elixirCollectorBtn;
 	cocos2d::MenuItemImage* goldStorageBtn;
@@ -96,24 +99,26 @@ private:
 	cocos2d::MenuItemImage* armyCampBtn;
 	cocos2d::MenuItemImage* wallsBtn;
 
-	cocos2d::MenuItemImage* draggingItem; // µ±Ç°ÕıÔÚÍÏ×§µÄÏî
-	cocos2d::Vec2 dragStartPosition; // ÍÏ×§¿ªÊ¼Ê±µÄÎ»ÖÃ
-	bool isDragging; // ÊÇ·ñÕıÔÚÍÏ×§
+	cocos2d::MenuItemImage* draggingItem; // å½“å‰æ­£åœ¨æ‹–æ‹½çš„é¡¹
+	cocos2d::Vec2 dragStartPosition; // æ‹–æ‹½å¼€å§‹æ—¶çš„ä½ç½®
+	bool isDragging; // æ˜¯å¦æ­£åœ¨æ‹–æ‹½
     
-    // ½¨ÖşÒÆ¶¯Ïà¹Ø³ÉÔ±±äÁ¿
+    // å»ºç­‘ç§»åŠ¨ç›¸å…³æˆå‘˜å˜é‡
 	Building* movingBuilding;
-    bool isMovingBuilding; // ÊÇ·ñÕıÔÚÒÆ¶¯½¨Öş
+    bool isMovingBuilding; // æ˜¯å¦æ­£åœ¨ç§»åŠ¨å»ºç­‘
 
 	std::vector<Building*> placedBuildings;
-	int baseGoldRate; // »ù´¡²ú½ğËÙÂÊ
+	int baseGoldRate; // åŸºç¡€äº§é‡‘é€Ÿç‡
 	int baseElixirRate;
 };
 
-//Ê¥Ë®
+//åœ£æ°´
 extern int g_elixirCount;
-//½ğ±Ò
+//é‡‘å¸
 extern int g_goldCount;
-//±¦Ê¯
+//å®çŸ³
 extern int g_gemCount;
+//ä¸Šé™
+extern int maxLevel, maxGoldVolum, maxElixirVolum;
 #endif
 

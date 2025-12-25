@@ -1,4 +1,4 @@
-#include "ArmyCamp.h"
+#include "TownHall.h"
 
 using namespace cocos2d;
 
@@ -8,9 +8,9 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-ArmyCamp* ArmyCamp::create(const std::string& textureName, int hp, int lv, float x0, float y0)
+TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
-    ArmyCamp* mine = new (std::nothrow) ArmyCamp();
+    TownHall* mine = new (std::nothrow) TownHall();
     if (mine && mine->init(textureName, hp, lv, x0, y0))
     {
         mine->autorelease();
@@ -20,7 +20,7 @@ ArmyCamp* ArmyCamp::create(const std::string& textureName, int hp, int lv, float
     return nullptr;
 }
 
-bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float x0, float y0)
+bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -34,7 +34,7 @@ bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float x0, fl
     y = y0;
     level = lv;
     this->setPosition(Vec2(x0, y0));
-    std::fill(army, army + 6, 0);
+
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))
     {
@@ -48,12 +48,12 @@ bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float x0, fl
     return true;
 }
 
-bool ArmyCamp::initSprite(const std::string& textureName)
+bool TownHall::initSprite(const std::string& textureName)
 {
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'ArmyCampLv1.png'");
+        problemLoading("'WallsLv1.png'");
         return false;
     }
 

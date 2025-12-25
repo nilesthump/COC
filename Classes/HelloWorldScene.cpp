@@ -3,6 +3,7 @@
 #include "BattleTestLayer.h"
 #include "SQLiteTest.h"
 #include "SessionManager.h"
+#include "SQLiteManager.h"
 
 USING_NS_CC;
 
@@ -230,8 +231,35 @@ bool HelloWorld::init()
         changePasswordItem->addChild(changePasswordLabel);
     }
 
+    // Create WebSocket test button
+    auto webSocketTestItem = MenuItemImage::create(
+        "btn_normal.png",
+        "btn_pressed.png",
+        CC_CALLBACK_1(HelloWorld::menuWebSocketTestCallback, this));
+
+    if (webSocketTestItem == nullptr ||
+        webSocketTestItem->getContentSize().width <= 0 ||
+        webSocketTestItem->getContentSize().height <= 0)
+    {
+        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+    }
+    else
+    {
+        // Position at bottom right corner
+        double x = origin.x + visibleSize.width - webSocketTestItem->getContentSize().width / 2 - 20;
+        double y = origin.y + webSocketTestItem->getContentSize().height / 2 + 20;
+        webSocketTestItem->setPosition(Vec2(x, y));
+
+        auto webSocketTestLabel = Label::createWithSystemFont("WEBSOCKET TEST", "fonts/Marker Felt.ttf", 18);
+        webSocketTestLabel->setColor(Color3B::WHITE);
+        webSocketTestLabel->setPosition(Vec2(webSocketTestItem->getContentSize().width / 2,
+            webSocketTestItem->getContentSize().height / 2));
+        webSocketTestItem->addChild(webSocketTestLabel);
+    }
+
     auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem,
-        guestLoginItem, loginItem, registerItem, deleteAccountItem, changePasswordItem, NULL);
+        guestLoginItem, loginItem, registerItem, deleteAccountItem, 
+        changePasswordItem, webSocketTestItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -265,11 +293,21 @@ bool HelloWorld::init()
     confirmDeleteItem = nullptr;
     cancelDeleteItem = nullptr;
 
+    connectWebSocketItem = nullptr;
+    sendMessageItem = nullptr;
+    disconnectWebSocketItem = nullptr;
+
     usernameLabel = nullptr;
     passwordLabel = nullptr;
 
     confirmPasswordLabel = nullptr;
     registerResultLabel = nullptr;
+    webSocketStatusLabel = nullptr;
+
+    // Initialize WebSocket test specific edit boxes
+    webSocketMessageEditBox = nullptr;
+
+    webSocketTestLayer = nullptr;
 
     // Initially hide and disable secondSceneItem and battleTestItem
     auto session = SessionManager::getInstance();
@@ -443,31 +481,12 @@ bool HelloWorld::init()
         this->addChild(sprite, 0);
     }
 
-    // ³õÊ¼»¯SQLiteÊý¾Ý¿â²¢´´½¨ÓÃ»§±í
-    sqlite3* db;
-    int rc = sqlite3_open("users.db", &db);
-
-    if (rc) {
-        CCLOG("ÎÞ·¨´ò¿ªÊý¾Ý¿â: %s", sqlite3_errmsg(db));
+    // åˆå§‹åŒ–SQLiteæ•°æ®åº“å¹¶åˆ›å»ºç”¨æˆ·è¡¨
+    if (SQLiteManager::getInstance()->initDatabase("users.db")) {
+        CCLOG("æ•°æ®åº“åˆå§‹åŒ–æˆåŠŸ");
     }
     else {
-        CCLOG("Êý¾Ý¿â´ò¿ª³É¹¦");
-
-        // ´´½¨ÓÃ»§±í£¨Èç¹û²»´æÔÚ£©
-        const char* sql = "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT);";
-        char* errMsg = nullptr;
-
-        rc = sqlite3_exec(db, sql, nullptr, nullptr, &errMsg);
-
-        if (rc != SQLITE_OK) {
-            CCLOG("´´½¨±íÊ§°Ü: %s", errMsg);
-            sqlite3_free(errMsg);
-        }
-        else {
-            CCLOG("ÓÃ»§±í´´½¨³É¹¦");
-        }
-
-        sqlite3_close(db);
+        CCLOG("æ•°æ®åº“åˆå§‹åŒ–å¤±è´¥: %s", SQLiteManager::getInstance()->getLastError().c_str());
     }
     return true;
 }
@@ -577,70 +596,19 @@ void HelloWorld::menuConfirmDeleteCallback(cocos2d::Ref* pSender)
         deleteAccountConfirmLayer->setVisible(false);
     }
 
-    // Delete account from SQLite database
+    // Delete account from SQLite database using SQLiteManager
     auto session = SessionManager::getInstance();
     std::string username = session->getCurrentUsername();
     if (!username.empty())
     {
-        bool deleteSuccess = false;
-        sqlite3* db;
-        int rc = sqlite3_open("users.db", &db);
-
-        if (rc == SQLITE_OK)
+        bool deleteSuccess = SQLiteManager::getInstance()->deleteUser(username);
+        if (deleteSuccess)
         {
-            // Start a transaction
-            rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
-            if (rc != SQLITE_OK)
-            {
-                CCLOG("Error starting transaction: %s", sqlite3_errmsg(db));
-                sqlite3_close(db);
-                return;
-            }
-
-            // Prepare SQL statement to delete user
-            const char* sql = "DELETE FROM users WHERE username = ?;";
-            sqlite3_stmt* stmt;
-
-            rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-
-            if (rc == SQLITE_OK)
-            {
-                // Bind username parameter
-                sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-
-                // Execute the query
-                if (sqlite3_step(stmt) == SQLITE_DONE)
-                {
-                    CCLOG("Account deleted successfully");
-                    deleteSuccess = true;
-                }
-                else
-                {
-                    CCLOG("Error deleting account: %s", sqlite3_errmsg(db));
-                }
-
-                sqlite3_finalize(stmt);
-            }
-            else
-            {
-                CCLOG("Error preparing SQL statement: %s", sqlite3_errmsg(db));
-            }
-
-            // Commit or rollback transaction based on result
-            if (deleteSuccess)
-            {
-                sqlite3_exec(db, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
-            }
-            else
-            {
-                sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
-            }
-
-            sqlite3_close(db);
+            CCLOG("Account deleted successfully");
         }
         else
         {
-            CCLOG("Error opening database: %s", sqlite3_errmsg(db));
+            CCLOG("Error deleting account: %s", SQLiteManager::getInstance()->getLastError().c_str());
         }
 
         if (deleteSuccess)
@@ -1136,40 +1104,8 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
     std::string username = loginUsernameEditBox->getText();
     std::string password = loginPasswordEditBox->getText();
 
-    // Check if username and password match any account in the SQLite database
-    bool loginSuccess = false;
-    sqlite3* db;
-    int rc = sqlite3_open("users.db", &db);
-
-    if (rc == SQLITE_OK)
-    {
-        // Prepare SQL statement to check credentials
-        const char* sql = "SELECT password FROM users WHERE username = ?;";
-        sqlite3_stmt* stmt;
-
-        rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-
-        if (rc == SQLITE_OK)
-        {
-            // Bind username parameter
-            sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-
-            // Execute the query
-            if (sqlite3_step(stmt) == SQLITE_ROW)
-            {
-                // Get password from database
-                const char* dbPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                if (dbPassword != nullptr && password == dbPassword)
-                {
-                    loginSuccess = true;
-                }
-            }
-
-            sqlite3_finalize(stmt);
-        }
-
-        sqlite3_close(db);
-    }
+    // Check if username and password match any account using SQLiteManager
+    bool loginSuccess = SQLiteManager::getInstance()->loginUser(username, password);
 
     if (loginSuccess)
     {
@@ -1463,119 +1399,66 @@ void HelloWorld::menuChangePasswordConfirmCallback(cocos2d::Ref* pSender)
     }
 
     // Check if new password is the same as old password
-    {
-        sqlite3* db;
-        int rc = sqlite3_open("users.db", &db);
-        bool samePassword = false;
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+    bool samePassword = false;
 
+    // Get the old password by logging in (this is a way to verify the existing password)
+    sqlite3* db;
+    int rc = sqlite3_open("users.db", &db);
+    if (rc == SQLITE_OK)
+    {
+        const char* sql = "SELECT password FROM users WHERE username = ?;";
+        sqlite3_stmt* stmt;
+        rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
         if (rc == SQLITE_OK)
         {
-            const char* sql = "SELECT password FROM users WHERE username = ?;";
-            sqlite3_stmt* stmt;
-            rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-
-            if (rc == SQLITE_OK)
+            sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+            if (sqlite3_step(stmt) == SQLITE_ROW)
             {
-                auto session = SessionManager::getInstance();
-                sqlite3_bind_text(stmt, 1, session->getCurrentUsername().c_str(), -1, SQLITE_TRANSIENT);
-                if (sqlite3_step(stmt) == SQLITE_ROW)
+                const char* oldPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                if (oldPassword != nullptr)
                 {
-                    const char* oldPassword = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                    if (oldPassword != nullptr)
-                    {
-                        samePassword = (newPassword == std::string(oldPassword));
-                    }
+                    samePassword = (newPassword == std::string(oldPassword));
                 }
-                sqlite3_finalize(stmt);
             }
-            sqlite3_close(db);
+            sqlite3_finalize(stmt);
         }
+        sqlite3_close(db);
+    }
 
-        if (samePassword)
-        {
-            // Show error message
-            auto errorLabel = Label::createWithSystemFont("New password cannot be the same as old password", "fonts/Marker Felt.ttf", 18);
-            errorLabel->setColor(Color3B::RED);
-            auto visibleSize = Director::getInstance()->getVisibleSize();
-            Vec2 origin = Director::getInstance()->getVisibleOrigin();
-            errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
-            changePasswordLayer->addChild(errorLabel);
+    if (samePassword)
+    {
+        // Show error message
+        auto errorLabel = Label::createWithSystemFont("New password cannot be the same as old password", "fonts/Marker Felt.ttf", 18);
+        errorLabel->setColor(Color3B::RED);
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        errorLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 150));
+        changePasswordLayer->addChild(errorLabel);
 
-            // Remove error message after 2 seconds
-            auto delay = DelayTime::create(2.0f);
-            auto removeLabel = CallFunc::create([errorLabel]() {
-                errorLabel->removeFromParentAndCleanup(true);
-                });
-            auto sequence = Sequence::create(delay, removeLabel, nullptr);
-            errorLabel->runAction(sequence);
-            return;
-        }
+        // Remove error message after 2 seconds
+        auto delay = DelayTime::create(2.0f);
+        auto removeLabel = CallFunc::create([errorLabel]() {
+            errorLabel->removeFromParentAndCleanup(true);
+            });
+        auto sequence = Sequence::create(delay, removeLabel, nullptr);
+        errorLabel->runAction(sequence);
+        return;
     }
 
     // Check if passwords match
     if (newPassword == confirmNewPassword)
     {
-        // Update password in SQLite database
-        sqlite3* db;
-        int rc = sqlite3_open("users.db", &db);
-
-        if (rc == SQLITE_OK)
+        // Update password using SQLiteManager
+        passwordChanged = SQLiteManager::getInstance()->changePassword(session->getCurrentUsername(), newPassword);
+        if (passwordChanged)
         {
-            // Start a transaction
-            rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
-            if (rc != SQLITE_OK)
-            {
-                CCLOG("Error starting transaction: %s", sqlite3_errmsg(db));
-                sqlite3_close(db);
-                return;
-            }
-
-            // Prepare SQL statement to update password
-            const char* sql = "UPDATE users SET password = ? WHERE username = ?;";
-            sqlite3_stmt* stmt;
-
-            rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-
-            if (rc == SQLITE_OK)
-            {
-                // Bind parameters
-                sqlite3_bind_text(stmt, 1, newPassword.c_str(), -1, SQLITE_TRANSIENT);
-                auto session = SessionManager::getInstance();
-                sqlite3_bind_text(stmt, 2, session->getCurrentUsername().c_str(), -1, SQLITE_TRANSIENT);
-
-                // Execute the statement
-                if (sqlite3_step(stmt) == SQLITE_DONE)
-                {
-                    CCLOG("Password updated successfully");
-                    passwordChanged = true;
-                }
-                else
-                {
-                    CCLOG("Error updating password: %s", sqlite3_errmsg(db));
-                }
-
-                sqlite3_finalize(stmt);
-            }
-            else
-            {
-                CCLOG("Error preparing SQL statement: %s", sqlite3_errmsg(db));
-            }
-
-            // Commit or rollback transaction based on result
-            if (passwordChanged)
-            {
-                sqlite3_exec(db, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
-            }
-            else
-            {
-                sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
-            }
-
-            sqlite3_close(db);
+            CCLOG("Password updated successfully");
         }
         else
         {
-            CCLOG("Error opening database: %s", sqlite3_errmsg(db));
+            CCLOG("Error updating password: %s", SQLiteManager::getInstance()->getLastError().c_str());
         }
 
         if (passwordChanged)
@@ -2078,155 +1961,74 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
         // Check if username already exists in SQLite database
         else
         {
-            sqlite3* db;
-            int rc = sqlite3_open("users.db", &db);
+            // ä½¿ç”¨SQLiteManageræ³¨å†Œç”¨æˆ·
+            if (SQLiteManager::getInstance()->registerUser(username, password)) {
+                registerResultLabel->setString("Registration Success");
+                registerResultLabel->setColor(Color3B::GREEN);
 
-
-            if (rc == SQLITE_OK)
-            {
-                // Start a transaction
-                rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
-                if (rc != SQLITE_OK)
+                // Add a 1-second delay before hiding the register layer
+                if (registerLayer != nullptr)
                 {
-                    registerResultLabel->setString("Registration Failed: Database error");
-                    registerResultLabel->setColor(Color3B::RED);
-                    sqlite3_close(db);
-                    return;
-                }
-
-                bool usernameExists = false;
-
-                // Prepare SQL statement to check if username exists
-                const char* sql = "SELECT username FROM users WHERE username = ?;";
-                sqlite3_stmt* stmt;
-
-                rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
-
-                if (rc == SQLITE_OK)
-                {
-                    // Bind username parameter
-                    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-
-                    // Execute the query
-                    if (sqlite3_step(stmt) == SQLITE_ROW)
-                    {
-                        usernameExists = true;
-                    }
-
-                    sqlite3_finalize(stmt);
-                }
-
-                if (usernameExists)
-                {
-                    sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
-                    registerResultLabel->setString("Registration Failed: Username already exists");
-                    registerResultLabel->setColor(Color3B::RED);
-                }
-                else
-                {
-                    // Prepare SQL statement to insert new user
-                    const char* insertSql = "INSERT INTO users (username, password) VALUES (?, ?);";
-                    sqlite3_stmt* insertStmt;
-
-                    rc = sqlite3_prepare_v2(db, insertSql, -1, &insertStmt, nullptr);
-
-                    if (rc == SQLITE_OK)
-                    {
-                        // Bind parameters
-                        sqlite3_bind_text(insertStmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-                        sqlite3_bind_text(insertStmt, 2, password.c_str(), -1, SQLITE_TRANSIENT);
-
-                        // Execute the statement
-                        rc = sqlite3_step(insertStmt);
-
-                        if (rc == SQLITE_DONE)
+                    auto delay = DelayTime::create(1.0f);
+                    auto hideLayer = CallFunc::create([this]() {
+                        if (registerLayer != nullptr)
                         {
-                            sqlite3_exec(db, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
-                            registerResultLabel->setString("Registration Success");
-                            registerResultLabel->setColor(Color3B::GREEN);
-
-                            // Add a 1-second delay before hiding the register layer
-                            if (registerLayer != nullptr)
+                            registerLayer->setVisible(false);
+                        }
+                        // Clear input fields after successful registration
+                        if (registerUsernameEditBox != nullptr)
+                        {
+                            registerUsernameEditBox->setText("");
+                        }
+                        if (registerPasswordEditBox != nullptr)
+                        {
+                            registerPasswordEditBox->setText("");
+                        }
+                        if (confirmPasswordEditBox != nullptr)
+                        {
+                            confirmPasswordEditBox->setText("");
+                        }
+                        // Clear registration result message
+                        if (registerResultLabel != nullptr)
+                        {
+                            registerResultLabel->setString("");
+                        }
+                        // Show login, register, and guest login buttons
+                        if (loginItem != nullptr)
+                        {
+                            loginItem->setVisible(true);
+                            loginItem->setEnabled(true);
+                            if (loginLabel != nullptr)
                             {
-                                auto delay = DelayTime::create(1.0f);
-                                auto hideLayer = CallFunc::create([this]() {
-                                    if (registerLayer != nullptr)
-                                    {
-                                        registerLayer->setVisible(false);
-                                    }
-                                    // Clear input fields after successful registration
-                                    if (registerUsernameEditBox != nullptr)
-                                    {
-                                        registerUsernameEditBox->setText("");
-                                    }
-                                    if (registerPasswordEditBox != nullptr)
-                                    {
-                                        registerPasswordEditBox->setText("");
-                                    }
-                                    if (confirmPasswordEditBox != nullptr)
-                                    {
-                                        confirmPasswordEditBox->setText("");
-                                    }
-                                    // Clear registration result message
-                                    if (registerResultLabel != nullptr)
-                                    {
-                                        registerResultLabel->setString("");
-                                    }
-                                    // Show login, register, and guest login buttons
-                                    if (loginItem != nullptr)
-                                    {
-                                        loginItem->setVisible(true);
-                                        loginItem->setEnabled(true);
-                                        if (loginLabel != nullptr)
-                                        {
-                                            loginLabel->setVisible(true);
-                                        }
-                                    }
-                                    if (registerItem != nullptr)
-                                    {
-                                        registerItem->setVisible(true);
-                                        registerItem->setEnabled(true);
-                                        if (registerLabel != nullptr)
-                                        {
-                                            registerLabel->setVisible(true);
-                                        }
-                                    }
-                                    if (guestLoginItem != nullptr)
-                                    {
-                                        guestLoginItem->setVisible(true);
-                                        guestLoginItem->setEnabled(true);
-                                        if (guestLoginLabel != nullptr)
-                                        {
-                                            guestLoginLabel->setVisible(true);
-                                        }
-                                    }
-                                    });
-                                auto sequence = Sequence::create(delay, hideLayer, nullptr);
-                                registerLayer->runAction(sequence);
+                                loginLabel->setVisible(true);
                             }
                         }
-                        else
+                        if (registerItem != nullptr)
                         {
-                            sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
-                            registerResultLabel->setString("Registration Failed: Database error");
-                            registerResultLabel->setColor(Color3B::RED);
+                            registerItem->setVisible(true);
+                            registerItem->setEnabled(true);
+                            if (registerLabel != nullptr)
+                            {
+                                registerLabel->setVisible(true);
+                            }
                         }
-
-                        sqlite3_finalize(insertStmt);
-                    }
-                    else
-                    {
-                        sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
-                        registerResultLabel->setString("Registration Failed: Database error");
-                        registerResultLabel->setColor(Color3B::RED);
-                    }
+                        if (guestLoginItem != nullptr)
+                        {
+                            guestLoginItem->setVisible(true);
+                            guestLoginItem->setEnabled(true);
+                            if (guestLoginLabel != nullptr)
+                            {
+                                guestLoginLabel->setVisible(true);
+                            }
+                        }
+                        });
+                    auto sequence = Sequence::create(delay, hideLayer, nullptr);
+                    registerLayer->runAction(sequence);
                 }
-
-                sqlite3_close(db);
             }
             else
             {
-                registerResultLabel->setString("Registration Failed: Database error");
+                registerResultLabel->setString("Registration Failed: Username already exists");
                 registerResultLabel->setColor(Color3B::RED);
             }
         }
@@ -2289,5 +2091,228 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
     {
         deleteAccountItem->setVisible(false);
         deleteAccountItem->setEnabled(false);
+    }
+}
+
+// WebSocket test related callback functions implementation
+void HelloWorld::menuWebSocketTestCallback(cocos2d::Ref* pSender)
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    // Create semi-transparent background layer
+    if (webSocketTestLayer == nullptr)
+    {
+        webSocketTestLayer = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
+        webSocketTestLayer->setPosition(Vec2(origin.x, origin.y));
+        this->addChild(webSocketTestLayer, 10);
+
+        // Create status label
+        webSocketStatusLabel = Label::createWithSystemFont("WebSocket Status: Disconnected", "fonts/Marker Felt.ttf", 24);
+        webSocketStatusLabel->setColor(Color3B::WHITE);
+        webSocketStatusLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 100));
+        webSocketTestLayer->addChild(webSocketStatusLabel, 11);
+
+        // Create message edit box
+        Size editBoxSize = Size(400, 50);
+        webSocketMessageEditBox = ui::EditBox::create(editBoxSize, ui::Scale9Sprite::create("btn_normal.png"));
+        webSocketMessageEditBox->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 200));
+        webSocketMessageEditBox->setPlaceHolder("Enter message to send...");
+        webSocketMessageEditBox->setFontName("fonts/Marker Felt.ttf");
+        webSocketMessageEditBox->setFontSize(24);
+        webSocketMessageEditBox->setFontColor(Color3B::WHITE);
+        webSocketMessageEditBox->setPlaceholderFontColor(Color3B::GRAY);
+        webSocketMessageEditBox->setMaxLength(100);
+        webSocketTestLayer->addChild(webSocketMessageEditBox, 11);
+
+        // Create connect button
+        connectWebSocketItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuConnectWebSocketCallback, this));
+        connectWebSocketItem->setPosition(Vec2(origin.x + visibleSize.width / 2 - 200, origin.y + visibleSize.height / 2));
+        auto connectLabel = Label::createWithSystemFont("CONNECT", "fonts/Marker Felt.ttf", 24);
+        connectLabel->setColor(Color3B::WHITE);
+        connectLabel->setPosition(Vec2(connectWebSocketItem->getContentSize().width / 2, connectWebSocketItem->getContentSize().height / 2));
+        connectWebSocketItem->addChild(connectLabel);
+
+        // Create send message button
+        sendMessageItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuSendMessageCallback, this));
+        sendMessageItem->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+        auto sendLabel = Label::createWithSystemFont("SEND", "fonts/Marker Felt.ttf", 24);
+        sendLabel->setColor(Color3B::WHITE);
+        sendLabel->setPosition(Vec2(sendMessageItem->getContentSize().width / 2, sendMessageItem->getContentSize().height / 2));
+        sendMessageItem->addChild(sendLabel);
+
+        // Create disconnect button
+        disconnectWebSocketItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuDisconnectWebSocketCallback, this));
+        disconnectWebSocketItem->setPosition(Vec2(origin.x + visibleSize.width / 2 + 200, origin.y + visibleSize.height / 2));
+        auto disconnectLabel = Label::createWithSystemFont("DISCONNECT", "fonts/Marker Felt.ttf", 24);
+        disconnectLabel->setColor(Color3B::WHITE);
+        disconnectLabel->setPosition(Vec2(disconnectWebSocketItem->getContentSize().width / 2, disconnectWebSocketItem->getContentSize().height / 2));
+        disconnectWebSocketItem->addChild(disconnectLabel);
+
+        // Create cancel button
+        auto cancelItem = MenuItemImage::create(
+            "btn_normal.png",
+            "btn_pressed.png",
+            CC_CALLBACK_1(HelloWorld::menuCancelWebSocketTestCallback, this));
+        cancelItem->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 100));
+        auto cancelLabel = Label::createWithSystemFont("CANCEL", "fonts/Marker Felt.ttf", 24);
+        cancelLabel->setColor(Color3B::WHITE);
+        cancelLabel->setPosition(Vec2(cancelItem->getContentSize().width / 2, cancelItem->getContentSize().height / 2));
+        cancelItem->addChild(cancelLabel);
+
+        // Create menu for WebSocket test buttons
+        auto webSocketMenu = Menu::create(connectWebSocketItem, sendMessageItem, disconnectWebSocketItem, cancelItem, NULL);
+        webSocketMenu->setPosition(Vec2::ZERO);
+        webSocketTestLayer->addChild(webSocketMenu, 11);
+
+        // Set up WebSocketManager callbacks
+        auto wsManager = WebSocketManager::getInstance();
+        wsManager->setOnOpenCallback([this]() {
+            webSocketStatusLabel->setString("WebSocket Status: Connected");
+            });
+
+        wsManager->setOnMessageCallback([this](const std::string& message) {
+            webSocketStatusLabel->setString("WebSocket Status: Received message");
+            CCLOG("WebSocket message received: %s", message.c_str());
+            });
+
+        wsManager->setOnErrorCallback([this](WebSocket::ErrorCode errorCode) {
+            webSocketStatusLabel->setString("WebSocket Status: Error");
+            CCLOG("WebSocket error: %d", static_cast<int>(errorCode));
+            });
+
+        wsManager->setOnCloseCallback([this]() {
+            webSocketStatusLabel->setString("WebSocket Status: Disconnected");
+            });
+    }
+    else
+    {
+        webSocketTestLayer->setVisible(true);
+    }
+
+    // Disable all main menu buttons
+    if (secondSceneItem != nullptr)
+    {
+        secondSceneItem->setVisible(false);
+        secondSceneItem->setEnabled(false);
+    }
+    if (battleTestItem != nullptr)
+    {
+        battleTestItem->setVisible(false);
+        battleTestItem->setEnabled(false);
+    }
+    if (guestLoginItem != nullptr)
+    {
+        guestLoginItem->setVisible(false);
+        guestLoginItem->setEnabled(false);
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(false);
+        loginItem->setEnabled(false);
+    }
+    if (registerItem != nullptr)
+    {
+        registerItem->setVisible(false);
+        registerItem->setEnabled(false);
+    }
+    if (deleteAccountItem != nullptr)
+    {
+        deleteAccountItem->setVisible(false);
+        deleteAccountItem->setEnabled(false);
+    }
+    if (changePasswordItem != nullptr)
+    {
+        changePasswordItem->setVisible(false);
+        changePasswordItem->setEnabled(false);
+    }
+}
+
+void HelloWorld::menuConnectWebSocketCallback(cocos2d::Ref* pSender)
+{
+    auto wsManager = WebSocketManager::getInstance();
+    wsManager->connect("ws://100.80.250.106:8080");
+}
+
+void HelloWorld::menuSendMessageCallback(cocos2d::Ref* pSender)
+{
+    if (webSocketMessageEditBox != nullptr)
+    {
+        std::string message = webSocketMessageEditBox->getText();
+        if (!message.empty())
+        {
+            auto wsManager = WebSocketManager::getInstance();
+            wsManager->send(message);
+            webSocketMessageEditBox->setText("");
+            webSocketStatusLabel->setString("WebSocket Status: Message sent");
+        }
+    }
+}
+
+void HelloWorld::menuDisconnectWebSocketCallback(cocos2d::Ref* pSender)
+{
+    auto wsManager = WebSocketManager::getInstance();
+    wsManager->disconnect();
+}
+
+void HelloWorld::menuCancelWebSocketTestCallback(cocos2d::Ref* pSender)
+{
+    // Hide WebSocket test layer
+    if (webSocketTestLayer != nullptr)
+    {
+        webSocketTestLayer->setVisible(false);
+    }
+
+    // Show all main menu buttons
+    auto session = SessionManager::getInstance();
+    if (session->getIsLoggedIn())
+    {
+        if (secondSceneItem != nullptr)
+        {
+            secondSceneItem->setVisible(true);
+            secondSceneItem->setEnabled(true);
+        }
+        if (battleTestItem != nullptr)
+        {
+            battleTestItem->setVisible(true);
+            battleTestItem->setEnabled(true);
+        }
+        if (deleteAccountItem != nullptr)
+        {
+            deleteAccountItem->setVisible(true);
+            deleteAccountItem->setEnabled(true);
+        }
+        if (changePasswordItem != nullptr)
+        {
+            changePasswordItem->setVisible(true);
+            changePasswordItem->setEnabled(true);
+        }
+    }
+    else
+    {
+        if (guestLoginItem != nullptr)
+        {
+            guestLoginItem->setVisible(true);
+            guestLoginItem->setEnabled(true);
+        }
+        if (registerItem != nullptr)
+        {
+            registerItem->setVisible(true);
+            registerItem->setEnabled(true);
+        }
+    }
+    if (loginItem != nullptr)
+    {
+        loginItem->setVisible(true);
+        loginItem->setEnabled(true);
     }
 }
