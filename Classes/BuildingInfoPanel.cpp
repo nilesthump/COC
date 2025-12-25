@@ -23,19 +23,6 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     if (!_targetBuilding) {
         return false; // 建筑为空则初始化失败
     }
-    /*
-    // 1. 半透明遮罩（点击关闭面板）
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto mask = LayerColor::create(Color4B(0, 0, 0, 128), visibleSize.width, visibleSize.height);
-    this->addChild(mask);
-
-    auto touchListener = EventListenerTouchOneByOne::create();
-    touchListener->onTouchBegan = [=](Touch*, Event*) {
-        this->removeFromParent(); // 点击遮罩关闭
-        return true;
-        };
-    touchListener->setSwallowTouches(true);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, mask);*/
 
     //兵营的额外训练面板
     if (dynamic_cast<ArmyCamp*>(building))
@@ -190,6 +177,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     else if (dynamic_cast<Walls*>(building)) {
         type = "Walls";
     }
+    else if (dynamic_cast<TownHall*>(building)) {
+        type = "TownHall";
+    }
     _titleLabel = Label::createWithTTF(
         StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
         "fonts/Marker Felt.ttf", 24
@@ -330,7 +320,16 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         _balloon->setColor(Color3B::BLACK);
         panelBg->addChild(_balloon);
     }
-
+    else if (dynamic_cast<Walls*>(building)) {}
+    else if (dynamic_cast<TownHall*>(building)) {
+        _resourceLabel = Label::createWithTTF(
+            StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()),
+            "fonts/Marker Felt.ttf", 24
+        );
+        _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
+        _resourceLabel->setColor(Color3B::BLACK);
+        panelBg->addChild(_resourceLabel);
+    }
     
     // 6. 升级按钮,最高等级15
     _upgradeBtn = MenuItemImage::create(
@@ -385,6 +384,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     return true;
 }
 
+//需要更新的文字
 void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* background_sprite_) {
     if (!building) return;
     std::string type;
@@ -407,6 +407,9 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     }
     else if (dynamic_cast<Walls*>(building)) {
         type = "Walls";
+    }
+    else if (dynamic_cast<TownHall*>(building)) {
+        type = "Townhall";
     }
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
@@ -435,12 +438,16 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
         _bomber->setString(StringUtils::format("bomberNum: %d", building->getArmy(4)));
         _balloon->setString(StringUtils::format("balloonNum: %d", building->getArmy(5)));
     }
+    else if(dynamic_cast<Walls*>(building)){}
+    else if (dynamic_cast<TownHall*>(building)) {
+        _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()));
+    }
 }
 
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     if (!_targetBuilding) return;
 
-    if (_targetBuilding->getLv() < 15) {
+    if (_targetBuilding->getLv() < maxLevel&&!dynamic_cast<TownHall*>(_targetBuilding)) {
         // 升级所需资源（可根据建筑类型和当前等级调整）
         int requiredGold = 1;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
         int requiredElixir = 1;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
@@ -488,6 +495,37 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         _targetBuilding->updateTexture(newTexture);
         // 播放升级成功动画
         _targetBuilding->playSuccessBlink();
+    }
+    else if (dynamic_cast<TownHall*>(_targetBuilding) && _targetBuilding->getLv() < 15) {
+        // 升级所需资源
+        int requiredGold = 100;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
+        int requiredElixir = 100;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
+
+        // 检查是否有足够资源
+        if (g_goldCount < requiredGold || g_elixirCount < requiredElixir) {
+            // 资源不足，播放失败动画
+            _targetBuilding->playFailBlink();
+            _targetBuilding->setColor(Color3B::WHITE);
+            return;
+        }
+        // 消耗升级资源
+        g_goldCount -= requiredGold;
+        g_elixirCount -= requiredElixir;
+
+        _targetBuilding->updateLv(); // 等级提升
+        _targetBuilding->updateHp();  // 生命值提升
+        _targetBuilding->update();  // 最大容量提升
+        //更新全局变量
+        maxGoldVolum = _targetBuilding->getMaxGoldNum();
+        maxElixirVolum = _targetBuilding->getMaxElixirNum();
+        maxLevel = _targetBuilding->getLv();
+
+        std::string newTexture = StringUtils::format("TownHallLv%d.png", _targetBuilding->getLv());
+        // 调用 更新纹理
+        _targetBuilding->updateTexture(newTexture);
+        // 播放升级成功动画
+        _targetBuilding->playSuccessBlink();
+  
     }
     // 更新信息面板显示
     updateInfo(_targetBuilding, temp);

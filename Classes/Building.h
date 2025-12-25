@@ -89,7 +89,10 @@ public:
 	virtual int getArmy(int i)const { return 0; }
 	virtual int getArmySize(int i)const { return 0; }
 	virtual void updateNum(int i){ return; }
-
+	//大本营相关
+	virtual int getMaxGoldNum() {return 0;}
+	virtual int getMaxElixirNum() {return 0 ;}
+	virtual void update() { return; }
 	// 新增：库存相关接口
 	int getCurrentStock() const { return currentSize; }   // 获取当前库存
 	int getMaxStock() const { return maxSize; }           // 获取库存上限

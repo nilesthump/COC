@@ -464,7 +464,7 @@ bool HelloWorld::init()
             sqlite3_free(errMsg);
         }
         else {
-            CCLOG("用户表创建成功");
+            CCLOG("用户表创建成功: %s",errMsg);
         }
 
         sqlite3_close(db);
