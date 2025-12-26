@@ -9,6 +9,7 @@ protected:
     int maxSize = 20,currentSize = 0;
     int army[6];//代表六个兵种
     int size[6] = { 1,1,5,1,2,5 }, cost[2] = { 200,200 };
+    int upgradeTime = 10;
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
@@ -18,10 +19,14 @@ public:
         //公有属性
         level += 1;
         _hp += 500;
-        _textureName = StringUtils::format("ArmyCampLv%d.png", level);
-        updateTexture(_textureName);
         //私有属性
         maxSize += 20;
+        upgradeTime = level * 10;//每次升级完成后，需要的升级时间对应延长
+        isUpgrade = false;
+        //换图
+        _textureName = StringUtils::format("ArmyCampLv%d.png", level);
+        updateTexture(_textureName);
+        playSuccessBlink();
     }
     int getMaxStock() const override {
         return maxSize;
@@ -44,6 +49,18 @@ public:
     }
     int getElixirCost() const override {
         return cost[1];
+    }
+    void finishUpgrade()override {
+        update();
+    }
+    void cutTime()override {
+        upgradeTime--;
+        if (upgradeTime <= 0) {
+            update();
+        }
+    }
+    int getRemainTime() override{
+        return upgradeTime;
     }
 
     static ArmyCamp* create(const std::string& textureName, int hp = 100, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);

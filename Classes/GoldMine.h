@@ -9,6 +9,7 @@ protected:
     int _generateSpeed=1;//金矿生产速度
     int maxSize = 100,currentSize=0;//金矿最大储量和现储量
     int cost[2] = { 100,0 };//消耗的金币和圣水数量
+    int upgradeTime = 5;
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
@@ -18,12 +19,16 @@ public:
         //公有属性
         level += 1;
         _hp += 500;
-        _textureName = StringUtils::format("GoldMineLv%d.png", level);
-        updateTexture(_textureName);
         //私有属性
         _generateSpeed += 1;
         maxSize += 100;
         //加速成本升级
+        upgradeTime = level * 5;//每次升级完成后，需要的升级时间对应延长
+        isUpgrade = false;
+        //换图
+        _textureName = StringUtils::format("GoldMineLv%d.png", level);
+        updateTexture(_textureName);
+        playSuccessBlink();
     }
     int getSpeed()const override {
         return _generateSpeed;
@@ -51,7 +56,18 @@ public:
     int getElixirCost() const override {
         return cost[1];
     }
-
+    void finishUpgrade()override {
+        update();
+    }
+    void cutTime()override {
+        upgradeTime--;
+        if (upgradeTime <= 0) {        
+            update();
+        }
+    }
+    int getRemainTime() override {
+        return upgradeTime;
+    }
     static GoldMine* create(const std::string& textureName, int hp = 100, int lv=1, float x0=667.0f, float y0 = 2074.0f);
 };
 

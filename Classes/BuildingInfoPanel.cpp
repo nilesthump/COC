@@ -222,7 +222,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     
     //4.网格坐标
     _positionLabel = Label::createWithTTF(
-        StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()),
+        StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()),
         "fonts/Marker Felt.ttf", 24
     );
     _positionLabel->setPosition(bgWidth / 2, bgHeight - 110);
@@ -362,14 +362,22 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
      );
     //设置文字提示
-    if (_targetBuilding->getLv() < 15) {
-        auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
-        upGradeLabel->setColor(Color3B::GREEN);
-        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
-        _upgradeBtn->addChild(upGradeLabel);
+    if (!_targetBuilding->getIsUpgrade()) {
+        if (_targetBuilding->getLv() < 15) {
+            auto upGradeLabel = Label::createWithSystemFont("UpGrade", "fonts/Marker Felt.ttf", 24);
+            upGradeLabel->setColor(Color3B::YELLOW);
+            upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+            _upgradeBtn->addChild(upGradeLabel);
+        }
+        else {
+            auto upGradeLabel = Label::createWithSystemFont("MaxGrade", "fonts/Marker Felt.ttf", 24);
+            upGradeLabel->setColor(Color3B::RED);
+            upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+            _upgradeBtn->addChild(upGradeLabel);
+        }
     }
     else {
-        auto upGradeLabel = Label::createWithSystemFont("maxGrade", "fonts/Marker Felt.ttf", 24);
+        auto upGradeLabel = Label::createWithSystemFont(StringUtils::format("please wait %d s!", _targetBuilding->getRemainTime()),"fonts/Marker Felt.ttf", 24);
         upGradeLabel->setColor(Color3B::RED);
         upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _upgradeBtn->addChild(upGradeLabel);
@@ -386,7 +394,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             CC_CALLBACK_1(BuildingInfoPanel::speedUpgradeClicked, this)
         );
         auto speedUpLabel = Label::createWithSystemFont("SpeedUp", "fonts/Marker Felt.ttf", 24);
-        speedUpLabel->setColor(Color3B::GREEN);
+        speedUpLabel->setColor(Color3B::YELLOW);
         speedUpLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _speedUpBtn->addChild(speedUpLabel);
         //缩放和位置
@@ -403,7 +411,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     );
     //设置文字提示
     auto collectLabel = Label::createWithSystemFont("Collect", "fonts/Marker Felt.ttf", 24);
-    collectLabel->setColor(Color3B::WHITE);
+    collectLabel->setColor(Color3B::YELLOW);
     collectLabel->setPosition(Vec2(_collectBtn->getContentSize().width / 2,
         _collectBtn->getContentSize().height / 2));
     _collectBtn->addChild(collectLabel);
@@ -471,7 +479,7 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     //公共标签
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()));
+    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
     
 }
 //升级
@@ -497,9 +505,10 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         g_goldCount -= requiredGold;
         g_elixirCount -= requiredElixir;
 
-        _targetBuilding->update();//建筑物升级
-        _targetBuilding->playSuccessBlink();// 播放升级成功动画
+        //_targetBuilding->update();//建筑物升级
+        _targetBuilding->playSuccessBlink();// 播放成功准备升级动画
 
+        _targetBuilding->startUpgrade();
     }
     //大本营
     else if (dynamic_cast<TownHall*>(_targetBuilding) && _targetBuilding->getLv() < 15) {
@@ -518,7 +527,7 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         g_goldCount -= requiredGold;
         g_elixirCount -= requiredElixir;
 
-        _targetBuilding->update();//建筑物升级
+       // _targetBuilding->update();//建筑物升级
         
         //更新全局变量
         maxGoldVolum = _targetBuilding->getMaxGoldNum();
@@ -526,13 +535,17 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         maxLevel = _targetBuilding->getLv();
 
         _targetBuilding->playSuccessBlink();// 播放升级成功动画
+        _targetBuilding->startUpgrade();
     }
     // 更新信息面板显示
     updateInfo(_targetBuilding, temp);
 }
 //一键完成加速
 void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
-    _targetBuilding->finishUpgrade();
+    if (g_gemCount > 0&& _targetBuilding->getIsUpgrade()) {
+        g_gemCount--;
+        _targetBuilding->finishUpgrade();
+    }
 }
 //收集
 void BuildingInfoPanel::onCollectClicked(Ref* sender) {
