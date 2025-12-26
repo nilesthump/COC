@@ -1067,7 +1067,9 @@ void HelloWorld::menuCancelRegisterCallback(cocos2d::Ref* pSender)
     setupMenuItemVisibleAndEnabled(0b00011100);
 
     this->scheduleOnce([](float dt) {
-        WebSocketManager::getInstance()->disconnect();
+        if (WebSocketManager::getInstance()->getReadyState() == WebSocket::State::OPEN) {
+            WebSocketManager::getInstance()->disconnect();
+        }
         }, 0.5f, "delayedDisconnect");
 }
 
@@ -1467,7 +1469,9 @@ void HelloWorld::handleWebSocketMessage(const std::string& message) {
                     setupMenuItemVisibleAndEnabled(0b00011100);
 
                     this->scheduleOnce([](float dt) {
-                        WebSocketManager::getInstance()->disconnect();
+                        if (WebSocketManager::getInstance()->getReadyState() == WebSocket::State::OPEN) {
+                            WebSocketManager::getInstance()->disconnect();
+                        }
                         }, 0.5f, "delayedDisconnect");
                     });
                 auto sequence = Sequence::create(delay, hideLayer, nullptr);
@@ -1672,7 +1676,9 @@ void HelloWorld::performLocalLogout() {
     if (wasAccountLogin) 
     {
         this->scheduleOnce([](float dt) {
-            WebSocketManager::getInstance()->disconnect();
+            if (WebSocketManager::getInstance()->getReadyState() == WebSocket::State::OPEN) {
+                WebSocketManager::getInstance()->disconnect();
+            }
             }, 0.5f, "delayedDisconnect");
     }
 }
