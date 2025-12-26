@@ -622,6 +622,8 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+    autoConnectToServer();
+
     // Create a semi-transparent background layer
     if (loginLayer == nullptr)
     {
@@ -779,6 +781,8 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    autoConnectToServer();
 
     // Create a semi-transparent background layer
     if (registerLayer == nullptr)
@@ -979,8 +983,29 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
     std::string username = loginUsernameEditBox->getText();
     std::string password = loginPasswordEditBox->getText();
 
-    // Send login request via WebSocket
-    sendLoginRequest(username, password);
+    auto wsManager = WebSocketManager::getInstance();
+
+    if (wsManager->getReadyState() == WebSocket::State::OPEN) {
+        sendLoginRequest(username, password);
+        return;
+    }
+    autoConnectToServer();
+
+    pendingUsername = username;
+
+    this->schedule([this, username, password](float dt) {
+        auto wsManager = WebSocketManager::getInstance();
+        if (wsManager->getReadyState() == WebSocket::State::OPEN) {
+            this->unschedule("waitForConnectionAndLogin");
+            this->unschedule("loginConnectionTimeout");
+            sendLoginRequest(username, password);
+        }
+        }, 0.5f, 59, 0.0f, "waitForConnectionAndLogin");
+
+    this->scheduleOnce([this](float dt) {
+        this->unschedule("waitForConnectionAndLogin");
+        CCLOG("Login connection timeout after %d seconds", CONNECTION_TIMEOUT_SECONDS);
+        }, CONNECTION_TIMEOUT_SECONDS, "loginConnectionTimeout");
 }
 
 void HelloWorld::menuChangePasswordCallback(cocos2d::Ref* pSender)
@@ -1447,6 +1472,10 @@ void HelloWorld::menuCancelRegisterCallback(cocos2d::Ref* pSender)
             guestLoginLabel->setVisible(true);
         }
     }
+
+    this->scheduleOnce([](float dt) {
+        WebSocketManager::getInstance()->disconnect();
+        }, 0.5f, "delayedDisconnect");
 }
 
 void HelloWorld::menuLogoutCallback(cocos2d::Ref* pSender)
@@ -1643,7 +1672,7 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
             registerResultLabel->setString("Registration Failed: Username too short");
             registerResultLabel->setColor(Color3B::RED);
         }
-
+        return;
     }
     else if (password.length() < 6 || password.length() > 16)
     {
@@ -1652,7 +1681,7 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
             registerResultLabel->setString("Registration Failed: Password length 6-16 chars");
             registerResultLabel->setColor(Color3B::RED);
         }
-
+        return;
     }
     else if (password != confirmPassword)
     {
@@ -1660,8 +1689,8 @@ void HelloWorld::menuRegisterConfirmCallback(cocos2d::Ref* pSender)
         {
             registerResultLabel->setString("Registration Failed: Passwords do not match");
             registerResultLabel->setColor(Color3B::RED);
-
         }
+        return;
     }
     else
     {
@@ -1709,7 +1738,7 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
     }
     // Update login status - guest login doesn't set currentLoggedInUser
     auto session = SessionManager::getInstance();
-    session->login(""); // Guest login uses empty username
+    session->login("", LoginType::GUEST); // Guest login uses empty username
 
     // Update welcome label for guest login
     if (welcomeLabel != nullptr)
@@ -1750,19 +1779,13 @@ void HelloWorld::setupWebSocketCallbacks()
     wsManager->setOnErrorCallback([this](WebSocket::ErrorCode errorCode) {
         _isConnecting = false;
         _connectionTimeoutScheduled = false;
-        CCLOG("WebSocket error: %d, will retry...", static_cast<int>(errorCode));
-        if (!_isReconnecting) {
-            startReconnecting();
-        }
+        CCLOG("WebSocket error: %d", static_cast<int>(errorCode));
         });
 
     wsManager->setOnCloseCallback([this]() {
         _isConnecting = false;
         _connectionTimeoutScheduled = false;
-        CCLOG("WebSocket disconnected, will retry...");
-        if (!_isReconnecting) {
-            startReconnecting();
-        }
+        CCLOG("WebSocket disconnected");
         });
 }
     
@@ -1774,11 +1797,6 @@ void HelloWorld::connectionTimeoutCallback(float dt)
         wsManager->disconnect();
         _isConnecting = false;
         _connectionTimeoutScheduled = false;
-
-        // 如果不是用户主动停止重连，则开始重试
-        if (!_isReconnecting) {
-            startReconnecting();
-        }
     }
 }
 
@@ -1864,7 +1882,6 @@ void HelloWorld::autoConnectToServer() {
 void HelloWorld::onEnter() {
     Scene::onEnter();
     CCLOG("HelloWorld scene entering, starting auto-connect...");
-    autoConnectToServer();
 }
 
 void HelloWorld::onExit() {
@@ -2020,6 +2037,10 @@ void HelloWorld::handleWebSocketMessage(const std::string& message) {
                             guestLoginLabel->setVisible(true);
                         }
                     }
+
+                    this->scheduleOnce([](float dt) {
+                        WebSocketManager::getInstance()->disconnect();
+                        }, 0.5f, "delayedDisconnect");
                     });
                 auto sequence = Sequence::create(delay, hideLayer, nullptr);
                 registerLayer->runAction(sequence);
@@ -2080,13 +2101,16 @@ void HelloWorld::handleWebSocketMessage(const std::string& message) {
 
             auto session = SessionManager::getInstance();
             std::string username = session->getCurrentUsername();
-            sendLogoutRequest(username);
             session->logout();
 
             if (welcomeLabel != nullptr) {
                 welcomeLabel->setVisible(false);
                 welcomeLabel->setString("");
             }
+
+            this->scheduleOnce([](float dt) {
+                WebSocketManager::getInstance()->disconnect();
+                }, 0.5f, "delayedDisconnect");
         }
         else {
             CCLOG("Error deleting account: %s", responseMessage.c_str());
@@ -2299,6 +2323,7 @@ void HelloWorld::performLocalLogout() {
 
     // Update login status
     auto session = SessionManager::getInstance();
+    bool wasAccountLogin = session->isAccountLogin();
     session->logout();
 
     // Hide welcome label
@@ -2306,5 +2331,13 @@ void HelloWorld::performLocalLogout() {
     {
         welcomeLabel->setVisible(false);
         welcomeLabel->setString("");
+    }
+
+    // Disconnect WebSocket with delay to ensure logout state is processed
+    if (wasAccountLogin) 
+    {
+        this->scheduleOnce([](float dt) {
+            WebSocketManager::getInstance()->disconnect();
+            }, 0.5f, "delayedDisconnect");
     }
 }
