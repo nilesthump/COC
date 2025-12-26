@@ -2,18 +2,34 @@
 #define __ELIXIR_STORAGE_H__
 
 #include "Building.h"
+extern int g_goldCount, g_elixirCount,maxLevel;
 
 class ElixirStorage : public Building
 {
 protected:
     int addSize = 1000;
-    int cost[2] = { 100,100 };
+    int establishCost[2] = { 100,100 };
+    int upgradeCost[2] = { 50,50 };
     int upgradeTime = 10;
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
     bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
+    int getUpgradeGoldCost()const override {
+        return upgradeCost[0];
+    }
+    int getUpgradeElixirCost() const override {
+        return upgradeCost[1];
+    }
+    bool canUpgrade()override {
+        if (g_goldCount >= upgradeCost[0] && g_elixirCount >= upgradeCost[1] && level < maxLevel) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     void update()override {
         //公有属性
         level += 1;
@@ -32,10 +48,10 @@ public:
         return addSize;
     }
     int getGoldCost() const override {
-        return cost[0];
+        return establishCost[0];
     }
     int getElixirCost() const override {
-        return cost[1];
+        return establishCost[1];
     }
     void finishUpgrade()override {
         update();

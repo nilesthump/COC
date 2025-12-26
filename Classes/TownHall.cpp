@@ -52,7 +52,7 @@ bool TownHall::initSprite(const std::string& textureName)
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'WallsLv1.png'");
+        problemLoading("'TownHallLv1.png'");
         return false;
     }
 

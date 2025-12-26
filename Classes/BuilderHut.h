@@ -2,17 +2,33 @@
 #define __BUILDER_HUT_H__
 
 #include "Building.h"
+extern int g_goldCount, g_elixirCount,maxLevel;
 
 class BuilderHut : public Building
 {
 protected:
-    int cost[2] = { 20,10 };
+    int establishCost[2] = { 10,10 };
+    int upgradeCost[2] = { 5,5 };
     int upgradeTime = 1;
     bool initSprite(const std::string& textureName)override;
 public:
     // 静态创建函数（Cocos推荐方式）
     bool BuilderHut::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
+    int getUpgradeGoldCost()const override {
+        return upgradeCost[0];
+    }
+    int getUpgradeElixirCost() const override {
+        return upgradeCost[1];
+    }
+    bool canUpgrade()override {
+        if (g_goldCount >= upgradeCost[0] && g_elixirCount >= upgradeCost[1] && level < maxLevel&& level < 7) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     void update()override {
         //公有属性
         level += 1;
@@ -25,10 +41,10 @@ public:
         playSuccessBlink();
     }
     int getGoldCost() const override {
-        return cost[0];
+        return establishCost[0];
     }
     int getElixirCost() const override {
-        return cost[1];
+        return establishCost[1];
     }
     void finishUpgrade()override {
         update();

@@ -14,7 +14,8 @@ public:
 
     // 更新面板信息（如升级后调用）
     void updateInfo(Building* building, cocos2d::Sprite* background_sprite_);
-
+    // 按钮回调
+    void onUpgradeClicked(cocos2d::Ref* sender);
     //成功放置
     void playBlinkAnimation(cocos2d::MenuItemImage* btn) {
         if (!btn) return;
@@ -32,8 +33,6 @@ protected:
     // 在protected部分添加回调声明
     void onCollectClicked(cocos2d::Ref* sender);
     void showSoldierInfo(int lv);
-    // 按钮回调
-    void onUpgradeClicked(cocos2d::Ref* sender);
     void speedUpgradeClicked(cocos2d::Ref* sender);
 private:
     cocos2d::Node* armyExtraPanel; // 改为Node类型，方便添加子元素
@@ -69,9 +68,6 @@ private:
     //信息面板
     cocos2d::MenuItemImage* soldierInfoBtn;
     cocos2d::Node* soldierNode;
-    cocos2d::Label* id[6];
-    cocos2d::Label* hp[6];
-    cocos2d::Label* atk[6];
 };
 
 #endif // __BUILDING_INFO_PANEL_H__
