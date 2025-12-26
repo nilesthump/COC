@@ -82,6 +82,7 @@ bool SecondScene::init()
         townHall->updatePosition(Vec2(1918,1373));
         background_sprite_->addChild(townHall, 15);
         placedBuildings.push_back(townHall);
+        townHall->setScale(0.9f);
 
         maxGoldVolum = townHall->getMaxGoldNum();
         maxElixirVolum = townHall->getMaxElixirNum();
@@ -1463,51 +1464,46 @@ bool SecondScene::isInDiamond(const Vec2& diamondPos)
 }
 
 //判断点是否在建筑范围内
-bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
-    if (!building) return false;
-
-    Sprite* sprite = nullptr;
-    // 判断建筑类型并获取精灵
-    if (dynamic_cast<GoldMine*>(building)){
-        sprite = static_cast<GoldMine*>(building)->getSprite();
-    }
-    else if (dynamic_cast<ElixirCollector*>(building)) {
-        sprite = static_cast<ElixirCollector*>(building)->getSprite();
-    }
-    else if (dynamic_cast<GoldStorage*>(building)) {
-        sprite = static_cast<GoldStorage*>(building)->getSprite();
-    }
-    else if (dynamic_cast<ElixirStorage*>(building)) {
-        sprite = static_cast<ElixirStorage*>(building)->getSprite();
-    }
-    else if (dynamic_cast<ArmyCamp*>(building)) {
-        sprite = static_cast<ArmyCamp*>(building)->getSprite();
-    }
-    else if (dynamic_cast<Walls*>(building)) {
-        sprite = static_cast<Walls*>(building)->getSprite();
-    }
-    else if (dynamic_cast<BuilderHut*>(building)) {
-        sprite = static_cast<BuilderHut*>(building)->getSprite();
+bool SecondScene::isPointInBuilding(const Vec2& point, Building* building) {
+    if (!building) {
+        return false;
     }
 
-    if (!sprite) return false;
+    int yourSize = building->getSize();
+    int mySize = 0;
+    if (draggingItem == goldMineBtn ||
+        draggingItem == elixirCollectorBtn ||
+        draggingItem == goldStorageBtn ||
+        draggingItem == elixirStorageBtn ||
+        draggingItem == armyCampBtn) {
+        mySize = 3;
+    }
+    else if (draggingItem == wallsBtn) {
+        mySize = 1;
+    }
+    else if (draggingItem == builderHutBtn) {
+        mySize = 2;
+    }
+    else {
+        mySize = 4;
+    }
 
     // 计算建筑中心在背景精灵的本地坐标（和传入的point同空间）
     Vec2 buildingWorldPos = building->convertToWorldSpace(Vec2::ZERO);
     Vec2 buildingLocalCenter = background_sprite_->convertToNodeSpace(buildingWorldPos);
 
     // 大菱形参数：
-    // 水平对角线长 56.0*6 = 336 → 半长 168
+    // 水平对角线长 56.0* = 336 → 半长 168
     // 竖直对角线长 42.0*6 = 252 → 半长 126
-    const float bigHalfHoriz = 56.0f * 3;  // 水平半对角线（56*6的一半）
-    const float bigHalfVert = 42.0f * 3;   // 竖直半对角线（42*6的一半）
+    const float bigHalfHoriz = 56.0f * (yourSize + mySize) / 8; // 水平半对角线（56*6的一半）
+    const float bigHalfVert = 42.0f * (yourSize + mySize) / 8;   // 竖直半对角线（42*6的一半）
 
-    // 单个菱形碰撞判断（带浮点容错）
+    // 菱形碰撞判断（带浮点容错）
     auto isPointInSingleDiamond = [](const Vec2& p, const Vec2& center, float hh, float hv) -> bool {
         float dx = abs(p.x - center.x);
         float dy = abs(p.y - center.y);
         // 菱形碰撞公式：|x/x半长| + |y/y半长| ≤ 1（加容错值避免浮点精度问题）
-        return (dx / hh) + (dy / hv) <= 1.0f + 0.001f;
+        return (dx / hh) + (dy / hv) <= 1.0f + 0.01f;
         };
 
     // 直接检测大菱形区域

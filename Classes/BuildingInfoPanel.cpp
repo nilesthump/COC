@@ -222,7 +222,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     
     //4.网格坐标
     _positionLabel = Label::createWithTTF(
-        StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()),
+        StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()),
         "fonts/Marker Felt.ttf", 24
     );
     _positionLabel->setPosition(bgWidth / 2, bgHeight - 110);
@@ -479,7 +479,7 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     //公共标签
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getXX(), building->getYY()));
+    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
     
 }
 //升级

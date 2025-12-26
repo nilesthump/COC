@@ -12,7 +12,7 @@ protected:
 	std::string _textureName; // 纹理名称
 	cocos2d::Sprite* _sprite; // 图像精灵
 	float x, y;               //世界坐标
-	float size = 3.0f;        //尺寸
+	int size;        //尺寸
 	//升级相关
 	bool isUpgrade = false;
 	// 初始化精灵（内部调用）
@@ -67,7 +67,7 @@ public:
 	float getY() {
 		return y;
 	}
-	float getSize() {
+	int getSize() {
 		return size;
 	}
 	int getLv() {

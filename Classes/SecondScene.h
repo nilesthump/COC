@@ -61,7 +61,7 @@ private:
 	const double DOUBLE_CLICK_INTERVAL = 0.3; // 双击时间间隔阈值（秒）
 
 	//碰撞判断
-	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
+	bool isPointInBuilding(const cocos2d::Vec2& point, Building* building);
 
 	Node* buildPanel;//建造建筑面板
 	Node* attackPanel;
