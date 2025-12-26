@@ -131,6 +131,7 @@ private:
     cocos2d::Label* loginLabel;
     cocos2d::Label* registerLabel;
     cocos2d::Label* registerResultLabel;
+    cocos2d::Label* loginResultLabel;
     cocos2d::Label* deleteAccountLabel;
     cocos2d::Label* welcomeLabel;
 
@@ -144,6 +145,7 @@ private:
     bool _isConnecting;
     bool _connectionTimeoutScheduled;
     bool _isReconnecting;
+    bool _sceneIsDestroyed;
     std::string _serverUrl;
 
     void connectionTimeoutCallback(float dt);

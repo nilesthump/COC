@@ -179,11 +179,13 @@ bool HelloWorld::init()
 
     confirmPasswordLabel = nullptr;
     registerResultLabel = nullptr;
+    loginResultLabel = nullptr;
 
     // Initialize auto-connection state
     _isConnecting = false;
     _connectionTimeoutScheduled = false;
     _isReconnecting = false;
+    _sceneIsDestroyed = false;
     _serverUrl = "ws://100.80.250.106:8080";
 
     welcomeLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 36);
@@ -477,6 +479,13 @@ void HelloWorld::menuLoginCallback(cocos2d::Ref* pSender)
             auto loginMenu = Menu::create(confirmItem, cancelLoginItem, NULL);
             loginMenu->setPosition(Vec2::ZERO);
             loginLayer->addChild(loginMenu);
+
+            // Create login result label
+            loginResultLabel = Label::createWithSystemFont("", "fonts/Marker Felt.ttf", 20);
+            loginResultLabel->setColor(Color3B::RED);
+            loginResultLabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
+                origin.y + visibleSize.height / 2 - 180));
+            loginLayer->addChild(loginResultLabel);
         }
     }
     else
@@ -674,9 +683,26 @@ void HelloWorld::menuRegisterCallback(cocos2d::Ref* pSender)
 
 void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
 {
+    this->unschedule("waitForConnectionAndLogin");
+    this->unschedule("loginConnectionTimeout");
+
     // Get input values
     std::string username = loginUsernameEditBox->getText();
     std::string password = loginPasswordEditBox->getText();
+
+    if (username.empty() || password.empty()) {
+        CCLOG("Username and password cannot be empty");
+        if (loginResultLabel != nullptr) {
+            loginResultLabel->setString("Please enter username and password");
+            this->unschedule("clearLoginResultLabel");
+            this->scheduleOnce([this](float dt) {
+                if (loginResultLabel != nullptr) {
+                    loginResultLabel->setString("");
+                }
+                }, 1.0f, "clearLoginResultLabel");
+        }
+        return;
+    }
 
     auto wsManager = WebSocketManager::getInstance();
 
@@ -684,6 +710,12 @@ void HelloWorld::menuConfirmCallback(cocos2d::Ref* pSender)
         sendLoginRequest(username, password);
         return;
     }
+
+    if (_isConnecting) {
+        CCLOG("Already attempting to connect, skipping...");
+        return;
+    }
+
     autoConnectToServer();
 
     pendingUsername = username;
@@ -1253,6 +1285,8 @@ void HelloWorld::setupWebSocketCallbacks()
     auto wsManager = WebSocketManager::getInstance();
 
     wsManager->setOnOpenCallback([this]() {
+        if (_sceneIsDestroyed) 
+            return;
         _isConnecting = false;
         if (_connectionTimeoutScheduled) {
             this->unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::connectionTimeoutCallback));
@@ -1263,16 +1297,22 @@ void HelloWorld::setupWebSocketCallbacks()
         });
 
     wsManager->setOnMessageCallback([this](const std::string& message) {
+        if (_sceneIsDestroyed)
+            return;
         handleWebSocketMessage(message);
         });
 
     wsManager->setOnErrorCallback([this](WebSocket::ErrorCode errorCode) {
+        if (_sceneIsDestroyed) 
+            return;
         _isConnecting = false;
         _connectionTimeoutScheduled = false;
         CCLOG("WebSocket error: %d", static_cast<int>(errorCode));
         });
 
     wsManager->setOnCloseCallback([this]() {
+        if (_sceneIsDestroyed) 
+            return;
         _isConnecting = false;
         _connectionTimeoutScheduled = false;
         CCLOG("WebSocket disconnected");
@@ -1375,7 +1415,19 @@ void HelloWorld::onEnter() {
 }
 
 void HelloWorld::onExit() {
-    CCLOG("HelloWorld scene exiting, keeping WebSocket connection alive for global access...");
+    CCLOG("HelloWorld scene exiting, stopping all timers and WebSocket callbacks...");
+
+    this->unschedule("waitForConnectionAndLogin");
+    this->unschedule("loginConnectionTimeout");
+    this->unschedule("retryConnection");
+    this->unschedule("delayedDisconnect");
+    this->unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::connectionTimeoutCallback));
+
+    _isReconnecting = false;
+    _isConnecting = false;
+    _connectionTimeoutScheduled = false;
+
+    _sceneIsDestroyed = true;
 
     Scene::onExit();
 }
