@@ -93,7 +93,7 @@ public:
 	cocos2d::Sprite* getSprite() const { return _sprite; }
 
 	// 视觉反馈：闪烁（成功放置）
-	void playSuccessBlink() { this->runAction(cocos2d::Blink::create(1.0f, 2)); }
+	void playSuccessBlink() { this->runAction(cocos2d::Blink::create(0.5f, 2)); }
 	// 视觉反馈：红色闪烁+销毁（失败放置）
 	void playFailBlinkAndRemove();
 	// 视觉反馈：红色闪烁
