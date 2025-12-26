@@ -13,7 +13,11 @@ protected:
 	cocos2d::Sprite* _sprite; // 图像精灵
 	float x, y;               //世界坐标
 	float size = 3.0f;        //尺寸
-	virtual bool initSprite(const std::string& textureName) = 0;// 初始化精灵（内部调用）
+	//升级相关
+	bool isUpgrade = false;
+	int upgradeTime = 10;
+	// 初始化精灵（内部调用）
+	virtual bool initSprite(const std::string& textureName) = 0;
 public:
 	// 初始化函数
 	virtual bool init(const std::string& textureName, int hp, int lv, float x0, float y0) = 0;
@@ -29,6 +33,15 @@ public:
 	virtual int getElixirCost() const { return 0; }
 	//升级相关
 	virtual void update() { return; }
+	bool getIsUpgrade() {
+		return isUpgrade;
+	}
+	void startUpgrade() {
+		isUpgrade = true;
+	}
+	void finishUpgrade() {
+		isUpgrade = false;
+	}
 	void updateTexture(const std::string& newTextureName) {
 		if (_sprite) {
 			// 尝试加载新纹理

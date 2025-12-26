@@ -799,8 +799,8 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
 
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
         //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
-        float gridCellSizeX = grid_manager_->getGridCellSizeX();
-        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float gridCellSizeX = grid_manager_->getGridCellSizeX()/2;
+        float gridCellSizeY = grid_manager_->getGridCellSizeY()/2;
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
 
@@ -860,8 +860,8 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
         Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
         bool inDiamond = isInDiamond(diamondPos);
 
-        float gridCellSizeX = grid_manager_->getGridCellSizeX();
-        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float gridCellSizeX = grid_manager_->getGridCellSizeX()/2;
+        float gridCellSizeY = grid_manager_->getGridCellSizeY()/2;
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         static Vec2 lastValidMovePos;
@@ -930,8 +930,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         //Vec2 localPos = ConvertTest::convertScreenToGrid(screenPos, background_sprite_, buildPanel);
 
         // 获取网格单元格大小并进行向上取整
-        float gridCellSizeX = grid_manager_->getGridCellSizeX();
-        float gridCellSizeY = grid_manager_->getGridCellSizeY();
+        float gridCellSizeX = grid_manager_->getGridCellSizeX()/2;
+        float gridCellSizeY = grid_manager_->getGridCellSizeY()/2;
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         Vec2 snappedPos = Vec2(snappedX, snappedY);
@@ -1262,31 +1262,32 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             isDragging = false;
             draggingItem = nullptr;
         }
-        else if (isMovingBuilding) {
-
-            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-            //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
-            Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
-            bool inDiamond = isInDiamond(diamondPos);
-
-            float gridCellSizeX = grid_manager_->getGridCellSizeX();
-            float gridCellSizeY = grid_manager_->getGridCellSizeY();
-            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
-
-            if (inDiamond && movingBuilding) {
-                // 使用新的更新方法
-                movingBuilding->updatePosition(Vec2(snappedX, snappedY));
-                movingBuilding->setOpacity(255);
-                background_sprite_->reorderChild(movingBuilding, 15);
-                movingBuilding = nullptr;
-            }
-            isMovingBuilding = false;
-        }
-        else if (zoom_manager_) {
-            zoom_manager_->onTouchEnded(touch, event);
-        }
     }
+    else if (isMovingBuilding) {
+
+        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+        //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
+        Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
+        bool inDiamond = isInDiamond(diamondPos);
+
+        float gridCellSizeX = grid_manager_->getGridCellSizeX()/2;
+        float gridCellSizeY = grid_manager_->getGridCellSizeY()/2;
+        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+
+        if (inDiamond && movingBuilding) {
+            // 使用新的更新方法
+            movingBuilding->updatePosition(Vec2(snappedX, snappedY));
+            movingBuilding->setOpacity(255);
+            background_sprite_->reorderChild(movingBuilding, 15);
+            movingBuilding = nullptr;
+        }
+        isMovingBuilding = false;
+    }
+    else if (zoom_manager_) {
+        zoom_manager_->onTouchEnded(touch, event);
+    }
+    
 }
 
 void SecondScene::onTouchCancelled(Touch* touch, Event* event)

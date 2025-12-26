@@ -357,14 +357,14 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     
     // 6. 升级按钮,最高等级15
     _upgradeBtn = MenuItemImage::create(
-        "btn_disabled.png",  // 正常状态图
-        "btn_disabled.png", // 按下状态图
+        "5.png",  // 正常状态图
+        "5.png", // 按下状态图
         CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
      );
     //设置文字提示
     if (_targetBuilding->getLv() < 15) {
         auto upGradeLabel = Label::createWithSystemFont("upGrade", "fonts/Marker Felt.ttf", 24);
-        upGradeLabel->setColor(Color3B::YELLOW);
+        upGradeLabel->setColor(Color3B::GREEN);
         upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _upgradeBtn->addChild(upGradeLabel);
     }
@@ -378,10 +378,27 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _upgradeBtn->setScale(0.75f);
     _upgradeBtn->setPosition(bgWidth / 2, 70);
     
+    //7. 加速按钮
+    if (_targetBuilding->getIsUpgrade()) {
+        _speedUpBtn = MenuItemImage::create(
+            "5.png",  // 正常状态图
+            "5.png", // 按下状态图
+            CC_CALLBACK_1(BuildingInfoPanel::speedUpgradeClicked, this)
+        );
+        auto speedUpLabel = Label::createWithSystemFont("SpeedUp", "fonts/Marker Felt.ttf", 24);
+        speedUpLabel->setColor(Color3B::GREEN);
+        speedUpLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+        _speedUpBtn->addChild(speedUpLabel);
+        //缩放和位置
+        _speedUpBtn->setScale(0.75f);
+        _speedUpBtn->setPosition(bgWidth / 2, 170); // 位置在升级按钮上方
+    }
+
+
     // 8. 收集按钮
     _collectBtn = MenuItemImage::create(
-        "btn_disabled.png",  // 正常状态图
-        "btn_disabled.png", // 按下状态图
+        "5.png",  // 正常状态图
+        "5.png", // 按下状态图
         CC_CALLBACK_1(BuildingInfoPanel::onCollectClicked, this)
     );
     //设置文字提示
@@ -396,12 +413,12 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 
     // 菜单容器
     if (dynamic_cast<GoldMine*>(building)|| dynamic_cast<ElixirCollector*>(building)) {
-        auto menu = Menu::create(_collectBtn, _upgradeBtn, nullptr);
+        auto menu = Menu::create(_collectBtn, _upgradeBtn, _speedUpBtn, nullptr);
         menu->setPosition(Vec2::ZERO);
         panelBg->addChild(menu);
     }
     else {
-        auto menu = Menu::create(_upgradeBtn, nullptr);
+        auto menu = Menu::create(_upgradeBtn, _speedUpBtn, nullptr);
         menu->setPosition(Vec2::ZERO);
         panelBg->addChild(menu);
     }
@@ -463,7 +480,7 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
 
     //非大本营、建筑小屋最高等级15级，建筑小屋7级
     if ((_targetBuilding->getLv() < maxLevel && !dynamic_cast<TownHall*>(_targetBuilding) && !dynamic_cast<BuilderHut*>(_targetBuilding))
-        || (dynamic_cast<BuilderHut*>(_targetBuilding) && _targetBuilding->getLv() && _targetBuilding->getLv() < 7)) {
+        || (dynamic_cast<BuilderHut*>(_targetBuilding) && _targetBuilding->getLv()<maxLevel && _targetBuilding->getLv() < 7)) {
         // 升级所需资源
         int requiredGold = 1;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
         int requiredElixir = 1;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
@@ -512,6 +529,10 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     }
     // 更新信息面板显示
     updateInfo(_targetBuilding, temp);
+}
+//一键完成加速
+void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
+    _targetBuilding->finishUpgrade();
 }
 //收集
 void BuildingInfoPanel::onCollectClicked(Ref* sender) {

@@ -34,7 +34,7 @@ protected:
     void showSoldierInfo(int lv);
     // 按钮回调
     void onUpgradeClicked(cocos2d::Ref* sender);
-
+    void speedUpgradeClicked(cocos2d::Ref* sender);
 private:
     cocos2d::Node* armyExtraPanel; // 改为Node类型，方便添加子元素
    
@@ -58,6 +58,7 @@ private:
     cocos2d::Label* _resourceLabel;
     cocos2d::MenuItemImage* _upgradeBtn;
     cocos2d::MenuItemImage* _collectBtn;
+    cocos2d::MenuItemImage* _speedUpBtn;
     //兵种
     cocos2d::Label* _barbarian;
     cocos2d::Label* _archer;
