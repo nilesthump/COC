@@ -15,7 +15,6 @@ protected:
 	float size = 3.0f;        //尺寸
 	//升级相关
 	bool isUpgrade = false;
-	int upgradeTime = 10;
 	// 初始化精灵（内部调用）
 	virtual bool initSprite(const std::string& textureName) = 0;
 public:
@@ -33,15 +32,15 @@ public:
 	virtual int getElixirCost() const { return 0; }
 	//升级相关
 	virtual void update() { return; }
+	virtual void cutTime() { return; }
+	virtual int getRemainTime() { return 0; }
 	bool getIsUpgrade() {
 		return isUpgrade;
 	}
 	void startUpgrade() {
 		isUpgrade = true;
 	}
-	void finishUpgrade() {
-		isUpgrade = false;
-	}
+	virtual void finishUpgrade() {return;}
 	void updateTexture(const std::string& newTextureName) {
 		if (_sprite) {
 			// 尝试加载新纹理

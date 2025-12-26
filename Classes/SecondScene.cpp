@@ -648,7 +648,11 @@ void SecondScene::update(float delta)
         int totalElixirRate = baseElixirRate;
         // 判断建筑类型并分别累加速度
         for (auto building : placedBuildings) {
-            if (dynamic_cast<GoldMine*>(building)) {
+            if (building->getIsUpgrade()) {
+                building->cutTime();
+            }
+            //一下均为非升级中
+            else if (dynamic_cast<GoldMine*>(building)) {
                 building->updateCurrentStock(); // 产到库存
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
