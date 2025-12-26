@@ -161,6 +161,11 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         soldierInfoBtn->setScale(0.5f);
         soldierInfoBtn->setPosition(bgWidth / 2, barbarianBtn->getPositionY() - 150);
 
+        auto soldierInfoLabel = Label::createWithSystemFont("Soldiers' Information", "fonts/Marker Felt.ttf", 60);
+        soldierInfoLabel->setColor(Color3B::MAGENTA);
+        soldierInfoLabel->setPosition(Vec2(soldierInfoBtn->getContentSize().width / 2, soldierInfoBtn->getContentSize().height / 2));
+        soldierInfoBtn->addChild(soldierInfoLabel);
+
         // 创建菜单
         menu = cocos2d::Menu::create(barbarianBtn, archerBtn, giantBtn, goblinBtn, bomberBtn, balloonBtn, soldierInfoBtn, nullptr);
         menu->setPosition(0, 0); // 菜单位置相对于父节点（armyExtraPanel）
@@ -365,7 +370,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     if (!_targetBuilding->getIsUpgrade()) {
         if (_targetBuilding->getLv() < 15) {
             auto upGradeLabel = Label::createWithSystemFont("UpGrade", "fonts/Marker Felt.ttf", 24);
-            upGradeLabel->setColor(Color3B::YELLOW);
+            upGradeLabel->setColor(Color3B::MAGENTA);
             upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
             _upgradeBtn->addChild(upGradeLabel);
         }
@@ -394,14 +399,13 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             CC_CALLBACK_1(BuildingInfoPanel::speedUpgradeClicked, this)
         );
         auto speedUpLabel = Label::createWithSystemFont("SpeedUp", "fonts/Marker Felt.ttf", 24);
-        speedUpLabel->setColor(Color3B::YELLOW);
+        speedUpLabel->setColor(Color3B::MAGENTA);
         speedUpLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _speedUpBtn->addChild(speedUpLabel);
         //缩放和位置
         _speedUpBtn->setScale(0.75f);
         _speedUpBtn->setPosition(bgWidth / 2, 170); // 位置在升级按钮上方
     }
-
 
     // 8. 收集按钮
     _collectBtn = MenuItemImage::create(
@@ -482,64 +486,28 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
     
 }
+
 //升级
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     if (!_targetBuilding) return;
 
-    //非大本营、建筑小屋最高等级15级，建筑小屋7级
-    if ((_targetBuilding->getLv() < maxLevel && !dynamic_cast<TownHall*>(_targetBuilding) && !dynamic_cast<BuilderHut*>(_targetBuilding))
-        || (dynamic_cast<BuilderHut*>(_targetBuilding) && _targetBuilding->getLv()<maxLevel && _targetBuilding->getLv() < 7)) {
-        // 升级所需资源
-        int requiredGold = 1;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
-        int requiredElixir = 1;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
-
-        // 检查是否有足够资源
-        if (g_goldCount < requiredGold || g_elixirCount < requiredElixir) {
-            // 资源不足，播放失败动画
-            _targetBuilding->playFailBlink();
-            _targetBuilding->setColor(Color3B::WHITE);
-            return;
+    int count = 0;
+    for (auto building :SecondScene::placedBuildings) {
+        if (building->getIsUpgrade()) {
+            count++;
         }
+    }
+    //canUpgrade函数判断了资源是否足够，等级是否超上限，而count则是同时可以升级的建筑数量
+    if (count < hutNum && _targetBuilding->canUpgrade()) {
+        g_goldCount -= _targetBuilding->getUpgradeGoldCost();
+        g_elixirCount-= _targetBuilding->getUpgradeElixirCost();
 
-        // 消耗升级资源
-        g_goldCount -= requiredGold;
-        g_elixirCount -= requiredElixir;
-
-        //_targetBuilding->update();//建筑物升级
-        _targetBuilding->playSuccessBlink();// 播放成功准备升级动画
-
+        _targetBuilding->playSuccessBlink();// 播放开始升级动画
         _targetBuilding->startUpgrade();
     }
-    //大本营
-    else if (dynamic_cast<TownHall*>(_targetBuilding) && _targetBuilding->getLv() < 15) {
-        // 升级所需资源
-        int requiredGold = 100;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
-        int requiredElixir = 100;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50
-
-        // 检查是否有足够资源
-        if (g_goldCount < requiredGold || g_elixirCount < requiredElixir) {
-            // 资源不足，播放失败动画
-            _targetBuilding->playFailBlink();
-            _targetBuilding->setColor(Color3B::WHITE);
-            return;
-        }
-        // 消耗升级资源
-        g_goldCount -= requiredGold;
-        g_elixirCount -= requiredElixir;
-
-       // _targetBuilding->update();//建筑物升级
-        
-        //更新全局变量
-        maxGoldVolum = _targetBuilding->getMaxGoldNum();
-        maxElixirVolum = _targetBuilding->getMaxElixirNum();
-        maxLevel = _targetBuilding->getLv();
-
-        _targetBuilding->playSuccessBlink();// 播放升级成功动画
-        _targetBuilding->startUpgrade();
-    }
-    // 更新信息面板显示
     updateInfo(_targetBuilding, temp);
 }
+
 //一键完成加速
 void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
     if (g_gemCount > 0&& _targetBuilding->getIsUpgrade()) {
@@ -547,6 +515,7 @@ void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
         _targetBuilding->finishUpgrade();
     }
 }
+
 //收集
 void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     if (!_targetBuilding) return;
@@ -577,6 +546,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
         updateInfo(_targetBuilding,temp); // 刷新信息显示
     }
 }
+
 //展示士兵信息
 void BuildingInfoPanel::showSoldierInfo(int lv){
    
@@ -599,35 +569,90 @@ void BuildingInfoPanel::showSoldierInfo(int lv){
         bool isVisible = soldierNode->isVisible();
         soldierNode->setVisible(!isVisible);
         });
-#if 0
+
     AttackerData Data[6] = {
-        AttackerData::CreateBarbarianData(lv),
-        AttackerData::CreateArcherData(lv),
-        AttackerData::CreateGiantData(lv),
-        AttackerData::CreateGoblinData(lv),
-        AttackerData::CreateBomberData(lv),
-        AttackerData::CreateBomberData(lv)
-    };
+        AttackerData::CreateBarbarianData(lv >= 12 ? 12 : lv),
+        AttackerData::CreateArcherData(lv >= 12 ? 12 : lv),
+        AttackerData::CreateGiantData(lv >= 12 ? 12 : lv),
+        AttackerData::CreateGoblinData(lv >= 12 ? 12 : lv),
+        AttackerData::CreateBomberData(lv >= 12 ? 12 : lv),
+        AttackerData::CreateGoblinData(lv >= 12 ? 12 : lv) };
 
-    int baseL = 150, baseH = 30;
+    int L = 160, H = 300;
     for (int i = 0; i < 6; i++) {
-        id[i] = Label::createWithTTF(
-            StringUtils::format("%s Lv: %d", Data[i].id,lv),
-            "fonts/Marker Felt.ttf", 24);
-        id[i]->setPosition(Vec2(baseL * (i + 1), soldierData->getContentSize().height - baseH));
-        soldierData->addChild(id[i]);
+        auto nameLabel=Label::createWithTTF(
+            StringUtils::format("%s", Data[i].id.c_str()),
+            "fonts/Marker Felt.ttf", 36
+        );
+        nameLabel->setPosition(L * (i + 1) - 60, H);
+        nameLabel->setColor(Color3B::BLACK);
+        soldierData->addChild(nameLabel);
 
-        atk[i] = Label::createWithTTF(
-            StringUtils::format("Atk: %d", Data[i].damage),
-            "fonts/Marker Felt.ttf", 24);
-        atk[i]->setPosition(Vec2(baseL * (i + 1), soldierData->getContentSize().height - baseH * 2));
-        soldierData->addChild(atk[i]);
+        auto lvLabel = Label::createWithTTF(
+            StringUtils::format("Lv :%d", Data[i].level),
+            "fonts/Marker Felt.ttf", 24
+        );
+        lvLabel->setPosition(L * (i + 1) - 60, H-30);
+        lvLabel->setColor(Color3B::BLACK);
+        soldierData->addChild(lvLabel);
 
-        hp[i] = Label::createWithTTF(
-            StringUtils::format("Hp: %d", Data[i].health),
-            "fonts/Marker Felt.ttf", 24);
-        hp[i]->setPosition(Vec2(baseL * (i + 1), soldierData->getContentSize().height - baseH * 3 ));
-        soldierData->addChild(hp[i]);
+        auto hpLabel=Label::createWithTTF(
+            StringUtils::format("Hp: %.0f", Data[i].health),
+            "fonts/Marker Felt.ttf", 24
+        );
+        hpLabel->setPosition(L * (i + 1) - 60, H-30*4);
+        hpLabel->setColor(Color3B::GREEN);
+        soldierData->addChild(hpLabel);
+
+        auto atkLabel = Label::createWithTTF(
+            StringUtils::format("Atk: %.0f", Data[i].damage),
+            "fonts/Marker Felt.ttf", 24
+        );
+        atkLabel->setPosition(L * (i + 1) - 60, H - 30 * 5);
+        atkLabel->setColor(Color3B::RED);
+        soldierData->addChild(atkLabel);
+
+        auto spaceLabel = Label::createWithTTF(
+            StringUtils::format("Space: %d", Data[i].housing_space),
+            "fonts/Marker Felt.ttf", 24
+        );
+        spaceLabel->setPosition(L * (i + 1) - 60, H - 30 * 2);
+        spaceLabel->setColor(Color3B::YELLOW);
+        soldierData->addChild(spaceLabel);
+
+        auto speedLabel = Label::createWithTTF(
+            StringUtils::format("Speed: %.0f", Data[i].move_speed),
+            "fonts/Marker Felt.ttf", 24
+        );
+        speedLabel->setPosition(L * (i + 1) - 60, H - 30 * 3);
+        speedLabel->setColor(Color3B::BLUE);
+        soldierData->addChild(speedLabel);
+
+        auto atkDistanceLabel = Label::createWithTTF(
+            StringUtils::format("AtkDistance: %.0f", Data[i].attack_distance),
+            "fonts/Marker Felt.ttf", 24
+        );
+        atkDistanceLabel->setPosition(L * (i + 1) - 60, H - 30 * 6);
+        atkDistanceLabel->setColor(Color3B::ORANGE);
+        soldierData->addChild(atkDistanceLabel);
+
+        auto atkIntervalLabel = Label::createWithTTF(
+            StringUtils::format("AtkInterval: %.0fs", Data[i].attack_interval),
+            "fonts/Marker Felt.ttf", 24
+        );
+        atkIntervalLabel->setPosition(L * (i + 1) - 60, H - 30 * 7);
+        atkIntervalLabel->setColor(Color3B::ORANGE);
+        soldierData->addChild(atkIntervalLabel);
+
+        if (i == 4) {
+            auto damageHpLabel= Label::createWithTTF(
+                StringUtils::format("DamageHp: %d", Data[i].bomber_data->death_damage),
+                "fonts/Marker Felt.ttf", 24
+            );
+            damageHpLabel->setPosition(L * (i + 1) - 60, H - 30 * 8);
+            damageHpLabel->setColor(Color3B::ORANGE);
+            soldierData->addChild(damageHpLabel);
+        }
     }
-#endif
+
 }

@@ -51,6 +51,8 @@ public:
 
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
+
+	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
 	//new判断
 	CREATE_FUNC(SecondScene);
 private:
@@ -109,20 +111,13 @@ private:
 	Building* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
 
-	std::vector<Building*> placedBuildings;
+	static std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率
 	int baseElixirRate;
 };
 
-//圣水
-extern int g_elixirCount;
-//金币
-extern int g_goldCount;
-//宝石
-extern int g_gemCount;
-//上限
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
-//建筑小屋数量
-extern int hutNum;
+extern int g_elixirCount, g_goldCount, g_gemCount, hutNum;
+
 #endif
 

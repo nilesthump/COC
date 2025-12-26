@@ -31,16 +31,19 @@ public:
 	virtual int getGoldCost() const { return 0; }
 	virtual int getElixirCost() const { return 0; }
 	//升级相关
+	virtual bool canUpgrade() { return 0; }
+	virtual int getUpgradeGoldCost() const{ return 0; }
+	virtual int getUpgradeElixirCost()const { return 0; }
 	virtual void update() { return; }
 	virtual void cutTime() { return; }
 	virtual int getRemainTime() { return 0; }
+	virtual void finishUpgrade() {return;}
 	bool getIsUpgrade() {
 		return isUpgrade;
 	}
 	void startUpgrade() {
 		isUpgrade = true;
 	}
-	virtual void finishUpgrade() {return;}
 	void updateTexture(const std::string& newTextureName) {
 		if (_sprite) {
 			// 尝试加载新纹理

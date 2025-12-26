@@ -7,9 +7,11 @@
 #include<ctime>
 
 // 初始化全局变量
-int maxLevel,maxGoldVolum,maxElixirVolum;
-int g_elixirCount = 750,g_goldCount = 750;
+int maxLevel, maxGoldVolum, maxElixirVolum;
+int g_elixirCount = 750, g_goldCount = 750;
 int g_gemCount = 15, hutNum = 2;
+
+std::vector<Building*> SecondScene::placedBuildings;
 
 USING_NS_CC;
 
@@ -749,48 +751,49 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
         }
         return true; // 吞噬事件，避免触发移动
     }
+    else {
+        // 非双击，只处理拖拽状态下的逻辑、建筑移动逻辑和缩放管理器的逻辑   
+        if (isDragging) {
 
-    // 非双击，只处理拖拽状态下的逻辑、建筑移动逻辑和缩放管理器的逻辑   
-    if (isDragging) {
-
-        return true; // 正在拖拽时返回true，保持事件被捕获
-    }
-    Vec2 touchPos = touch->getLocation();
-    // 检查是否点击了已放置的
-    for (auto& building : placedBuildings) {
-        if (!building) continue;
-        Sprite* mineSprite = building->getSprite();
-        if (!mineSprite) continue;
-
-        // 建筑的世界坐标（菱形中心）
-        Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
-
-        // 菱形参数配置
-        const float horizontalDiag = 56.0f * 3; // 水平对角线总长度
-        const float verticalDiag = 42.0f * 3;   // 竖直对角线总长度
-        const float a = horizontalDiag / 2;     // 水平半轴（x方向）
-        const float b = verticalDiag / 2;       // 竖直半轴（y方向）
-
-        // 菱形碰撞检测核心公式
-        float dx = touchPos.x - buildingScreenPos.x; // 触摸点与中心的x偏移
-        float dy = touchPos.y - buildingScreenPos.y; // 触摸点与中心的y偏移
-        bool isInDiamond = (fabs(dx) / a + fabs(dy) / b) <= 1.0f;
-
-        // 如果触摸点在菱形内，触发建筑移动逻辑
-        if (isInDiamond) {
-            if (_curOpenInfoPanel) {
-                _curOpenInfoPanel->removeFromParent(); // 关闭面板
-                _curOpenInfoPanel = nullptr;
-            }
-            isMovingBuilding = true;
-            movingBuilding = building;
-            building->setOpacity(128);
-            background_sprite_->reorderChild(building, 20);
-            return true;
+            return true; // 正在拖拽时返回true，保持事件被捕获
         }
+        Vec2 touchPos = touch->getLocation();
+        // 检查是否点击了已放置的
+        for (auto& building : placedBuildings) {
+            if (!building) continue;
+            Sprite* mineSprite = building->getSprite();
+            if (!mineSprite) continue;
+
+            // 建筑的世界坐标（菱形中心）
+            Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
+
+            // 菱形参数配置
+            const float horizontalDiag = 56.0f * 3; // 水平对角线总长度
+            const float verticalDiag = 42.0f * 3;   // 竖直对角线总长度
+            const float a = horizontalDiag / 2;     // 水平半轴（x方向）
+            const float b = verticalDiag / 2;       // 竖直半轴（y方向）
+
+            // 菱形碰撞检测核心公式
+            float dx = touchPos.x - buildingScreenPos.x; // 触摸点与中心的x偏移
+            float dy = touchPos.y - buildingScreenPos.y; // 触摸点与中心的y偏移
+            bool isInDiamond = (fabs(dx) / a + fabs(dy) / b) <= 1.0f;
+
+            // 如果触摸点在菱形内，触发建筑移动逻辑
+            if (isInDiamond) {
+                if (_curOpenInfoPanel) {
+                    _curOpenInfoPanel->removeFromParent(); // 关闭面板
+                    _curOpenInfoPanel = nullptr;
+                }
+                isMovingBuilding = true;
+                movingBuilding = building;
+                building->setOpacity(128);
+                background_sprite_->reorderChild(building, 20);
+                return true;
+            }
+        }
+        // 如果没有拖拽且没有点击建筑，则使用缩放管理器的触摸处理
+        return zoom_manager_->onTouchBegan(touch, event);
     }
-    // 如果没有拖拽且没有点击建筑，则使用缩放管理器的触摸处理
-    return zoom_manager_->onTouchBegan(touch, event);
 }
 
 void SecondScene::onTouchMoved(Touch* touch, Event* event)
@@ -1178,8 +1181,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == builderHutBtn) {
                 // 创建小屋
-                int goldCost = static_cast<Walls*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<Walls*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<BuilderHut*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<BuilderHut*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
                 if (g_goldCount >= goldCost && g_elixirCount >= elixirCost && hutNum < 5) {
                     //除旧
@@ -1189,7 +1192,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         draggingItem->setUserData(nullptr);
                     }
                     //迎新
-                    auto placedBuilderhut = Walls::create("BuilderHutLv1.png");
+                    auto placedBuilderhut = BuilderHut::create("BuilderHutLv1.png");
                     if (placedBuilderhut) {
                         // 更新
                         placedBuilderhut->updatePosition(snappedPos);
@@ -1269,6 +1272,22 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         }
     }
     else if (isMovingBuilding) {
+
+        // 检查是否可能是双击序列中的第一次点击
+        double currentTime = clock() / (double)CLOCKS_PER_SEC;
+        double timeDiff = currentTime - _lastClickTime;
+
+        // 如果时间差小于双击间隔，说明可能是双击序列的第一次点击，不执行移动
+        if (timeDiff < DOUBLE_CLICK_INTERVAL) {
+            // 恢复建筑状态
+            if (movingBuilding) {
+                movingBuilding->setOpacity(255);
+                background_sprite_->reorderChild(movingBuilding, 15);
+                movingBuilding = nullptr;
+            }
+            isMovingBuilding = false;
+            return;
+        }
 
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
         //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
