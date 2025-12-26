@@ -236,7 +236,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 
     // 5. 资源信息显示
     // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源和生产速度，有收集按钮
-    // 存钱罐和圣水瓶显示的是容量，无收集按钮
+    // 存钱罐和圣水瓶显示的是容量/上限，有收集按钮
     //兵营显示各个士兵的信息，城墙、建筑小屋不需要显示
     if (dynamic_cast<GoldMine*>(building)) {
         _speedLabel = Label::createWithTTF(
@@ -275,7 +275,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("GoldVolum: %d", building->getMaxStock()),
+            StringUtils::format("Gold: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
@@ -284,7 +284,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("ElixirVolum: %d", building->getMaxStock()),
+            StringUtils::format("Elixir: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
@@ -424,7 +424,8 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _collectBtn->setPosition(bgWidth / 2, 120); // 位置在升级按钮上方
 
     // 菜单容器
-    if (dynamic_cast<GoldMine*>(building)|| dynamic_cast<ElixirCollector*>(building)) {
+    if (dynamic_cast<GoldMine*>(building)|| dynamic_cast<ElixirCollector*>(building)||
+        dynamic_cast<GoldStorage*>(building) || dynamic_cast<ElixirStorage*>(building)) {
         auto menu = Menu::create(_collectBtn, _upgradeBtn, _speedUpBtn, nullptr);
         menu->setPosition(Vec2::ZERO);
         panelBg->addChild(menu);
@@ -522,29 +523,56 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
 
     int collected = 0;
     // 判断建筑类型并执行对应收集逻辑
-    if (auto goldMine = dynamic_cast<GoldMine*>(_targetBuilding)) {
-        collected = goldMine->getCurrentStock();
+    if (dynamic_cast<GoldMine*>(_targetBuilding)) {
+        collected = _targetBuilding->getCurrentStock();
         if (collected > 0&&collected+ g_goldCount<=maxGoldVolum) {
             g_goldCount += collected;
+            collected = 0;
         }
         else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
             g_goldCount = maxGoldVolum;
+            collected -= (maxGoldVolum - g_goldCount);//剩余未存的
         }
     }
-    else if (auto elixirCollector = dynamic_cast<ElixirCollector*>(_targetBuilding)) {
-        collected = elixirCollector->getCurrentStock();
+    else if (dynamic_cast<ElixirCollector*>(_targetBuilding)) {
+        collected = _targetBuilding->getCurrentStock();
         if (collected > 0 && collected + g_goldCount <= maxElixirVolum) {
             g_elixirCount += collected;
+            collected = 0;
         }
         else if (collected > 0 && collected + g_goldCount > maxElixirVolum) {
             g_elixirCount = maxElixirVolum;
+            collected -= (maxElixirVolum - g_elixirCount);//剩余未存的
+        }
+    }
+    else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
+        collected = _targetBuilding->getCurrentStock();
+        if (collected > 0 && collected + g_goldCount <= maxGoldVolum) {
+            g_goldCount += collected;
+            collected = 0;
+        }
+        else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
+            g_goldCount = maxGoldVolum;
+            collected -= (maxGoldVolum - g_goldCount);//剩余未存的
+        }
+    }
+    else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
+        collected = _targetBuilding->getCurrentStock();
+        if (collected > 0 && collected + g_elixirCount <= maxElixirVolum) {
+            g_elixirCount += collected;
+            collected = 0;
+        }
+        else if (collected > 0 && collected + g_elixirCount > maxElixirVolum) {
+            g_elixirCount = maxElixirVolum;
+            collected -= (maxElixirVolum - g_elixirCount);//剩余未存的
         }
     }
     // 更新面板显示的资源数量
+    _targetBuilding->clearCurrentStock();
     if (collected > 0) {
-        _targetBuilding->clearCurrentStock();
-        updateInfo(_targetBuilding,temp); // 刷新信息显示
+        _targetBuilding->updateCurrentStock(collected);
     }
+    updateInfo(_targetBuilding, temp); // 刷新信息显示
 }
 
 //展示士兵信息

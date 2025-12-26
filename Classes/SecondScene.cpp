@@ -647,19 +647,46 @@ void SecondScene::update(float delta)
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
-        int totalGoldRate = baseGoldRate;
-        int totalElixirRate = baseElixirRate;
         // 判断建筑类型并分别累加速度
         for (auto building : placedBuildings) {
             if (building->getIsUpgrade()) {
                 building->cutTime();
             }
-            //一下均为非升级中
+            //下均为非升级中
             else if (dynamic_cast<GoldMine*>(building)) {
-                building->updateCurrentStock(); // 产到库存
+                //两个临时变量存储
+                Building* t = building;
+                int tempGold = building->getSpeed();
+                while (t != nullptr&&tempGold>0) {
+                    //金矿非常未满
+                    if (t->getMaxStock() - t->getCurrentStock() >= tempGold) {
+                        t->updateCurrentStock(tempGold);
+                        tempGold = 0;//接下来肯定会退出循环
+                    }
+                    //金矿将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存钱罐
+                    else if (t->getMaxStock() - t->getCurrentStock() < tempGold && t->getMaxStock() - t->getCurrentStock() > 0) {
+                        tempGold -= t->getMaxStock() - t->getCurrentStock();
+                        t->updateCurrentStock(t->getMaxStock() - t->getCurrentStock());
+                        t = getGoldStorage();//获得一个未满的存钱罐来继续“存钱”，直到完全存完或存钱罐为空
+                    }
+                }
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                building->updateCurrentStock(); // 产到库存
+                Building* t2 = building;
+                int tempElixir = t2->getSpeed();
+                while (t2 != nullptr && tempElixir > 0) {
+                    //非常未满
+                    if (t2->getMaxStock() - t2->getCurrentStock() >= tempElixir) {
+                        t2->updateCurrentStock(tempElixir);
+                        tempElixir = 0;//接下来肯定会退出循环
+                    }
+                    //将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存罐
+                    else if (t2->getMaxStock() - t2->getCurrentStock() < tempElixir && t2->getMaxStock() - t2->getCurrentStock() > 0) {
+                        tempElixir -= t2->getMaxStock() - t2->getCurrentStock();
+                        t2->updateCurrentStock(t2->getMaxStock() - t2->getCurrentStock());
+                        t2 = getElixirStorage();//获得一个未满的存罐来继续“存”，直到完全存完或存为空
+                    }
+                }
             }
             else {
                 continue;//只有金矿和圣水收集器需要实时更新

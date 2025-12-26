@@ -2,12 +2,12 @@
 #define __GOLD_STORAGE_H__
 
 #include "Building.h"
-extern int g_goldCount, g_elixirCount,maxLevel;
+extern int g_goldCount, g_elixirCount,maxLevel,maxGoldVolum;
 
 class GoldStorage : public Building
 {
 protected:
-    int addSize = 1000;//额外储量
+    int addSize = 1000, currentSize = 0;//额外储量
     int establishCost[2] = { 100,100 };
     int upgradeCost[2] = { 50,50 };
     int upgradeTime = 10;
@@ -16,6 +16,27 @@ public:
     // 静态创建函数（Cocos推荐方式）
     bool GoldStorage::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
+    //功能相关
+    int getMaxStock() const override {
+        return addSize;
+    }
+    int getCurrentStock() const override {
+        return currentSize;
+    }
+    void clearCurrentStock()override {
+        if (g_goldCount + currentSize <= maxGoldVolum) {
+            currentSize = 0;
+            g_goldCount += currentSize;
+        }
+        else {
+            currentSize -= (maxGoldVolum - g_goldCount);
+            g_goldCount = maxGoldVolum;
+        }
+    }
+    void addCurrent(int n) {
+        currentSize += n;
+    }
+    //升级相关
     int getUpgradeGoldCost()const override {
         return upgradeCost[0];
     }
@@ -43,9 +64,6 @@ public:
         _textureName = StringUtils::format("GoldStorageLv%d.png", level);
         updateTexture(_textureName);
         playSuccessBlink();
-    }
-    int getMaxStock() const override {
-        return addSize;
     }
     int getGoldCost() const override {
         return establishCost[0];

@@ -58,13 +58,8 @@ public:
     void clearCurrentStock() override {
         currentSize = 0;
     }
-    void updateCurrentStock() override {
-        if (currentSize + _generateSpeed <= maxSize) {
-            currentSize += _generateSpeed;
-        }
-        else {
-            currentSize = maxSize;
-        }
+    void updateCurrentStock(int n) override {
+        currentSize += n;
     }
     int getGoldCost() const override {
         return establishCost[0];

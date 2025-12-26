@@ -62,7 +62,7 @@ public:
 		x = newPos.x;
 		y = newPos.y;
 	}
-	virtual void updateCurrentStock() { return; }
+	virtual void updateCurrentStock(int n) { return; }
 	//接口
 	float getX() {
 		return x;
@@ -99,7 +99,7 @@ public:
 	virtual int getCurrentStock() const { return 0; }
 	virtual void clearCurrentStock() { return; }
 	virtual int getMaxStock() const { return 0; }  
-
+	virtual void addCurrent(int n) { return; }
 	// 设置/获取位置（复用Node的position，锚点内部管理）
 	void setMinePosition(const cocos2d::Vec2& pos) { this->setPosition(pos); }
 	cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }
