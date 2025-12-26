@@ -200,6 +200,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     else if (dynamic_cast<TownHall*>(building)) {
         type = "TownHall";
     }
+    else {
+        type = "BuilderHut";
+    }
     _titleLabel = Label::createWithTTF(
         StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
         "fonts/Marker Felt.ttf", 24
@@ -229,7 +232,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     // 5. 资源信息显示
     // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源和生产速度，有收集按钮
     // 存钱罐和圣水瓶显示的是容量，无收集按钮
-    //兵营显示各个士兵的信息，城墙不需要显示
+    //兵营显示各个士兵的信息，城墙、建筑小屋不需要显示
     if (dynamic_cast<GoldMine*>(building)) {
         _speedLabel = Label::createWithTTF(
             StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
@@ -350,6 +353,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         _resourceLabel->setColor(Color3B::BLACK);
         panelBg->addChild(_resourceLabel);
     }
+    else if(dynamic_cast<BuilderHut*>(building)){}
     
     // 6. 升级按钮,最高等级15
     _upgradeBtn = MenuItemImage::create(
@@ -444,6 +448,9 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
         type = "Townhall";
         _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()));
     }
+    else if (dynamic_cast<BuilderHut*>(building)) {
+        type = "BuilderHut";
+    }
     //公共标签
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
@@ -454,8 +461,9 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
 void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
     if (!_targetBuilding) return;
 
-    //非大本营
-    if (_targetBuilding->getLv() < maxLevel&&!dynamic_cast<TownHall*>(_targetBuilding)) {
+    //非大本营、建筑小屋最高等级15级，建筑小屋7级
+    if ((_targetBuilding->getLv() < maxLevel && !dynamic_cast<TownHall*>(_targetBuilding) && !dynamic_cast<BuilderHut*>(_targetBuilding))
+        || (dynamic_cast<BuilderHut*>(_targetBuilding) && _targetBuilding->getLv() && _targetBuilding->getLv() < 7)) {
         // 升级所需资源
         int requiredGold = 1;//100 * _targetBuilding->getLv();    // 每级所需金币为当前等级*100
         int requiredElixir = 1;//50 * _targetBuilding->getLv();   // 每级所需圣水为当前等级*50

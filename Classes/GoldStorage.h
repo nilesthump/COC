@@ -21,6 +21,7 @@ public:
         updateTexture(_textureName);
         //私有属性
         addSize += 1000;
+        //加速成本升级
     }
     int getMaxStock() const override {
         return addSize;

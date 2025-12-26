@@ -62,7 +62,7 @@ private:
     cocos2d::Label* _barbarian;
     cocos2d::Label* _archer;
     cocos2d::Label* _giant;
-    cocos2d::Label* _goblin;
+    cocos2d::Label* _goblin; 
     cocos2d::Label* _bomber;
     cocos2d::Label* _balloon;
     //–≈œ¢√Ê∞Â

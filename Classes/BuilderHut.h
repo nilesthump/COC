@@ -17,8 +17,9 @@ public:
         level += 1;
         _hp += 1000;
         //»»Í¼
-        _textureName = StringUtils::format("BuilderHut.png", level);
+        _textureName = StringUtils::format("BuilderHutLv%d.png", level);
         updateTexture(_textureName);
+
     }
     int getGoldCost() const override {
         return cost[0];

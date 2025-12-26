@@ -9,7 +9,7 @@
 // 初始化全局变量
 int maxLevel,maxGoldVolum,maxElixirVolum;
 int g_elixirCount = 750,g_goldCount = 750;
-int g_gemCount = 15;
+int g_gemCount = 15, hutNum = 2;
 
 USING_NS_CC;
 
@@ -88,8 +88,8 @@ bool SecondScene::init()
         maxLevel = townHall->getLv();
     }
 
-    //建筑小屋
-    auto builderHut1 = BuilderHut::create("BuilderHut.png");
+    //建筑小屋*2
+    auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
     if (builderHut1)
     {
         builderHut1->updatePosition(Vec2(1600, 1373));
@@ -97,7 +97,7 @@ bool SecondScene::init()
         placedBuildings.push_back(builderHut1);
        
     }
-    auto builderHut2 = BuilderHut::create("BuilderHut.png");
+    auto builderHut2 = BuilderHut::create("BuilderHutLv1.png");
     if (builderHut2) {
         builderHut2->updatePosition(Vec2(2200, 1373));
         background_sprite_->addChild(builderHut2, 15);
@@ -353,7 +353,7 @@ bool SecondScene::init()
                 draggingItem = elixirStorageBtn;
                 dragStartPosition = elixirStorageBtn->getPosition();
 
-                auto elixirStoragePreview = ElixirStorage::create("ElixirStorageLv1.png"); // 预览用圣水瓶纹理
+                auto elixirStoragePreview = ElixirStorage::create("ElixirStorageLv1.png"); 
                 if (elixirStoragePreview) {
                     // 预览态设置：半透明（区分实际对象）
                     elixirStoragePreview->setOpacity(150);
@@ -391,7 +391,7 @@ bool SecondScene::init()
                 draggingItem = armyCampBtn;
                 dragStartPosition = armyCampBtn->getPosition();
 
-                auto armyCampPreview = ArmyCamp::create("ArmyCampLv1.png"); // 预览用圣水瓶纹理
+                auto armyCampPreview = ArmyCamp::create("ArmyCampLv1.png");
                 if (armyCampPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     armyCampPreview->setOpacity(150);
@@ -449,7 +449,45 @@ bool SecondScene::init()
     }
     wallsBtn->setScale(0.6f);
 
-    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn,armyCampBtn, wallsBtn, nullptr);
+    //7.建筑小屋按钮
+    builderHutBtn = MenuItemImage::create(
+        "BuilderHut.png",
+        "BuilderHut.png",
+        [=](Ref* pSender) {
+            // 先检查是否有足够资源，且数量不超过5
+            BuilderHut* tempMine = BuilderHut::create("BuilderHutLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost || hutNum >= 5) {
+                return; // 直接返回，不允许放置
+            }
+
+            if (!isDragging) {
+                log("BuilderHut ");
+                isDragging = true;
+                draggingItem = builderHutBtn;
+                dragStartPosition = builderHutBtn->getPosition();
+
+                auto builderHutPreview = BuilderHut::create("BuilderHutLv1.png"); 
+                if (builderHutPreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    builderHutPreview->setOpacity(150);
+                    Vec2 my = Vec2(builderHutPreview->getX(), builderHutPreview->getY());
+                    Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                    builderHutPreview->setMinePosition(you);
+
+                    // 添加到背景精灵，并保存到按钮的UserData
+                    background_sprite_->addChild(builderHutPreview, 10);
+                    builderHutBtn->setUserData(builderHutPreview);
+                }
+            }
+        }
+    );
+    if (builderHutBtn) {
+        builderHutBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 6.5 - 20));
+    }
+    builderHutBtn->setScale(0.6f);
+
+    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn,armyCampBtn, wallsBtn,builderHutBtn, nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
 
@@ -808,6 +846,13 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
                 dragWallsPreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
+        //小屋预览
+        else if (draggingItem == builderHutBtn) {
+            BuilderHut* dragBuilderHutPreview = static_cast<BuilderHut*>(userData);
+            if (dragBuilderHutPreview) {
+                dragBuilderHutPreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
     }
     else if (isMovingBuilding) {
         Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());       
@@ -973,9 +1018,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             if (draggingItem == goldMineBtn) {
                 // 创建金矿
                 int goldCost = static_cast<GoldMine*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost= static_cast<GoldMine*>(draggingItem->getUserData())->getElixirCost();
+                int elixirCost = static_cast<GoldMine*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost&& g_elixirCount>=elixirCost) {
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
                     //除旧
                     GoldMine* dragMinePreview = static_cast<GoldMine*>(draggingItem->getUserData());
                     if (dragMinePreview) {
@@ -994,7 +1039,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     //扣除资源
                     g_goldCount -= goldCost;
                     g_elixirCount -= elixirCost;
-                }              
+                }
             }
             else if (draggingItem == elixirCollectorBtn) {
                 // 创建圣水收集器
@@ -1126,86 +1171,121 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     g_elixirCount -= elixirCost;
                 }
             }
+            else if (draggingItem == builderHutBtn) {
+                // 创建小屋
+                int goldCost = static_cast<Walls*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<Walls*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost && hutNum < 5) {
+                    //除旧
+                    BuilderHut* dragBuilderHutPreview = static_cast<BuilderHut*>(draggingItem->getUserData());
+                    if (dragBuilderHutPreview) {
+                        dragBuilderHutPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedBuilderhut = Walls::create("BuilderHutLv1.png");
+                    if (placedBuilderhut) {
+                        // 更新
+                        placedBuilderhut->updatePosition(snappedPos);
+                        background_sprite_->addChild(placedBuilderhut, 15);
+                        placedBuildings.push_back(placedBuilderhut);
+                        placedBuilderhut->playSuccessBlink();
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
+                    hutNum++;
+                }
+            }
+            // 无效区域：创建对应建筑并执行失败反馈
+            else {
+                if (draggingItem == goldMineBtn) {
+                    auto failGoldMine = GoldMine::create("GoldMineLv1.png");
+                    if (failGoldMine) {
+                        failGoldMine->setPosition(snappedPos);
+                        background_sprite_->addChild(failGoldMine, 15);
+                        failGoldMine->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == elixirCollectorBtn) {
+                    auto failElixir = ElixirCollector::create("ElixirCollectorLv1.png");
+                    if (failElixir) {
+                        failElixir->setPosition(snappedPos);
+                        background_sprite_->addChild(failElixir, 15);
+                        failElixir->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == goldStorageBtn) {
+                    auto failGoldStorage = GoldStorage::create("GoldStorageLv1.png");
+                    if (failGoldStorage) {
+                        failGoldStorage->setPosition(snappedPos);
+                        background_sprite_->addChild(failGoldStorage, 15);
+                        failGoldStorage->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == elixirStorageBtn) {
+                    auto failElixirStorage = ElixirStorage::create("ElixirStorageLv1.png");
+                    if (failElixirStorage) {
+                        failElixirStorage->setPosition(snappedPos);
+                        background_sprite_->addChild(failElixirStorage, 15);
+                        failElixirStorage->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == armyCampBtn) {
+                    auto failArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
+                    if (failArmyCamp) {
+                        failArmyCamp->setPosition(snappedPos);
+                        background_sprite_->addChild(failArmyCamp, 15);
+                        failArmyCamp->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == wallsBtn) {
+                    auto failWalls = Walls::create("WallsLv1.png");
+                    if (failWalls) {
+                        failWalls->setPosition(snappedPos);
+                        background_sprite_->addChild(failWalls, 15);
+                        failWalls->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == builderHutBtn) {
+                    auto failBuilderHut = BuilderHut::create("BuilderHutLv1.png");
+                    if (failBuilderHut) {
+                        failBuilderHut->setPosition(snappedPos);
+                        background_sprite_->addChild(failBuilderHut, 15);
+                        failBuilderHut->playFailBlinkAndRemove();
+                    }
+                }
+            }
+
+            // 重置拖拽状态
+            isDragging = false;
+            draggingItem = nullptr;
         }
-        // 无效区域：创建对应建筑并执行失败反馈
-        else {         
-            if (draggingItem == goldMineBtn) {
-                auto failGoldMine = GoldMine::create("GoldMineLv1.png");
-                if (failGoldMine) {
-                    failGoldMine->setPosition(snappedPos);
-                    background_sprite_->addChild(failGoldMine, 15);
-                    failGoldMine->playFailBlinkAndRemove();
-                }
+        else if (isMovingBuilding) {
+
+            Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
+            //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
+            Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
+            bool inDiamond = isInDiamond(diamondPos);
+
+            float gridCellSizeX = grid_manager_->getGridCellSizeX();
+            float gridCellSizeY = grid_manager_->getGridCellSizeY();
+            float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
+            float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
+
+            if (inDiamond && movingBuilding) {
+                // 使用新的更新方法
+                movingBuilding->updatePosition(Vec2(snappedX, snappedY));
+                movingBuilding->setOpacity(255);
+                background_sprite_->reorderChild(movingBuilding, 15);
+                movingBuilding = nullptr;
             }
-            else if (draggingItem == elixirCollectorBtn) {
-                auto failElixir = ElixirCollector::create("ElixirCollectorLv1.png");
-                if (failElixir) {
-                    failElixir->setPosition(snappedPos);
-                    background_sprite_->addChild(failElixir, 15);
-                    failElixir->playFailBlinkAndRemove();                     
-                }
-            }
-            else if(draggingItem == goldStorageBtn){
-                auto failGoldStorage = GoldStorage::create("GoldStorageLv1.png");
-                if (failGoldStorage) {
-                    failGoldStorage->setPosition(snappedPos);
-                    background_sprite_->addChild(failGoldStorage, 15);
-                    failGoldStorage->playFailBlinkAndRemove();
-                }
-            }
-            else if (draggingItem == elixirStorageBtn) {
-                auto failElixirStorage = ElixirStorage::create("ElixirStorageLv1.png");
-                if (failElixirStorage) {
-                    failElixirStorage->setPosition(snappedPos);
-                    background_sprite_->addChild(failElixirStorage, 15);
-                    failElixirStorage->playFailBlinkAndRemove();
-                }
-            }
-            else if (draggingItem == armyCampBtn) {
-                auto failArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
-                if (failArmyCamp) {
-                    failArmyCamp->setPosition(snappedPos);
-                    background_sprite_->addChild(failArmyCamp, 15);
-                    failArmyCamp->playFailBlinkAndRemove();
-                }
-            }
-            else if (draggingItem == wallsBtn) {
-                auto failWalls = Walls ::create("WallsLv1.png");
-                if (failWalls) {
-                    failWalls->setPosition(snappedPos);
-                    background_sprite_->addChild(failWalls, 15);
-                    failWalls->playFailBlinkAndRemove();
-                }
-            }
+            isMovingBuilding = false;
         }
-
-        // 重置拖拽状态
-        isDragging = false;
-        draggingItem = nullptr;
-    }
-    else if (isMovingBuilding) {
-
-        Vec2 localPos = background_sprite_->convertToNodeSpace(touch->getLocation());
-        //Vec2 localPos = ConvertTest::convertScreenToGrid(touch->getLocation(), background_sprite_, buildPanel);
-        Vec2 diamondPos = convertScreenToDiamond(touch->getLocation());
-        bool inDiamond = isInDiamond(diamondPos);
-
-        float gridCellSizeX = grid_manager_->getGridCellSizeX();
-        float gridCellSizeY = grid_manager_->getGridCellSizeY();
-        float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
-        float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
-
-        if (inDiamond && movingBuilding) {
-            // 使用新的更新方法
-            movingBuilding->updatePosition(Vec2(snappedX, snappedY));
-            movingBuilding->setOpacity(255);
-            background_sprite_->reorderChild(movingBuilding, 15);
-            movingBuilding = nullptr;
+        else if (zoom_manager_) {
+            zoom_manager_->onTouchEnded(touch, event);
         }
-        isMovingBuilding = false;
-    }
-    else if (zoom_manager_) {
-        zoom_manager_->onTouchEnded(touch, event);
     }
 }
 
@@ -1252,6 +1332,13 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
             Walls* dragWallsPreview = static_cast<Walls*>(draggingItem->getUserData());
             if (dragWallsPreview) {
                 dragWallsPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == builderHutBtn) {
+            BuilderHut* dragBuilderHutPreview = static_cast<BuilderHut*>(draggingItem->getUserData());
+            if (dragBuilderHutPreview) {
+                dragBuilderHutPreview->removeFromParentAndCleanup(true);
                 draggingItem->setUserData(nullptr);
             }
         }
@@ -1393,6 +1480,9 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Node* building) {
     }
     else if (dynamic_cast<Walls*>(building)) {
         sprite = static_cast<Walls*>(building)->getSprite();
+    }
+    else if (dynamic_cast<BuilderHut*>(building)) {
+        sprite = static_cast<BuilderHut*>(building)->getSprite();
     }
 
     if (!sprite) return false;

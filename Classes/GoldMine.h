@@ -23,6 +23,7 @@ public:
         //私有属性
         _generateSpeed += 1;
         maxSize += 100;
+        //加速成本升级
     }
     int getSpeed()const override {
         return _generateSpeed;

@@ -1,4 +1,5 @@
 #include "Building.h"
+#include "SecondScene.h"
 
 using namespace cocos2d;
 

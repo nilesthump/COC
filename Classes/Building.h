@@ -13,7 +13,6 @@ protected:
 	cocos2d::Sprite* _sprite; // 图像精灵
 	float x, y;               //世界坐标
 	float size = 3.0f;        //尺寸
-
 	virtual bool initSprite(const std::string& textureName) = 0;// 初始化精灵（内部调用）
 public:
 	// 初始化函数
@@ -91,6 +90,7 @@ public:
 	cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }
 	// 获取精灵（仅用于特殊操作，尽量封装在类内）
 	cocos2d::Sprite* getSprite() const { return _sprite; }
+
 
 	// 视觉反馈：闪烁（成功放置）
 	void playSuccessBlink() { this->runAction(cocos2d::Blink::create(0.5f, 2)); }

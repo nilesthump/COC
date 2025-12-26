@@ -122,5 +122,7 @@ extern int g_goldCount;
 extern int g_gemCount;
 //上限
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
+//建筑小屋数量
+extern int hutNum;
 #endif
 
