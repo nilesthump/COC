@@ -69,6 +69,20 @@ private:
     void sendLogoutRequest(const std::string& username);
     void performLocalLogout();
 
+    /*
+        用二进制状态控制按钮显示和隐藏，共8位
+        从低位到高位依次为：
+        secondSceneItem
+        battleTestItem
+        guestLoginItem
+        registerItem
+        loginItem
+        deleteAccountItem
+        changePasswordItem
+        welcomeLabel
+    */
+    void setupMenuItemVisibleAndEnabled(int status, std::string usrname = "");
+
     cocos2d::MenuItemImage* secondSceneItem;
     cocos2d::MenuItemImage* battleTestItem;
     cocos2d::MenuItemImage* guestLoginItem;
