@@ -69,6 +69,20 @@ private:
     void sendLogoutRequest(const std::string& username);
     void performLocalLogout();
 
+    /*
+        用二进制状态控制按钮显示和隐藏，共8位
+        从低位到高位依次为：
+        secondSceneItem
+        battleTestItem
+        guestLoginItem
+        registerItem
+        loginItem
+        deleteAccountItem
+        changePasswordItem
+        welcomeLabel
+    */
+    void setupMenuItemVisibleAndEnabled(int status, std::string usrname = "");
+
     cocos2d::MenuItemImage* secondSceneItem;
     cocos2d::MenuItemImage* battleTestItem;
     cocos2d::MenuItemImage* guestLoginItem;
@@ -117,6 +131,7 @@ private:
     cocos2d::Label* loginLabel;
     cocos2d::Label* registerLabel;
     cocos2d::Label* registerResultLabel;
+    cocos2d::Label* loginResultLabel;
     cocos2d::Label* deleteAccountLabel;
     cocos2d::Label* welcomeLabel;
 
@@ -130,6 +145,7 @@ private:
     bool _isConnecting;
     bool _connectionTimeoutScheduled;
     bool _isReconnecting;
+    bool _sceneIsDestroyed;
     std::string _serverUrl;
 
     void connectionTimeoutCallback(float dt);
