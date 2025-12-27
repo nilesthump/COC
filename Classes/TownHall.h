@@ -39,10 +39,16 @@ public:
         //每次升级完成后，需要的升级时间对应延长
         upgradeTime = level * 15;
         isUpgrade = false;
+        //更新全局变量
+        maxGoldVolum = maxGoldNum;
+        maxElixirVolum = maxElixirNum;
+        maxLevel = level;
         //换图
+        CCLOG("aaa");
         _textureName = StringUtils::format("TownHallLv%d.png", level);
         updateTexture(_textureName);
         playSuccessBlink();
+        CCLOG("BBB");
     }
     int getMaxGoldNum()override {
         return maxGoldNum;
@@ -56,11 +62,7 @@ public:
     void cutTime()override {
         upgradeTime--;
         if (upgradeTime <= 0) {
-            update();
-            //更新全局变量
-            maxGoldVolum = maxGoldNum;
-            maxElixirVolum = maxElixirNum;
-            maxLevel = level;
+            update();         
         }
     }
     int getRemainTime() override {
