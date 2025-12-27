@@ -58,8 +58,10 @@ bool SecondScene::init()
     _sceneIsDestroyed = false;
     setupWebSocketCallbacks();
 
-    auto sessionManager = SessionManager::getInstance();
-    if (sessionManager->isAccountLogin()) {
+    auto session_manager = SessionManager::getInstance();
+    std::string username = session_manager->getCurrentUsername();
+
+    if (session_manager->isAccountLogin()) {
         this->scheduleOnce([this](float dt) {
             setupWebSocketAndRequestResources();
             }, 0.2f, "setupWebSocketDelay");
@@ -72,6 +74,7 @@ bool SecondScene::init()
     // 初始化建筑移动相关变量
     isMovingBuilding = false;
     movingBuilding = nullptr;
+    _buildingsInitialized = false; // 仅在账号登录模式下重置，游客模式在initDefaultBuildingsAndSave中设置
 
     //游戏背景
     auto label = Label::createWithTTF("Your Clan!!!", "fonts/Marker Felt.ttf", 36);
@@ -100,38 +103,44 @@ bool SecondScene::init()
         this->addChild(background_sprite_, 0);
     }
 
+#if 0
+    if (username.empty()) {
+        // 大本营
+        auto townHall = TownHall::create("TownHallLv1.png");
+        if (townHall)
+        {
+            townHall->updatePosition(Vec2(1918, 1373));
+            background_sprite_->addChild(townHall, 15);
+            placedBuildings.push_back(townHall);
+            townHall->setScale(0.9f);
 
-    // 大本营
-    auto townHall = TownHall::create("TownHallLv1.png");
-    if (townHall)
-    {
-        townHall->updatePosition(Vec2(1918,1373));
-        background_sprite_->addChild(townHall, 15);
-        placedBuildings.push_back(townHall);
-        townHall->setScale(0.9f);
+            maxGoldVolum = townHall->getMaxGoldNum();
+            maxElixirVolum = townHall->getMaxElixirNum();
+            maxLevel = townHall->getLv();
+        }
 
-        maxGoldVolum = townHall->getMaxGoldNum();
-        maxElixirVolum = townHall->getMaxElixirNum();
-        maxLevel = townHall->getLv();
+        //建筑小屋*2
+        auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
+        if (builderHut1)
+        {
+            builderHut1->updatePosition(Vec2(1600, 1373));
+            background_sprite_->addChild(builderHut1, 15);
+            placedBuildings.push_back(builderHut1);
+
+        }
+        auto builderHut2 = BuilderHut::create("BuilderHutLv1.png");
+        if (builderHut2) {
+            builderHut2->updatePosition(Vec2(2200, 1373));
+            background_sprite_->addChild(builderHut2, 15);
+            placedBuildings.push_back(builderHut2);
+        }
     }
-
-    //建筑小屋*2
-    auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
-    if (builderHut1)
-    {
-        builderHut1->updatePosition(Vec2(1600, 1373));
-        background_sprite_->addChild(builderHut1, 15);
-        placedBuildings.push_back(builderHut1);
-       
+#endif
+    if (!session_manager->isAccountLogin() && username.empty()) {
+        CCLOG("SecondScene: Guest mode, initializing default buildings directly");
+        initDefaultBuildingsAndSave();
     }
-    auto builderHut2 = BuilderHut::create("BuilderHutLv1.png");
-    if (builderHut2) {
-        builderHut2->updatePosition(Vec2(2200, 1373));
-        background_sprite_->addChild(builderHut2, 15);
-        placedBuildings.push_back(builderHut2);
-    }
-
-    
+    // 默认建筑初始化在 onWebSocketBuildingsMessage 中处理，通过服务器返回的建筑列表判断
     //53-100 总按钮部分
     auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
@@ -1964,7 +1973,8 @@ void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
         if (result && doc.HasMember("buildings") && doc["buildings"].IsArray()) {
             const rapidjson::Value& buildingsArray = doc["buildings"];
 
-            CCLOG("SecondScene: Loading %d buildings from server", buildingsArray.Size());
+            if (buildingsArray.Size() > 0) {
+                CCLOG("SecondScene: Loading %d buildings from server", buildingsArray.Size());
 
             for (rapidjson::SizeType i = 0; i < buildingsArray.Size(); i++) {
                 const rapidjson::Value& building = buildingsArray[i];
@@ -1985,33 +1995,7 @@ void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
                 CCLOG("SecondScene: Creating building - type=%s, x=%.2f, y=%.2f, level=%d",
                     buildingType.c_str(), x, y, level);
 
-                Building* newBuilding = nullptr;
-
-                if (buildingType == "GoldMine") {
-                    newBuilding = GoldMine::create("GoldMineLv1.png");
-                }
-                else if (buildingType == "ElixirCollector") {
-                    newBuilding = ElixirCollector::create("ElixirCollectorLv1.png");
-                }
-                else if (buildingType == "GoldStorage") {
-                    newBuilding = GoldStorage::create("GoldStorageLv1.png");
-                }
-                else if (buildingType == "ElixirStorage") {
-                    newBuilding = ElixirStorage::create("ElixirStorageLv1.png");
-                }
-                else if (buildingType == "ArmyCamp") {
-                    newBuilding = ArmyCamp::create("ArmyCampLv1.png");
-                }
-                else if (buildingType == "Walls") {
-                    newBuilding = Walls::create("WallsLv1.png");
-                }
-                else if (buildingType == "BuilderHut") {
-                    newBuilding = BuilderHut::create("BuilderHutLv1.png");
-                }
-                else if (buildingType == "TownHall") {
-                    newBuilding = TownHall::create("TownHallLv1.png");
-                }
-
+                Building* newBuilding = createBuildingByType(buildingType);
                 if (newBuilding) {
                     newBuilding->updatePosition(Vec2(x, y));
                     background_sprite_->addChild(newBuilding, 15);
@@ -2022,10 +2006,78 @@ void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
                     CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
                 }
             }
+            return;
+            }
         }
-        else {
-            CCLOG("SecondScene: Failed to load buildings or no buildings found");
+
+        if (_buildingsInitialized) {
+            CCLOG("SecondScene: Buildings already initialized, skipping");
+            return;
         }
+
+        if (_sceneIsDestroyed) {
+            CCLOG("SecondScene: Scene destroyed, skipping initialization");
+            return;
+        }
+
+        CCLOG("SecondScene: Account login - no buildings from server (unexpected case)");
+    }
+}
+
+Building* SecondScene::createBuildingByType(const std::string& buildingType) {
+    if (buildingType == "GoldMine") {
+        return GoldMine::create("GoldMineLv1.png");
+    }
+    else if (buildingType == "ElixirCollector") {
+        return ElixirCollector::create("ElixirCollectorLv1.png");
+    }
+    else if (buildingType == "GoldStorage") {
+        return GoldStorage::create("GoldStorageLv1.png");
+    }
+    else if (buildingType == "ElixirStorage") {
+        return ElixirStorage::create("ElixirStorageLv1.png");
+    }
+    else if (buildingType == "ArmyCamp") {
+        return ArmyCamp::create("ArmyCampLv1.png");
+    }
+    else if (buildingType == "Walls") {
+        return Walls::create("WallsLv1.png");
+    }
+    else if (buildingType == "BuilderHut") {
+        return BuilderHut::create("BuilderHutLv1.png");
+    }
+    else if (buildingType == "TownHall") {
+        return TownHall::create("TownHallLv1.png");
+    }
+    return nullptr;
+}
+
+void SecondScene::initDefaultBuildingsAndSave() {
+    _buildingsInitialized = true;
+
+    auto townHall = TownHall::create("TownHallLv1.png");
+    if (townHall) {
+        townHall->updatePosition(Vec2(1918, 1373));
+        background_sprite_->addChild(townHall, 15);
+        placedBuildings.push_back(townHall);
+        townHall->setScale(0.9f);
+        maxGoldVolum = townHall->getMaxGoldNum();
+        maxElixirVolum = townHall->getMaxElixirNum();
+        maxLevel = townHall->getLv();
+    }
+
+    auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
+    if (builderHut1) {
+        builderHut1->updatePosition(Vec2(1600, 1373));
+        background_sprite_->addChild(builderHut1, 15);
+        placedBuildings.push_back(builderHut1);
+    }
+
+    auto builderHut2 = BuilderHut::create("BuilderHutLv1.png");
+    if (builderHut2) {
+        builderHut2->updatePosition(Vec2(2200, 1373));
+        background_sprite_->addChild(builderHut2, 15);
+        placedBuildings.push_back(builderHut2);
     }
 }
 

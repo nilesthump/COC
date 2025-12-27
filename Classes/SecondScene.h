@@ -152,6 +152,11 @@ private:
 	static std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率
 	int baseElixirRate;
+
+	bool _buildingsInitialized; // 防止重复初始化建筑
+
+	Building* createBuildingByType(const std::string& buildingType);
+	void initDefaultBuildingsAndSave();
 };
 
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
