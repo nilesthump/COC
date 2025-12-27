@@ -667,7 +667,17 @@ void SecondScene::update(float delta)
     // 累计时间并每秒增加圣水数量
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
-
+    Building* notFullGoldStorage = nullptr, * notFullElixirStorage = nullptr;
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+            notFullGoldStorage = building;
+        }
+    }
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+            notFullElixirStorage = building;
+        }
+    }
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
@@ -679,36 +689,72 @@ void SecondScene::update(float delta)
             //下均为非升级中
             else if (dynamic_cast<GoldMine*>(building)) {
                 //两个临时变量存储
-                Building* t = building;
                 int tempGold = building->getSpeed();
-                while (t != nullptr&&tempGold>0) {
+                while (tempGold>0) {
                     //金矿非常未满
-                    if (t->getMaxStock() - t->getCurrentStock() >= tempGold) {
-                        t->updateCurrentStock(tempGold);
+                    if (building->getMaxStock() - building->getCurrentStock() >= tempGold) {
+                        CCLOG("A");
+                        building->updateCurrentStock(tempGold);
                         tempGold = 0;//接下来肯定会退出循环
+                        break;
                     }
                     //金矿将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存钱罐
-                    else if (t->getMaxStock() - t->getCurrentStock() < tempGold && t->getMaxStock() - t->getCurrentStock() > 0) {
-                        tempGold -= t->getMaxStock() - t->getCurrentStock();
-                        t->updateCurrentStock(t->getMaxStock() - t->getCurrentStock());
-                        t = getGoldStorage();//获得一个未满的存钱罐来继续“存钱”，直到完全存完或存钱罐为空
+                    else if (building->getMaxStock() - building->getCurrentStock() < tempGold && building->getMaxStock() - building->getCurrentStock() > 0) {
+                        CCLOG("B");
+                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());//尽量存
+                        tempGold -= (building->getMaxStock() - building->getCurrentStock());//剩余未存
+                        continue;//金矿已满，下次while循环会直接跳到下面对于存钱罐的判断
                     }
+                    //有
+                    if (notFullGoldStorage != nullptr) {
+                        if (notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock() >= tempGold) {
+                            CCLOG("C");
+                            notFullGoldStorage->addCurrent(tempGold);
+                            tempGold = 0;
+                            break;
+                        }
+                        else {
+                            CCLOG("D");
+                            notFullGoldStorage->addCurrent(notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock());
+                            tempGold -= notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock();//剩余未存
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+                    }               
                 }
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                Building* t2 = building;
-                int tempElixir = t2->getSpeed();
-                while (t2 != nullptr && tempElixir > 0) {
+                int tempElixir = building->getSpeed();
+                while (tempElixir > 0) {
                     //非常未满
-                    if (t2->getMaxStock() - t2->getCurrentStock() >= tempElixir) {
-                        t2->updateCurrentStock(tempElixir);
+                    if (building->getMaxStock() - building->getCurrentStock() >= tempElixir) {
+                        building->updateCurrentStock(tempElixir);
                         tempElixir = 0;//接下来肯定会退出循环
+                        break;
                     }
                     //将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存罐
-                    else if (t2->getMaxStock() - t2->getCurrentStock() < tempElixir && t2->getMaxStock() - t2->getCurrentStock() > 0) {
-                        tempElixir -= t2->getMaxStock() - t2->getCurrentStock();
-                        t2->updateCurrentStock(t2->getMaxStock() - t2->getCurrentStock());
-                        t2 = getElixirStorage();//获得一个未满的存罐来继续“存”，直到完全存完或存为空
+                    else if (building->getMaxStock() - building->getCurrentStock() < tempElixir && building->getMaxStock() - building->getCurrentStock() > 0) {
+                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());
+                        tempElixir -= (building->getMaxStock() - building->getCurrentStock());
+                        continue;
+                    }
+                    //有
+                    else if (notFullElixirStorage != nullptr) {
+                        if (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock() >= tempElixir) {
+                            notFullElixirStorage->addCurrent(tempElixir);
+                            tempElixir = 0;
+                            break;
+                        }
+                        else {
+                            notFullElixirStorage->addCurrent(notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());
+                            tempElixir -= (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());//剩余未存
+                            break;
+                        }
+                    }
+                    else {
+                        break;
                     }
                 }
             }
@@ -761,8 +807,8 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
             // 复用菱形碰撞检测代码（判断触摸点是否在当前建筑的菱形范围内）
             Sprite* mineSprite = building->getSprite();
             Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
-            const float horizontalDiag = 56.0f * 3;
-            const float verticalDiag = 42.0f * 3;
+            const float horizontalDiag = 56.0f * building->getSize();
+            const float verticalDiag = 42.0f * building->getSize();
             float a = horizontalDiag / 2;
             float b = verticalDiag / 2;
             float dx = touchPos.x - buildingScreenPos.x;
@@ -819,8 +865,8 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
             Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
 
             // 菱形参数配置
-            const float horizontalDiag = 56.0f * 3; // 水平对角线总长度
-            const float verticalDiag = 42.0f * 3;   // 竖直对角线总长度
+            const float horizontalDiag = 56.0f * building->getSize(); // 水平对角线总长度
+            const float verticalDiag = 42.0f * building->getSize();   // 竖直对角线总长度
             const float a = horizontalDiag / 2;     // 水平半轴（x方向）
             const float b = verticalDiag / 2;       // 竖直半轴（y方向）
 

@@ -455,11 +455,11 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         type = "GoldStorage";
-        _resourceLabel->setString(StringUtils::format("GoldVolum: %d", building->getMaxStock()));
+        _resourceLabel->setString(StringUtils::format("Gold: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()));
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
         type = "ElixirStorage";
-        _resourceLabel->setString(StringUtils::format("ElixirVolum: %d", building->getMaxStock()));
+        _resourceLabel->setString(StringUtils::format("Elixir: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()));
     }
     else if (dynamic_cast<ArmyCamp*>(building)) {
         type = "ArmyCamp";
