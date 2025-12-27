@@ -65,6 +65,7 @@ public:
 				return building;
 			}
 		}
+		return nullptr;
 	}
 	Building* getElixirStorage() {
 		for (auto building : placedBuildings) {
@@ -72,6 +73,7 @@ public:
 				return building;
 			}
 		}
+		return nullptr;
 	}
 	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
 	//new判断
