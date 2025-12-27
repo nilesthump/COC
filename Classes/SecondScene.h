@@ -85,6 +85,16 @@ public:
 	void onWebSocketMessage(const std::string& message);
 	void sendGetResourceRequest();
 	void sendUpdateResourceRequest(float dt);
+
+	// 公开方法：更新资源 UI 显示
+	void updateResourceLabels() {
+		if (goldLabel) {
+			goldLabel->setString(StringUtils::format("%d", g_goldCount));
+		}
+		if (elixirLabel) {
+			elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+		}
+	}
 	void sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level);
 	void sendDeleteBuildingRequest(float x, float y);
 	void sendGetBuildingsRequest();

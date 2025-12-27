@@ -5,7 +5,8 @@
 #include "SessionManager.h"
 #include "cocos2d.h"
 #include <cmath>
-#include<ctime>
+#include <ctime>
+#include <algorithm>
 
 // 初始化全局变量
 int maxLevel, maxGoldVolum, maxElixirVolum;
@@ -662,9 +663,20 @@ void SecondScene::update(float delta)
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
-        // 判断建筑类型并分别累加速度
-        for (auto building : placedBuildings) {
+        // 使用索引方式遍历，避免迭代器失效问题
+        // 复制一份副本进行遍历，避免遍历时修改容器
+        std::vector<Building*> buildingsCopy = placedBuildings;
+        for (auto building : buildingsCopy) {
             if (!building) continue;
+
+            // 跳过无效的 building 指针
+            uintptr_t ptrValue = reinterpret_cast<uintptr_t>(building);
+            if (ptrValue == 0xDDDDDDDD || ptrValue == 0xCCCCCCCC || ptrValue < 0x1000) {
+                CCLOG("SecondScene::update: found suspicious building pointer 0x%lX", ptrValue);
+                continue;
+            }
+
+
             if (building->getIsUpgrade()) {
                 building->cutTime();
             }
@@ -2194,6 +2206,30 @@ void SecondScene::onExit() {
     this->unschedule("requestResourceDelay");
     this->unschedule("resourceUpdateInterval");
     _sceneIsDestroyed = true;
+
+    if (_curOpenInfoPanel) {
+        _curOpenInfoPanel->removeFromParent();
+        _curOpenInfoPanel = nullptr;
+    }
+    _curOpenBuilding = nullptr;
+
+    if (_curOpenInfoPanel) {
+        _curOpenInfoPanel->removeFromParent();
+        _curOpenInfoPanel = nullptr;
+    }
+    _curOpenBuilding = nullptr;
+
+    if (background_sprite_) {
+        background_sprite_->removeAllChildren();
+    }
+
+    placedBuildings.clear();
+
+    if (background_sprite_) {
+        background_sprite_->removeFromParent();
+        background_sprite_ = nullptr;
+    }
+
     Scene::onExit();
 }
 
