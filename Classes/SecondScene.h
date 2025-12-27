@@ -58,6 +58,21 @@ public:
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
 
+	//返回未满
+	Building* getGoldStorage() {
+		for (auto building : placedBuildings) {
+			if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+				return building;
+			}
+		}
+	}
+	Building* getElixirStorage() {
+		for (auto building : placedBuildings) {
+			if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+				return building;
+			}
+		}
+	}
 	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
 	//new判断
 	CREATE_FUNC(SecondScene);
@@ -137,6 +152,11 @@ private:
 	static std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率
 	int baseElixirRate;
+
+	bool _buildingsInitialized; // 防止重复初始化建筑
+
+	Building* createBuildingByType(const std::string& buildingType);
+	void initDefaultBuildingsAndSave();
 };
 
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
