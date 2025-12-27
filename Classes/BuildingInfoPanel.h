@@ -8,10 +8,8 @@ class BuildingInfoPanel : public cocos2d::Node {
 public:
     // 静态创建方法（传入目标建筑）
     static BuildingInfoPanel* create(Building* building, cocos2d::Sprite* background_sprite_);
-
     // 初始化方法
    bool init(Building* building, cocos2d::Sprite* background_sprite_);
-
     // 更新面板信息（如升级后调用）
     void updateInfo(Building* building, cocos2d::Sprite* background_sprite_);
     // 按钮回调
@@ -29,8 +27,6 @@ public:
         auto blinkSeq = cocos2d::Sequence::create(fadeOut, fadeIn, nullptr);
         btn->runAction(blinkSeq);
     }
-protected:
-    // 在protected部分添加回调声明
     void onCollectClicked(cocos2d::Ref* sender);
     void showSoldierInfo(int lv);
     void speedUpgradeClicked(cocos2d::Ref* sender);
