@@ -597,6 +597,63 @@ bool registerUser(const std::string& username, const std::string& password) {
     }
 
     sqlite3_finalize(stmt);
+
+    // 插入默认建筑 (1个 TownHall + 2个 BuilderHut)
+    const char* insertBuildingsSQL = "INSERT INTO buildings (username, building_type, position_x, position_y, level) VALUES (?, ?, ?, ?, ?);";
+    sqlite3_stmt* buildingStmt = nullptr;
+    rc = sqlite3_prepare_v2(serverState.db, insertBuildingsSQL, -1, &buildingStmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return false;
+    }
+
+    // TownHall
+    sqlite3_bind_text(buildingStmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(buildingStmt, 2, "TownHall", -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(buildingStmt, 3, 1918.0);
+    sqlite3_bind_double(buildingStmt, 4, 1373.0);
+    sqlite3_bind_int(buildingStmt, 5, 1);
+    rc = sqlite3_step(buildingStmt);
+    if (rc != SQLITE_DONE) {
+        sqlite3_finalize(buildingStmt);
+        return false;
+    }
+    sqlite3_finalize(buildingStmt);
+
+    // BuilderHut 1
+    rc = sqlite3_prepare_v2(serverState.db, insertBuildingsSQL, -1, &buildingStmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return false;
+    }
+    sqlite3_bind_text(buildingStmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(buildingStmt, 2, "BuilderHut", -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(buildingStmt, 3, 1600.0);
+    sqlite3_bind_double(buildingStmt, 4, 1373.0);
+    sqlite3_bind_int(buildingStmt, 5, 1);
+    rc = sqlite3_step(buildingStmt);
+    if (rc != SQLITE_DONE) {
+        sqlite3_finalize(buildingStmt);
+        return false;
+    }
+    sqlite3_finalize(buildingStmt);
+
+    // BuilderHut 2
+    rc = sqlite3_prepare_v2(serverState.db, insertBuildingsSQL, -1, &buildingStmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return false;
+    }
+    sqlite3_bind_text(buildingStmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(buildingStmt, 2, "BuilderHut", -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(buildingStmt, 3, 2200.0);
+    sqlite3_bind_double(buildingStmt, 4, 1373.0);
+    sqlite3_bind_int(buildingStmt, 5, 1);
+    rc = sqlite3_step(buildingStmt);
+    if (rc != SQLITE_DONE) {
+        sqlite3_finalize(buildingStmt);
+        return false;
+    }
+    sqlite3_finalize(buildingStmt);
+
+    std::cout << "User " << username << " registered with default buildings (1 TownHall, 2 BuilderHuts)" << std::endl;
     return true;
 }
 
