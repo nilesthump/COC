@@ -58,7 +58,9 @@ public:
     int getRemainTime() override {
         return upgradeTime;
     }
-
+    std::string getBuildingType() const override {
+        return "BuilderHut";
+    }
     static BuilderHut* create(const std::string& textureName, int hp = 1000, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
 };
 

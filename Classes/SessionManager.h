@@ -23,6 +23,11 @@ private:
     std::string currentUsername;
     LoginType loginType;
 
+    int _gold;
+    int _elixir;
+    int _gems;
+    bool _hasResourceData;
+
 public:
     // 获取单例实例
     static SessionManager* getInstance();
@@ -44,6 +49,11 @@ public:
     LoginType getLoginType() const;
     bool isAccountLogin() const;
     bool isGuestLogin() const;
+
+    void setResourceData(int gold, int elixir, int gems);
+    void getResourceData(int& gold, int& elixir, int& gems) const;
+    bool hasResourceData() const;
+    void clearResourceData();
 };
 
 #endif // __SESSION_MANAGER_H__

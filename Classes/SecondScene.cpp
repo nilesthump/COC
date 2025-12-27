@@ -2,6 +2,7 @@
 #include "HelloWorldScene.h"
 #include "SecondScene.h"
 #include "ConvertTest.h"
+#include "SessionManager.h"
 #include "cocos2d.h"
 #include <cmath>
 #include<ctime>
@@ -36,10 +37,33 @@ bool SecondScene::init()
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    // 初始化产金相关变量
-    g_goldCount = 750; // 确保金币计数初始化为0
-    g_elixirCount = 750;
-    g_gemCount = 15;
+
+    auto session = SessionManager::getInstance();
+    if (session->isAccountLogin() && session->hasResourceData()) {
+        int gold, elixir, gems;
+        session->getResourceData(gold, elixir, gems);
+        g_goldCount = gold;
+        g_elixirCount = elixir;
+        g_gemCount = gems;
+        CCLOG("Loaded resources from server: gold=%d, elixir=%d, gems=%d",
+            g_goldCount, g_elixirCount, g_gemCount);
+    }
+    else {
+        // 初始化产金相关变量
+        g_goldCount = 750; // 确保金币计数初始化为0
+        g_elixirCount = 750;
+        g_gemCount = 15;
+    }
+
+    _sceneIsDestroyed = false;
+    setupWebSocketCallbacks();
+
+    auto sessionManager = SessionManager::getInstance();
+    if (sessionManager->isAccountLogin()) {
+        this->scheduleOnce([this](float dt) {
+            setupWebSocketAndRequestResources();
+            }, 0.2f, "setupWebSocketDelay");
+    }
 
     // 初始化拖拽状态
     isDragging = false;
@@ -813,6 +837,7 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
                 }
                 isMovingBuilding = true;
                 movingBuilding = building;
+                _movingBuildingOriginalPos = building->getPosition(); // 保存原始位置
                 building->setOpacity(128);
                 background_sprite_->reorderChild(building, 20);
                 return true;
@@ -1070,6 +1095,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedGoldMine, 15);
                         placedBuildings.push_back(placedGoldMine);
                         placedGoldMine->playSuccessBlink();
+                        sendSaveBuildingRequest("GoldMine", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1096,6 +1122,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedElixirCollector, 15);
                         placedBuildings.push_back(placedElixirCollector);
                         placedElixirCollector->playSuccessBlink();
+                        sendSaveBuildingRequest("ElixirCollector", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1122,6 +1149,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedGoldStorage, 15);
                         placedBuildings.push_back(placedGoldStorage);
                         placedGoldStorage->playSuccessBlink();
+                        sendSaveBuildingRequest("GoldStorage", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1148,6 +1176,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedElixirStorage, 15);
                         placedBuildings.push_back(placedElixirStorage);
                         placedElixirStorage->playSuccessBlink();
+                        sendSaveBuildingRequest("ElixirStorage", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1174,6 +1203,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedArmyCamp, 15);
                         placedBuildings.push_back(placedArmyCamp);
                         placedArmyCamp->playSuccessBlink();
+                        sendSaveBuildingRequest("ArmyCamp", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1200,6 +1230,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedWalls, 15);
                         placedBuildings.push_back(placedWalls);
                         placedWalls->playSuccessBlink();
+                        sendSaveBuildingRequest("Walls", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1226,6 +1257,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         background_sprite_->addChild(placedBuilderhut, 15);
                         placedBuildings.push_back(placedBuilderhut);
                         placedBuilderhut->playSuccessBlink();
+                        sendSaveBuildingRequest("BuilderHut", snappedPos.x, snappedPos.y, 1);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1329,6 +1361,11 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         if (inDiamond && movingBuilding) {
             // 使用新的更新方法
             movingBuilding->updatePosition(Vec2(snappedX, snappedY));
+            // 删除原位置记录
+            sendDeleteBuildingRequest(_movingBuildingOriginalPos.x, _movingBuildingOriginalPos.y);
+            // 保存建筑位置到数据库
+            sendSaveBuildingRequest(movingBuilding->getBuildingType(),
+                snappedX, snappedY, movingBuilding->getLv());
             movingBuilding->setOpacity(255);
             background_sprite_->reorderChild(movingBuilding, 15);
             movingBuilding = nullptr;
@@ -1559,6 +1596,470 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Building* building) {
 
     // 无碰撞
     return false;
+}
+
+void SecondScene::setupWebSocketCallbacks() {
+    auto wsManager = WebSocketManager::getInstance();
+
+    wsManager->setOnMessageCallback([this](const std::string& message) {
+        if (_sceneIsDestroyed)
+            return;
+        CCLOG("SecondScene: WebSocket message received: %s", message.c_str());
+        onWebSocketMessage(message);
+        });
+
+    wsManager->setOnCloseCallback([this]() {
+        if (_sceneIsDestroyed)
+            return;
+        CCLOG("SecondScene: WebSocket disconnected");
+        });
+
+    wsManager->setOnErrorCallback([this](WebSocket::ErrorCode errorCode) {
+        if (_sceneIsDestroyed)
+            return;
+        CCLOG("SecondScene: WebSocket error: %d", static_cast<int>(errorCode));
+        });
+}
+
+void SecondScene::setupWebSocketAndRequestResources() {
+    auto wsManager = WebSocketManager::getInstance();
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available");
+        return;
+    }
+
+    if (wsManager->getReadyState() == WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket already connected, sending resource and buildings request");
+        sendGetResourceRequest();
+        sendGetBuildingsRequest();
+    }
+    else {
+        CCLOG("SecondScene: WebSocket not connected, setting up open callback and connecting");
+        wsManager->setOnOpenCallback([this, username]() {
+            CCLOG("SecondScene: WebSocket opened for user: %s", username.c_str());
+            sendGetResourceRequest();
+            sendGetBuildingsRequest();
+            });
+        wsManager->connect("ws://100.80.250.106:8080");
+    }
+}
+
+void SecondScene::onWebSocketMessage(const std::string& message) {
+    CCLOG("SecondScene: onWebSocketMessage called with: %s", message.c_str());
+
+    rapidjson::Document doc;
+    doc.Parse(message.c_str());
+
+    if (doc.HasParseError() || !doc.IsObject()) {
+        CCLOG("SecondScene: Failed to parse WebSocket message as JSON");
+        return;
+    }
+
+    std::string action = "";
+    bool result = false;
+    std::string responseMessage = "";
+
+    if (doc.HasMember("action") && doc["action"].IsString()) {
+        action = doc["action"].GetString();
+    }
+    if (doc.HasMember("result") && doc["result"].IsBool()) {
+        result = doc["result"].GetBool();
+    }
+    if (doc.HasMember("message") && doc["message"].IsString()) {
+        responseMessage = doc["message"].GetString();
+    }
+
+    CCLOG("SecondScene: Parsed action=%s, result=%s", action.c_str(), result ? "true" : "false");
+
+    if (action == "getResource") {
+        CCLOG("SecondScene: Processing getResource response");
+        if (result) {
+            bool hasGold = doc.HasMember("gold") && doc["gold"].IsInt();
+            bool hasElixir = doc.HasMember("elixir") && doc["elixir"].IsInt();
+            bool hasGems = doc.HasMember("gems") && doc["gems"].IsInt();
+
+            if (hasGold && hasElixir && hasGems) {
+                int gold = doc["gold"].GetInt();
+                int elixir = doc["elixir"].GetInt();
+                int gems = doc["gems"].GetInt();
+
+                CCLOG("SecondScene: Parsed gold=%d, elixir=%d, gems=%d from response", gold, elixir, gems);
+
+                g_goldCount = gold;
+                g_elixirCount = elixir;
+                g_gemCount = gems;
+
+                CCLOG("SecondScene: Updated global variables - gold=%d, elixir=%d, gems=%d",
+                    g_goldCount, g_elixirCount, g_gemCount);
+
+                auto session = SessionManager::getInstance();
+                session->setResourceData(gold, elixir, gems);
+
+                CCLOG("SecondScene: Resource data loaded from server - gold=%d, elixir=%d, gems=%d",
+                    g_goldCount, g_elixirCount, g_gemCount);
+
+                // 立即更新 UI 标签显示
+                CCLOG("SecondScene: goldLabel=%p, elixirLabel=%p, gemLabel=%p", goldLabel, elixirLabel, gemLabel);
+                if (goldLabel) {
+                    goldLabel->setString(StringUtils::format("%d", g_goldCount));
+                    CCLOG("SecondScene: Updated goldLabel to %d", g_goldCount);
+                }
+                else {
+                    CCLOG("SecondScene: goldLabel is NULL!");
+                }
+                if (elixirLabel) {
+                    elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+                    CCLOG("SecondScene: Updated elixirLabel to %d", g_elixirCount);
+                }
+                if (gemLabel) {
+                    gemLabel->setString(StringUtils::format("%d", g_gemCount));
+                    CCLOG("SecondScene: Updated gemLabel to %d", g_gemCount);
+                }
+            }
+            else {
+                CCLOG("SecondScene: Incomplete resource response - gold=%s, elixir=%s, gems=%s, keeping current values",
+                    hasGold ? "present" : "missing",
+                    hasElixir ? "present" : "missing",
+                    hasGems ? "present" : "missing");
+                CCLOG("SecondScene: Current values kept - gold=%d, elixir=%d, gems=%d",
+                    g_goldCount, g_elixirCount, g_gemCount);
+            }
+        }
+        else {
+            CCLOG("SecondScene: Failed to get resource data: %s", responseMessage.c_str());
+        }
+    }
+    else if (action == "getBuildings") {
+        CCLOG("SecondScene: Processing getBuildings response");
+        onWebSocketBuildingsMessage(message);
+    }
+}
+
+void SecondScene::sendGetResourceRequest() {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState != WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket not connected, cannot send resource request");
+        return;
+    }
+
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available for resource request");
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+    doc.AddMember("action", "getResource", allocator);
+    doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    std::string message = buffer.GetString();
+    if (wsManager->send(message)) {
+        CCLOG("SecondScene: Resource request sent for user: %s", username.c_str());
+    }
+    else {
+        CCLOG("SecondScene: Failed to send resource request");
+    }
+}
+
+void SecondScene::sendUpdateResourceRequest(float dt) {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState != WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket not connected, cannot send resource update request");
+        return;
+    }
+
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available for resource update");
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+    doc.AddMember("action", "updateResource", allocator);
+    doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
+    doc.AddMember("gold", g_goldCount, allocator);
+    doc.AddMember("elixir", g_elixirCount, allocator);
+    doc.AddMember("gems", g_gemCount, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    std::string message = buffer.GetString();
+    if (wsManager->send(message)) {
+        CCLOG("SecondScene: Resource update sent for user: %s - gold=%d, elixir=%d, gems=%d",
+            username.c_str(), g_goldCount, g_elixirCount, g_gemCount);
+    }
+    else {
+        CCLOG("SecondScene: Failed to send resource update");
+    }
+}
+
+void SecondScene::sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level) {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState != WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket not connected, cannot send save building request");
+        return;
+    }
+
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available for save building");
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+    doc.AddMember("action", "saveBuilding", allocator);
+    doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
+    doc.AddMember("buildingType", rapidjson::Value(buildingType.c_str(), allocator), allocator);
+    doc.AddMember("x", x, allocator);
+    doc.AddMember("y", y, allocator);
+    doc.AddMember("level", level, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    std::string message = buffer.GetString();
+    if (wsManager->send(message)) {
+        CCLOG("SecondScene: Save building request sent for user: %s - type=%s, x=%.2f, y=%.2f, level=%d",
+            username.c_str(), buildingType.c_str(), x, y, level);
+    }
+    else {
+        CCLOG("SecondScene: Failed to send save building request");
+    }
+}
+
+void SecondScene::sendDeleteBuildingRequest(float x, float y) {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState != WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket not connected, cannot send delete building request");
+        return;
+    }
+
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available for delete building");
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+    doc.AddMember("action", "deleteBuilding", allocator);
+    doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
+    doc.AddMember("x", x, allocator);
+    doc.AddMember("y", y, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    std::string message = buffer.GetString();
+    if (wsManager->send(message)) {
+        CCLOG("SecondScene: Delete building request sent for user: %s - x=%.2f, y=%.2f",
+            username.c_str(), x, y);
+    }
+    else {
+        CCLOG("SecondScene: Failed to send delete building request");
+    }
+}
+
+void SecondScene::sendGetBuildingsRequest() {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState != WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket not connected, cannot send get buildings request");
+        return;
+    }
+
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available for get buildings");
+        return;
+    }
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+    doc.AddMember("action", "getBuildings", allocator);
+    doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    std::string message = buffer.GetString();
+    if (wsManager->send(message)) {
+        CCLOG("SecondScene: Get buildings request sent for user: %s", username.c_str());
+    }
+    else {
+        CCLOG("SecondScene: Failed to send get buildings request");
+    }
+}
+
+void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
+    CCLOG("SecondScene: Buildings message received: %s", message.c_str());
+
+    rapidjson::Document doc;
+    if (doc.Parse(message.c_str()).HasParseError()) {
+        CCLOG("SecondScene: Failed to parse buildings JSON");
+        return;
+    }
+
+    std::string action;
+    bool result = false;
+    std::string responseMessage;
+
+    if (doc.HasMember("action") && doc["action"].IsString()) {
+        action = doc["action"].GetString();
+    }
+    if (doc.HasMember("result") && doc["result"].IsBool()) {
+        result = doc["result"].GetBool();
+    }
+    if (doc.HasMember("message") && doc["message"].IsString()) {
+        responseMessage = doc["message"].GetString();
+    }
+
+    CCLOG("SecondScene: Buildings parsed action=%s, result=%s", action.c_str(), result ? "true" : "false");
+
+    if (action == "getBuildings") {
+        if (result && doc.HasMember("buildings") && doc["buildings"].IsArray()) {
+            const rapidjson::Value& buildingsArray = doc["buildings"];
+
+            CCLOG("SecondScene: Loading %d buildings from server", buildingsArray.Size());
+
+            for (rapidjson::SizeType i = 0; i < buildingsArray.Size(); i++) {
+                const rapidjson::Value& building = buildingsArray[i];
+
+                if (!building.HasMember("type") || !building["type"].IsString() ||
+                    !building.HasMember("x") || !building["x"].IsNumber() ||
+                    !building.HasMember("y") || !building["y"].IsNumber() ||
+                    !building.HasMember("level") || !building["level"].IsInt()) {
+                    CCLOG("SecondScene: Invalid building data at index %d", i);
+                    continue;
+                }
+
+                std::string buildingType = building["type"].GetString();
+                float x = static_cast<float>(building["x"].GetDouble());
+                float y = static_cast<float>(building["y"].GetDouble());
+                int level = building["level"].GetInt();
+
+                CCLOG("SecondScene: Creating building - type=%s, x=%.2f, y=%.2f, level=%d",
+                    buildingType.c_str(), x, y, level);
+
+                Building* newBuilding = nullptr;
+
+                if (buildingType == "GoldMine") {
+                    newBuilding = GoldMine::create("GoldMineLv1.png");
+                }
+                else if (buildingType == "ElixirCollector") {
+                    newBuilding = ElixirCollector::create("ElixirCollectorLv1.png");
+                }
+                else if (buildingType == "GoldStorage") {
+                    newBuilding = GoldStorage::create("GoldStorageLv1.png");
+                }
+                else if (buildingType == "ElixirStorage") {
+                    newBuilding = ElixirStorage::create("ElixirStorageLv1.png");
+                }
+                else if (buildingType == "ArmyCamp") {
+                    newBuilding = ArmyCamp::create("ArmyCampLv1.png");
+                }
+                else if (buildingType == "Walls") {
+                    newBuilding = Walls::create("WallsLv1.png");
+                }
+                else if (buildingType == "BuilderHut") {
+                    newBuilding = BuilderHut::create("BuilderHutLv1.png");
+                }
+                else if (buildingType == "TownHall") {
+                    newBuilding = TownHall::create("TownHallLv1.png");
+                }
+
+                if (newBuilding) {
+                    newBuilding->updatePosition(Vec2(x, y));
+                    background_sprite_->addChild(newBuilding, 15);
+                    placedBuildings.push_back(newBuilding);
+                    CCLOG("SecondScene: Building placed successfully");
+                }
+                else {
+                    CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
+                }
+            }
+        }
+        else {
+            CCLOG("SecondScene: Failed to load buildings or no buildings found");
+        }
+    }
+}
+
+void SecondScene::onEnter() {
+    Scene::onEnter();
+    _sceneIsDestroyed = false;
+    setupWebSocketCallbacks();
+
+    auto sessionManager = SessionManager::getInstance();
+    if (sessionManager->isAccountLogin()) {
+        CCLOG("SecondScene: onEnter - user logged in, requesting resources");
+        this->scheduleOnce([this](float dt) {
+            auto wsManager = WebSocketManager::getInstance();
+            if (wsManager->getReadyState() == WebSocket::State::OPEN) {
+                sendGetResourceRequest();
+            }
+            else {
+                CCLOG("SecondScene: WebSocket not open in onEnter, connecting...");
+                setupWebSocketAndRequestResources();
+            }
+            }, 0.5f, "requestResourceDelay");
+
+        this->schedule([this](float dt) {
+            sendUpdateResourceRequest(dt);
+            }, 3.0f, "resourceUpdateInterval");
+    }
+}
+
+void SecondScene::onExit() {
+    CCLOG("SecondScene: Exiting, cleaning up...");
+    this->unschedule("requestResourceDelay");
+    this->unschedule("resourceUpdateInterval");
+    _sceneIsDestroyed = true;
+    Scene::onExit();
 }
 
 #endif

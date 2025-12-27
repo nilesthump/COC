@@ -113,6 +113,9 @@ public:
 	void playFailBlinkAndRemove();
 	// 视觉反馈：红色闪烁
 	void playFailBlink();
+
+	// 获取建筑类型名称（用于持久化存储）
+	virtual std::string getBuildingType() const { return "Building"; }
 };
 
 #endif

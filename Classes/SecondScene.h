@@ -14,8 +14,14 @@
 #include "BuilderHut.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
+#include "WebSocketManager.h"
+#include "network/WebSocket.h"
+#include "json/document.h"
+#include "json/stringbuffer.h"
+#include "json/writer.h"
 
 USING_NS_CC;
+using namespace network;
 
 class SecondScene :public cocos2d::Scene
 {
@@ -70,7 +76,23 @@ public:
 	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
 	//new判断
 	CREATE_FUNC(SecondScene);
+
+	// WebSocket callbacks
+	void setupWebSocketCallbacks();
+	void setupWebSocketAndRequestResources();
+	void onWebSocketMessage(const std::string& message);
+	void sendGetResourceRequest();
+	void sendUpdateResourceRequest(float dt);
+	void sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level);
+	void sendDeleteBuildingRequest(float x, float y);
+	void sendGetBuildingsRequest();
+	void onWebSocketBuildingsMessage(const std::string& message);
+	void onEnter() override;
+	void onExit() override;
+
 private:
+	// WebSocket回调相关成员变量
+	bool _sceneIsDestroyed;
 	// 双击检测相关
 	double _lastClickTime; // 上一次点击的时间（使用double类型更精确）
 	cocos2d::Vec2 _lastClickPos; // 上一次点击的位置
@@ -125,6 +147,7 @@ private:
     // 建筑移动相关成员变量
 	Building* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
+	cocos2d::Vec2 _movingBuildingOriginalPos; // 移动建筑时的原始位置
 
 	static std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率

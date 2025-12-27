@@ -36,7 +36,7 @@ void SQLiteManager::destroyInstance()
     }
 }
 
-bool SQLiteManager::init() 
+bool SQLiteManager::init()
 {
     // 默认初始化数据库路径
     return initDatabase();
@@ -46,7 +46,7 @@ bool SQLiteManager::initDatabase(const std::string& dbPath)
 {
     _dbPath = dbPath;
 
-    if (!openDatabase()) 
+    if (!openDatabase())
     {
         return false;
     }
@@ -56,7 +56,7 @@ bool SQLiteManager::initDatabase(const std::string& dbPath)
     char* errMsg = nullptr;
     int rc = sqlite3_exec(_db, sql, nullptr, nullptr, &errMsg);
 
-    if (rc != SQLITE_OK) 
+    if (rc != SQLITE_OK)
     {
         _lastError = errMsg;
         sqlite3_free(errMsg);
@@ -68,15 +68,15 @@ bool SQLiteManager::initDatabase(const std::string& dbPath)
     return true;
 }
 
-bool SQLiteManager::openDatabase() 
+bool SQLiteManager::openDatabase()
 {
-    if (_isDatabaseOpen) 
+    if (_isDatabaseOpen)
     {
         return true;
     }
 
     int rc = sqlite3_open(_dbPath.c_str(), &_db);
-    if (rc) 
+    if (rc)
     {
         _lastError = sqlite3_errmsg(_db);
         _db = nullptr;
@@ -89,7 +89,7 @@ bool SQLiteManager::openDatabase()
 
 void SQLiteManager::closeDatabase()
 {
-    if (_isDatabaseOpen && _db != nullptr) 
+    if (_isDatabaseOpen && _db != nullptr)
     {
         sqlite3_close(_db);
         _db = nullptr;
@@ -225,28 +225,60 @@ bool SQLiteManager::deleteUser(const std::string& username)
 {
     return executeTransaction([this, username]() -> bool
         {
-            const char* sql = "DELETE FROM users WHERE username = ?;";
             sqlite3_stmt* stmt;
 
-            int rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, nullptr);
+            const char* sqlUsers = "DELETE FROM users WHERE username = ?;";
+            int rc = sqlite3_prepare_v2(_db, sqlUsers, -1, &stmt, nullptr);
             if (rc != SQLITE_OK)
             {
                 _lastError = sqlite3_errmsg(_db);
                 return false;
             }
-
             sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
-
             rc = sqlite3_step(stmt);
-            bool success = (rc == SQLITE_DONE);
-
-            if (!success)
+            if (rc != SQLITE_DONE)
             {
                 _lastError = sqlite3_errmsg(_db);
+                sqlite3_finalize(stmt);
+                return false;
             }
-
             sqlite3_finalize(stmt);
-            return success;
+
+            const char* sqlResources = "DELETE FROM resources WHERE username = ?;";
+            rc = sqlite3_prepare_v2(_db, sqlResources, -1, &stmt, nullptr);
+            if (rc != SQLITE_OK)
+            {
+                _lastError = sqlite3_errmsg(_db);
+                return false;
+            }
+            sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE)
+            {
+                _lastError = sqlite3_errmsg(_db);
+                sqlite3_finalize(stmt);
+                return false;
+            }
+            sqlite3_finalize(stmt);
+
+            const char* sqlBuildings = "DELETE FROM buildings WHERE username = ?;";
+            rc = sqlite3_prepare_v2(_db, sqlBuildings, -1, &stmt, nullptr);
+            if (rc != SQLITE_OK)
+            {
+                _lastError = sqlite3_errmsg(_db);
+                return false;
+            }
+            sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE)
+            {
+                _lastError = sqlite3_errmsg(_db);
+                sqlite3_finalize(stmt);
+                return false;
+            }
+            sqlite3_finalize(stmt);
+
+            return true;
         });
 }
 
@@ -280,9 +312,9 @@ bool SQLiteManager::changePassword(const std::string& username, const std::strin
         });
 }
 
-bool SQLiteManager::userExists(const std::string& username) 
+bool SQLiteManager::userExists(const std::string& username)
 {
-    if (!openDatabase()) 
+    if (!openDatabase())
     {
         return false;
     }
@@ -291,7 +323,7 @@ bool SQLiteManager::userExists(const std::string& username)
     sqlite3_stmt* stmt;
 
     int rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, nullptr);
-    if (rc != SQLITE_OK) 
+    if (rc != SQLITE_OK)
     {
         _lastError = sqlite3_errmsg(_db);
         closeDatabase();
@@ -308,7 +340,7 @@ bool SQLiteManager::userExists(const std::string& username)
     return exists;
 }
 
-std::string SQLiteManager::getLastError() const 
+std::string SQLiteManager::getLastError() const
 {
     return _lastError;
 }
