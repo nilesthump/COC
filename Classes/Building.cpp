@@ -13,7 +13,7 @@ void Building::playFailBlinkAndRemove()
     _sprite->setColor(Color3B::RED); // 设为红色
     this->runAction(Sequence::create(
         Blink::create(0.5f, 2),    // 闪烁2次
-        RemoveSelf::create(true),  // 销毁自身
+        RemoveSelf::create(true),  
         nullptr
     ));
 }

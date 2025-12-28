@@ -14,7 +14,6 @@ protected:
     int upgradeTime = 10;
     bool initSprite(const std::string& textureName)override;
 public:
-    // 静态创建函数（Cocos推荐方式）
     bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
     int getUpgradeGoldCost()const override {
@@ -87,4 +86,4 @@ public:
     static ArmyCamp* create(const std::string& textureName, int hp = 100, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
 };
 
-#endif // __GOLD_MINE_H__
+#endif 

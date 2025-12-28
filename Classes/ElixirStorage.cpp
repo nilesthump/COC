@@ -40,8 +40,7 @@ bool ElixirStorage::init(const std::string& textureName, int hp, int lv, float x
     {
         return false;
     }
-
-    // 设置锚点（这里设为中心，你可以根据需求改，比如(0,0)对齐网格）
+    // 设置锚点
     this->setAnchorPoint(Vec2(0.5f, 0.5f));
     _sprite->setAnchorPoint(Vec2(0.5f, 0.5f));
 
@@ -57,9 +56,8 @@ bool ElixirStorage::initSprite(const std::string& textureName)
         return false;
     }
 
-    // 精灵作为子节点挂载到金矿节点
     this->addChild(_sprite);
-    // 精灵缩放（根据你的需求调整，这里设为1.0f）
+    // 精灵缩放
     _sprite->setScale(1.0f);
 
     return true;

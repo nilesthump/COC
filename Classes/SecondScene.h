@@ -12,6 +12,9 @@
 #include "Walls.h"
 #include "TownHall.h"
 #include "BuilderHut.h"
+#include "ArcherTower.h"
+#include "Cannon.h"
+#include "Mortar.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
 #include "WebSocketManager.h"
@@ -170,6 +173,10 @@ private:
 	cocos2d::MenuItemImage* armyCampBtn;
 	cocos2d::MenuItemImage* wallsBtn;
 	cocos2d::MenuItemImage* builderHutBtn;
+	cocos2d::MenuItemImage* archerTowerBtn;
+	cocos2d::MenuItemImage* cannonBtn;
+	cocos2d::MenuItemImage* mortarBtn;
+
 
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置

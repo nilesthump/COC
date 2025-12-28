@@ -1,18 +1,18 @@
-#ifndef __WALLS_H__
-#define __WALLS_H__
+#ifndef __ARCHER_TOWER_H__
+#define __ARCHER_TOWER_H__
 
 #include "Building.h"
-extern int g_goldCount, g_elixirCount,maxLevel;
+extern int g_goldCount, g_elixirCount, maxLevel;
 
-class Walls : public Building
+class ArcherTower : public Building
 {
 protected:
-    int establishCost[2] = { 20,20 };
-    int upgradeCost[2] = {10,10};
-    int upgradeTime = 3;
+    int establishCost[2] = { 50,50 };
+    int upgradeCost[2] = { 25,25 };
+    int upgradeTime = 10;
     bool initSprite(const std::string& textureName)override;
 public:
-    bool Walls::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
+    bool ArcherTower::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
     int getUpgradeGoldCost()const override {
         return upgradeCost[0];
@@ -35,7 +35,7 @@ public:
         upgradeTime = level * 3;//每次升级完成后，需要的升级时间对应延长
         isUpgrade = false;
         //换图
-        _textureName = StringUtils::format("WallsLv%d.png", level);
+        _textureName = StringUtils::format("ArcherTowerLv%d.png", level);
         updateTexture(_textureName);
         playSuccessBlink();
     }
@@ -58,9 +58,9 @@ public:
         return upgradeTime;
     }
     std::string getBuildingType() const override {
-        return "Walls";
+        return "ArcherTower";
     }
-    static Walls* create(const std::string& textureName, int hp = 1000, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
+    static ArcherTower* create(const std::string& textureName, int hp = 1000, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
 };
 
 #endif 

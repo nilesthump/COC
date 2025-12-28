@@ -25,7 +25,7 @@ public:
         // 停止按钮上已有的动画（避免多次点击动画叠加）
         btn->stopAllActions();
 
-        // 透明度从255→50→255，总时长0.4秒
+        // 透明度改边，总时长0.6秒
         auto fadeOut = cocos2d::FadeTo::create(0.3f, 50);
         auto fadeIn = cocos2d::FadeTo::create(0.3f, 255);
         auto blinkSeq = cocos2d::Sequence::create(fadeOut, fadeIn, nullptr);
@@ -35,9 +35,9 @@ public:
     void showSoldierInfo(int lv);
     void speedUpgradeClicked(cocos2d::Ref* sender);
 private:
-    cocos2d::Node* armyExtraPanel; // 改为Node类型，方便添加子元素
+    cocos2d::Node* armyExtraPanel; // 方便添加子元素
    
-    Building* _targetBuilding; // 当前选中的建筑
+    Building* _targetBuilding; //当前选中的建筑
     cocos2d::Sprite* temp;
 
     cocos2d::MenuItemImage* barbarianBtn;

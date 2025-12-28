@@ -89,14 +89,6 @@ public:
 	void setHp(int hp) {
 		_hp = hp;
 	}
-	float getXX() {
-		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
-		return you.x;
-	}
-	float getYY() {
-		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));
-		return you.y;
-	}
 	//兵营相关
 	virtual int getArmy(int i)const { return 0; }
 	virtual int getArmySize(int i)const { return 0; }
@@ -110,7 +102,7 @@ public:
 	virtual void clearCurrentStock() { return; }
 	virtual int getMaxStock() const { return 0; }  
 	virtual void addCurrent(int n) { return; }
-	// 设置/获取位置（复用Node的position，锚点内部管理）
+	// 设置/获取位置
 	void setMinePosition(const cocos2d::Vec2& pos) { this->setPosition(pos); }
 	cocos2d::Vec2 getMinePosition() const { return this->getPosition(); }
 	// 获取精灵（仅用于特殊操作，尽量封装在类内）

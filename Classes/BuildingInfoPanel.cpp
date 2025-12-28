@@ -1,6 +1,6 @@
 #include "BuildingInfoPanel.h"
 #include "AttackerData.h"
-#include "SecondScene.h" // 用于访问全局变量 g_goldCount 等
+#include "SecondScene.h" 
 #include "WebSocketManager.h"
 #include "SessionManager.h"
 
@@ -65,8 +65,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             }
         );
         barbarianBtn->setScale(0.3f);
-        barbarianBtn->setPosition(100, barbarianBtn->getContentSize().height * 0.3); // 可根据需要调整位置     
-
+        barbarianBtn->setPosition(100, barbarianBtn->getContentSize().height * 0.3);
         archerBtn = MenuItemImage::create(
             "Archer.png",  
             "Archer.png", 
@@ -82,7 +81,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             }
         );
         archerBtn->setScale(0.3f);
-        archerBtn->setPosition(250, archerBtn->getContentSize().height*0.32); // 可根据需要调整位置
+        archerBtn->setPosition(250, archerBtn->getContentSize().height*0.32); 
 
         giantBtn = MenuItemImage::create(
             "Giant.png",
@@ -99,7 +98,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             }
         );
         giantBtn->setScale(0.3f);
-        giantBtn->setPosition(400, archerBtn->getContentSize().height * 0.32); // 可根据需要调整位置
+        giantBtn->setPosition(400, archerBtn->getContentSize().height * 0.32);
 
         goblinBtn = MenuItemImage::create(
             "Goblin.png",
@@ -116,7 +115,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             }
         );
         goblinBtn->setScale(0.3f);
-        goblinBtn->setPosition(550, archerBtn->getContentSize().height * 0.3); // 可根据需要调整位置
+        goblinBtn->setPosition(550, archerBtn->getContentSize().height * 0.3); 
 
         bomberBtn = MenuItemImage::create(
             "Bomber.png",
@@ -133,7 +132,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             }
         );
         bomberBtn->setScale(0.3f);
-        bomberBtn->setPosition(700, archerBtn->getContentSize().height * 0.32); // 可根据需要调整位置
+        bomberBtn->setPosition(700, archerBtn->getContentSize().height * 0.32);
 
         balloonBtn = MenuItemImage::create(
             "Balloon.png",
@@ -150,7 +149,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             }
         );
         balloonBtn->setScale(0.3f);
-        balloonBtn->setPosition(880, archerBtn->getContentSize().height * 0.35); // 可根据需要调整位置
+        balloonBtn->setPosition(880, archerBtn->getContentSize().height * 0.35); 
 
         // 添加详情按钮
         soldierInfoBtn = MenuItemImage::create(
@@ -206,6 +205,15 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<TownHall*>(building)) {
         type = "TownHall";
+    }
+    else if (dynamic_cast<ArcherTower*>(building)) {
+        type = "ArcherTower";
+    }
+    else if (dynamic_cast<Cannon*>(building)) {
+        type = "Cannon";
+    }
+    else if (dynamic_cast<Mortar*>(building)) {
+        type = "Mortar";
     }
     else {
         type = "BuilderHut";
@@ -342,6 +350,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_balloon);
     }
     else if (dynamic_cast<Walls*>(building)) {}
+    else if (dynamic_cast<ArcherTower*>(building)) {}
+    else if (dynamic_cast<Cannon*>(building)) {}
+    else if (dynamic_cast<Mortar*>(building)) {}
     else if (dynamic_cast<TownHall*>(building)) {
         _resourceLabel = Label::createWithTTF(
             StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()),
@@ -467,8 +478,17 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<Walls*>(building)) {
         type = "Walls";
     }
+    else if (dynamic_cast<ArcherTower*>(building)) {
+        type = "ArcherTower";
+    }
+    else if (dynamic_cast<Cannon*>(building)) {
+        type = "Cannon";
+    }
+    else if (dynamic_cast<Mortar*>(building)) {
+        type = "Mortar";
+    }
     else if (dynamic_cast<TownHall*>(building)) {
-        type = "Townhall";
+        type = "TownHall";
         _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()));
     }
     else if (dynamic_cast<BuilderHut*>(building)) {
@@ -744,7 +764,7 @@ void BuildingInfoPanel::showSoldierInfo(int lv){
     
     //信息按钮点击事件
     soldierInfoBtn->setCallback([this](Ref* sender) {
-        // 切换显示状态（显示→隐藏，隐藏→显示）
+        // 切换显示状态
         bool isVisible = soldierNode->isVisible();
         soldierNode->setVisible(!isVisible);
         });

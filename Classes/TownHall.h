@@ -13,7 +13,6 @@ protected:
     int upgradeCost[2] = { 10,10 };
     int upgradeTime = 10;
 public:
-    // 静态创建函数（Cocos推荐方式）
     bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
     int getUpgradeGoldCost()const override {
         return upgradeCost[0];

@@ -1,4 +1,4 @@
-#include "TownHall.h"
+#include "Cannon.h"
 
 using namespace cocos2d;
 
@@ -8,9 +8,9 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float x0, float y0)
+Cannon* Cannon::create(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
-    TownHall* mine = new (std::nothrow) TownHall();
+    Cannon* mine = new (std::nothrow) Cannon();
     if (mine && mine->init(textureName, hp, lv, x0, y0))
     {
         mine->autorelease();
@@ -20,7 +20,7 @@ TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float
     return nullptr;
 }
 
-bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, float y0)
+bool Cannon::init(const std::string& textureName, int hp, int lv, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -33,7 +33,7 @@ bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, fl
     x = x0;
     y = y0;
     level = lv;
-    size = 4;
+    size = 3;
     this->setPosition(Vec2(x0, y0));
     // 初始化精灵
     if (!initSprite(textureName))
@@ -48,15 +48,14 @@ bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, fl
     return true;
 }
 
-bool TownHall::initSprite(const std::string& textureName)
+bool Cannon::initSprite(const std::string& textureName)
 {
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'TownHallLv1.png'");
+        problemLoading("'CannonLv%d.png'");
         return false;
     }
-
     this->addChild(_sprite);
     // 精灵缩放
     _sprite->setScale(1.0f);
