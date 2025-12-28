@@ -1,10 +1,6 @@
 # 程序设计范式期末项目
 ## 部落冲突(Clash of Clans,COC)
 
-## 目录
-[项目引擎](#项目引擎)
-[军队功能](#军队功能)
-
 |组员姓名|GitHub昵称|
 |:-:|:-:|
 |唐荣炜(组长)|[@nilesthump](https://github.com/nilesthump)|
