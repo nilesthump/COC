@@ -240,11 +240,11 @@ AttackerData AttackerData::CreateBomberData(int level)
 	data.attack_type = AttackType::AREA_DAMAGE;
 	data.target_priority = TargetPriority::WALLS;
 	data.unit_type = UnitType::BOMBER;
-	data.search_range = 18.0;		//寻找最近墙
+	data.search_range = 20.0;		//寻找最近墙
 	data.housing_space = 2;
 	data.damage_radius = 0.8;		//这是主动半径爆炸0.8，死亡伤害半径是0.8我们就直接用数据加上0.7了，不单独写一个变量了
 	data.attack_interval = 0.0;     //! 爆炸一次会杀死自己不需要间隔
-	data.attack_distance = 0.5;		// 0.5格
+	data.attack_distance = 1.0;		// 
 	data.move_speed = 3.0;			// 3格/s
 	
 	static const std::vector<std::tuple<int, int,int>> klevel_stats = {

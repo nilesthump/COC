@@ -84,14 +84,6 @@ bool HelloWorld::init()
         origin + visibleSize - secondSceneItem->getContentSize() / 2, 
         "START GAME",secondSceneItem);
 
-    battleTestItem = MenuItemImage::create(
-        "btn_normal.png",
-        "btn_pressed.png",
-        CC_CALLBACK_1(HelloWorld::menuBattleTestCallback, this));
-    setupLabel("btn_normal.png", "btn_pressed.png",
-        origin + visibleSize - Vec2(0, secondSceneItem->getContentSize().height) -
-        battleTestItem->getContentSize() / 2, "TEST GAME", battleTestItem);
-
     // Create guest login button
     guestLoginItem = MenuItemImage::create(
         "btn_normal.png",
@@ -137,7 +129,7 @@ bool HelloWorld::init()
         origin + Vec2(visibleSize.width / 2 + 200, visibleSize.height / 4),
         "CHANGE PASSWORD", changePasswordItem);
 
-    auto menu = Menu::create(closeItem, secondSceneItem, battleTestItem,
+    auto menu = Menu::create(closeItem, secondSceneItem, 
         guestLoginItem, loginItem, registerItem, deleteAccountItem,
         changePasswordItem, NULL);
     menu->setPosition(Vec2::ZERO);
@@ -348,10 +340,6 @@ void HelloWorld::menuSecondSceneCallback(Ref* pSender)
     Director::getInstance()->replaceScene(SecondScene::createScene());
 }
 
-void HelloWorld::menuBattleTestCallback(Ref* pSender)
-{
-    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
-}
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
@@ -1741,11 +1729,6 @@ void HelloWorld::setupMenuItemVisibleAndEnabled(int status, std::string username
     {
         secondSceneItem->setVisible(status & 1);
         secondSceneItem->setEnabled(status & 1);
-    }
-    if (battleTestItem != nullptr)
-    {
-        battleTestItem->setVisible(status & (1 << 1));
-        battleTestItem->setEnabled(status & (1 << 1));
     }
     if (guestLoginItem != nullptr)
     {

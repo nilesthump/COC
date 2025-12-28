@@ -4,7 +4,6 @@
 #include "cocos2d.h"
 #include "BattleManager.h"
 #include "ZoomScrollManager.h"
-//#include "DiamondGridManager.h"
 #include "BattleHUD.h"
 #include <memory>
 #include <vector>
@@ -40,7 +39,7 @@ public:
 
 	virtual bool init() override;
 	virtual void update(float delta) override;
-	void menuFirstCallback(cocos2d::Ref* pSender);
+	void menuMainCallback(cocos2d::Ref* pSender);
 
 	//初始化
 	void setupUserInterface();		//所有不随地图缩放的ui元素

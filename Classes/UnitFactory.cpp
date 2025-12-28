@@ -109,7 +109,11 @@ BattleUnit* UnitFactory::CreateGoblin(int level, Node* parent, Sprite* backgroun
 
 BattleUnit* UnitFactory::CreateBomber(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseAttacker(AttackerData::CreateBomberData(level), "BomberLv1.png", parent, background);
+	auto unit = CreateBaseAttacker(AttackerData::CreateBomberData(level), "BomberLv1.png", parent, background);
+	unit->SetBehavior(std::make_unique<BomberBehavior>());
+	unit->SetNavigation(std::make_unique<BomberNavigation>());
+
+	return unit;
 }
 
 //气球兵高度问题
