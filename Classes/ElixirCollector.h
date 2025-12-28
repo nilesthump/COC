@@ -14,7 +14,7 @@ protected:
     int upgradeTime = 5;
     bool initSprite(const std::string& textureName)override;
 public:
-    // 静态创建函数（Cocos推荐方式）
+
     bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float x0, float y0)override;
 
     int getUpgradeGoldCost()const override {

@@ -25,7 +25,7 @@ public:
         // 停止按钮上已有的动画（避免多次点击动画叠加）
         btn->stopAllActions();
 
-        // 透明度从255→50→255，总时长0.4秒
+        // 透明度改边，总时长0.6秒
         auto fadeOut = cocos2d::FadeTo::create(0.3f, 50);
         auto fadeIn = cocos2d::FadeTo::create(0.3f, 255);
         auto blinkSeq = cocos2d::Sequence::create(fadeOut, fadeIn, nullptr);

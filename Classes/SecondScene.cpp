@@ -105,7 +105,7 @@ bool SecondScene::init()
     }
     // 默认建筑初始化在 onWebSocketBuildingsMessage 中处理，通过服务器返回的建筑列表判断
 
-    //53-100 总按钮部分
+    // 总按钮部分
     auto backItem = MenuItemImage::create("5.png", "5.2.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
     if (backItem == nullptr ||

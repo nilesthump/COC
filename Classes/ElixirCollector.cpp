@@ -67,9 +67,8 @@ bool ElixirCollector::initSprite(const std::string& textureName)
         return false;
     }
 
-    // 精灵作为子节点挂载到金矿节点
     this->addChild(_sprite);
-    // 精灵缩放（根据你的需求调整，这里设为1.0f）
+    // 精灵缩放
     _sprite->setScale(1.0f);
 
     return true;

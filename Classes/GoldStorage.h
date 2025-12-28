@@ -13,7 +13,6 @@ protected:
     int upgradeTime = 10;
     bool initSprite(const std::string& textureName)override;
 public:
-    // 静态创建函数（Cocos推荐方式）
     bool GoldStorage::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
 
     //功能相关
