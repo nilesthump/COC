@@ -181,7 +181,7 @@ void BattleTestLayer::setupBattleSession()
 	// 中心点 23.5f，占用索引范围：[22, 23, 24, 25]
 	BuildingSnapshot th;
 	th.type = BuildingType::TOWN_HALL;
-	th.level = 1;
+	th.level = 5;
 	th.logicalPos = Vec2(23.5f, 23.5f);
 	config->battle_start_params.buildings.push_back(th);
 
@@ -199,7 +199,7 @@ void BattleTestLayer::setupBattleSession()
 	{
 		BuildingSnapshot def;
 		def.type = defTypes[i];
-		def.level = 1;
+		def.level = 7;
 		def.logicalPos = defPositions[i];
 		config->battle_start_params.buildings.push_back(def);
 	}
@@ -211,13 +211,13 @@ void BattleTestLayer::setupBattleSession()
 	{
 		BuildingSnapshot gm;
 		gm.type = BuildingType::GOLD_MINE;
-		gm.level = 1;
+		gm.level = 3;
 		gm.logicalPos = Vec2(18.0f + i * 3.0f, 16.0f); // 占用 y: [15, 16, 17]
 		config->battle_start_params.buildings.push_back(gm);
 
 		BuildingSnapshot ex;
 		ex.type = BuildingType::ELIXIR;
-		ex.level = 1;
+		ex.level = 2;
 		ex.logicalPos = Vec2(18.0f + i * 3.0f, 31.0f); // 占用 y: [30, 31, 32]
 		config->battle_start_params.buildings.push_back(ex);
 	}
@@ -226,7 +226,7 @@ void BattleTestLayer::setupBattleSession()
 	// 左右护法，避开大本营 (22-25) 和防御塔
 	BuildingSnapshot gs;
 	gs.type = BuildingType::GOLD_STORAGE;
-	gs.level = 1;
+	gs.level = 7;
 	gs.logicalPos = Vec2(16.0f, 23.5f); // 3x3 偶数对齐有点特殊，建议也用整数避开 23.5
 	// 修正：仓库也用整数中心 16.0, 23.0，占用 x:[15,16,17], y:[22,23,24]
 	gs.logicalPos = Vec2(16.0f, 23.0f);
@@ -252,7 +252,7 @@ void BattleTestLayer::setupBattleSession()
 			{
 				BuildingSnapshot wall;
 				wall.type = BuildingType::WALL;
-				wall.level = 1;
+				wall.level = 5;
 				wall.logicalPos = Vec2((float)x, (float)y);
 				config->battle_start_params.buildings.push_back(wall);
 			}

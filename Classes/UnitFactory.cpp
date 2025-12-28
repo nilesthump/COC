@@ -1,5 +1,14 @@
 #include"UnitFactory.h"
 
+
+std::string UnitFactory::makeSpritePath(const std::string& prefix, int level)
+{
+	const int MAX_LEVEL = 9;
+	int clampLv = std::min(level, MAX_LEVEL);
+	clampLv = std::max(clampLv, 1);   // 防止传 0
+	return prefix + "Lv" + std::to_string(clampLv) + ".png";
+}
+
 BattleUnit* UnitFactory::CreateAttackerByType(UnitType type, int level, cocos2d::Node* parent, cocos2d::Sprite* background)
 {
 	switch (type)
@@ -23,11 +32,12 @@ BattleUnit* UnitFactory::CreateBuildingByType(BuildingType type, int level, coco
 	case BuildingType::MORTAR:				return CreateMortar(level, parent, background);
 	case BuildingType::WALL:				return CreateWall(level, parent, background);
 	case BuildingType::GOLD_MINE:			return CreateGoldMine(level, parent, background);
-	case BuildingType::GOLD_STORAGE:   return CreateGoldStorage(level, parent, background);
+	case BuildingType::GOLD_STORAGE:		return CreateGoldStorage(level, parent, background);
 	case BuildingType::ELIXIR:				return CreateElixir(level, parent, background);
 	case BuildingType::ELIXIR_STORAGE:      return CreateElixirStorage(level, parent, background);
 	case BuildingType::TOWN_HALL:			return CreateTownHall(level, parent, background);
 	case BuildingType::BUILDERSHUT:			return CreateBuildersHut(level, parent, background);
+	case BuildingType::ARMYCAMP:			return CreateArmyCamp(level, parent, background);
 
 	default: return nullptr;
 	}
@@ -89,27 +99,27 @@ BattleUnit* UnitFactory::CreateBaseAttacker(AttackerData data, const std::string
 
 BattleUnit* UnitFactory::CreateBarbarian(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseAttacker(AttackerData::CreateBarbarianData(level), "BarbarianLv1.png", parent, background);
+	return CreateBaseAttacker(AttackerData::CreateBarbarianData(level), makeSpritePath("Barbarian", level), parent, background);
 }
 
 BattleUnit* UnitFactory::CreateArcher(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseAttacker(AttackerData::CreateArcherData(level), "ArcherLv1.png", parent, background);
+	return CreateBaseAttacker(AttackerData::CreateArcherData(level), makeSpritePath("Archer", level), parent, background);
 }
 
 BattleUnit* UnitFactory::CreateGiant(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseAttacker(AttackerData::CreateGiantData(level), "GiantLv1.png", parent, background);
+	return CreateBaseAttacker(AttackerData::CreateGiantData(level), makeSpritePath("Giant", level), parent, background);
 }
 
 BattleUnit* UnitFactory::CreateGoblin(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseAttacker(AttackerData::CreateGoblinData(level), "GoblinLv1.png", parent, background);
+	return CreateBaseAttacker(AttackerData::CreateGoblinData(level), makeSpritePath("Goblin", level), parent, background);
 }
 
 BattleUnit* UnitFactory::CreateBomber(int level, Node* parent, Sprite* background)
 {
-	auto unit = CreateBaseAttacker(AttackerData::CreateBomberData(level), "BomberLv1.png", parent, background);
+	auto unit = CreateBaseAttacker(AttackerData::CreateBomberData(level), makeSpritePath("Bomber", level) , parent, background);
 	unit->SetBehavior(std::make_unique<BomberBehavior>());
 	unit->SetNavigation(std::make_unique<BomberNavigation>());
 
@@ -119,7 +129,8 @@ BattleUnit* UnitFactory::CreateBomber(int level, Node* parent, Sprite* backgroun
 //气球兵高度问题
 BattleUnit* UnitFactory::CreateBalloon(int level, Node* parent, Sprite* background)
 {
-	auto unit = CreateBaseAttacker(AttackerData::CreateBalloonData(level), "BalloonLv1.png", parent, background);
+	auto unit = CreateBaseAttacker(AttackerData::CreateBalloonData(level), makeSpritePath("Balloon", level), parent, background);
+	unit->SetBehavior(std::make_unique<BomberBehavior>()); 
 	auto sprite = unit->GetSprite();
 	if (sprite)
 	{
@@ -147,53 +158,58 @@ BattleUnit* UnitFactory::CreateBalloon(int level, Node* parent, Sprite* backgrou
 //资源类
 BattleUnit* UnitFactory::CreateGoldMine(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateGoldMineData(level), "GoldMineLv1.png", parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateGoldMineData(level), makeSpritePath("GoldMine", level) , parent, background, false);
 }
 
 BattleUnit* UnitFactory::CreateGoldStorage(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateGoldStorageData(level), "GoldStorageLv1.png", parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateGoldStorageData(level),  makeSpritePath("GoldStorage", level ),parent, background, false);
 }
 
 BattleUnit* UnitFactory::CreateElixir(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateElixirData(level), "ElixirCollectorLv1.png", parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateElixirData(level), makeSpritePath("ElixirCollector", level), parent, background, false);
 }
 
 BattleUnit* UnitFactory::CreateElixirStorage(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateElixirStorageData(level), "ElixirStorageLv1.png", parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateElixirStorageData(level), makeSpritePath("ElixirStorage", level), parent, background, false);
 }
 
 //功能类
 BattleUnit* UnitFactory::CreateTownHall(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateTownHallData(level), "TownHallLv1.png", parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateTownHallData(level), makeSpritePath("TownHall", level) , parent, background, false);
 }
 
 BattleUnit* UnitFactory::CreateBuildersHut(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateBuildersHutData(level), "BuildersHut.png", parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateBuildersHutData(level), makeSpritePath("BuildersHut", level), parent, background, false);
+}
+
+BattleUnit* UnitFactory::CreateArmyCamp(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateArmyCampData(level), makeSpritePath("ArmyCamp", level), parent, background, false);
 }
 
 BattleUnit* UnitFactory::CreateWall(int level, Node* parent, Sprite* background)
 {
-	auto unit = CreateBaseBuilding(DefenderData::CreateWallData(level), "WallsLv1.png", parent, background, false);
+	auto unit = CreateBaseBuilding(DefenderData::CreateWallData(level), makeSpritePath("Walls", level), parent, background, false);
 	return unit;
 }
 
 //防御攻击类
 BattleUnit* UnitFactory::CreateCannon(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateCannonData(level), "CannonLv1.png", parent, background, true);
+	return CreateBaseBuilding(DefenderData::CreateCannonData(level), makeSpritePath("Cannon", level) , parent, background, true);
 }
 
 BattleUnit* UnitFactory::CreateArcherTower(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateArcherTowerData(level), "ArcherTowerLv1.png", parent, background, true);
+	return CreateBaseBuilding(DefenderData::CreateArcherTowerData(level), makeSpritePath("ArcherTower", level) , parent, background, true);
 }
 
 BattleUnit* UnitFactory::CreateMortar(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateMortarData(level), "MortarLv1.png", parent, background, true);
+	return CreateBaseBuilding(DefenderData::CreateMortarData(level), makeSpritePath("Mortar", level), parent, background, true);
 }

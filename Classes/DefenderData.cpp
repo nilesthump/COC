@@ -365,7 +365,7 @@ DefenderData DefenderData::CreateBuildersHutData(int level)
 {
     DefenderData data;
     data.id = "builders_hut";
-    data.name = "建筑工人小屋";
+    data.name = "建筑工人屋";
     data.level = level;
     data.building_type = BuildingType::BUILDERSHUT;
     data.tile_width = 3;
@@ -385,6 +385,41 @@ DefenderData DefenderData::CreateBuildersHutData(int level)
         780,
         860,
         960,
+        //先写12个
+    };
+    int idx = level - 1;
+    if (idx >= 0 && idx < klevel_stats.size())
+    {
+        data.health = klevel_stats[idx];
+    }
+    return data;
+}
+
+//兵营
+DefenderData DefenderData::CreateArmyCampData(int level)
+{
+    DefenderData data;
+    data.id = "army_camp";
+    data.name = "兵营";
+    data.level = level;
+    data.building_type = BuildingType::ARMYCAMP;
+    data.tile_width = 4;
+    data.tile_height = 4;
+    data.damage = 0; // 不反击  
+    //唯一没有参照COC官方的数据，我们修改建筑小屋生命值不要太大，和金矿一致
+    static const std::vector<int> klevel_stats = {
+        100,
+        150,
+        200,
+        250,
+        300,
+        330,
+        400,
+        500,
+        600,
+        700,
+        800,
+        850,
         //先写12个
     };
     int idx = level - 1;

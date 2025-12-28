@@ -23,6 +23,8 @@
 //12/27 重构，漂亮了
 #ifndef UNITFACTORY_H
 #define UNITFACTORY_H
+#include <string>
+#include <algorithm>
 #include "BattleUnit.h"
 #include "AttackerData.h"
 #include "DefenderData.h"
@@ -56,6 +58,9 @@ private:
         cocos2d::Node* parent,
         cocos2d::Sprite* background);
 public:
+    //根据等级传图片，最大为9
+    static std::string makeSpritePath(const std::string& prefix, int level);
+
     //根据UnitType创建进攻方
     static BattleUnit* CreateAttackerByType(UnitType type, int level, cocos2d::Node* parent, cocos2d::Sprite* background);
     //根据 BuildingType创建防守方
@@ -78,6 +83,7 @@ public:
     static BattleUnit* CreateElixirStorage(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
     static BattleUnit* CreateTownHall(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
     static BattleUnit* CreateBuildersHut(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateArmyCamp(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
     
 };
 
