@@ -7,7 +7,12 @@ SessionManager* SessionManager::instance = nullptr;
 SessionManager::SessionManager() : 
     isLoggedIn(false),
     currentUsername(""), 
-    loginType(LoginType::NONE) {}
+    loginType(LoginType::NONE),
+    _gold(0),
+    _elixir(0),
+    _gems(0),
+    _hasResourceData(false) {
+}
 
 // 获取单例实例
 SessionManager* SessionManager::getInstance() 
@@ -71,3 +76,32 @@ bool SessionManager::isGuestLogin() const
 {
     return isLoggedIn && loginType == LoginType::GUEST;
 }
+
+void SessionManager::setResourceData(int gold, int elixir, int gems)
+{
+    _gold = gold;
+    _elixir = elixir;
+    _gems = gems;
+    _hasResourceData = true;
+}
+
+void SessionManager::getResourceData(int& gold, int& elixir, int& gems) const
+{
+    gold = _gold;
+    elixir = _elixir;
+    gems = _gems;
+}
+
+bool SessionManager::hasResourceData() const
+{
+    return _hasResourceData;
+}
+
+void SessionManager::clearResourceData()
+{
+    _gold = 0;
+    _elixir = 0;
+    _gems = 0;
+    _hasResourceData = false;
+}
+

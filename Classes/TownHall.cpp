@@ -33,8 +33,8 @@ bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, fl
     x = x0;
     y = y0;
     level = lv;
+    size = 4;
     this->setPosition(Vec2(x0, y0));
-
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))
     {
@@ -53,7 +53,7 @@ bool TownHall::initSprite(const std::string& textureName)
     _sprite = Sprite::create(textureName);
     if (!_sprite)
     {
-        problemLoading("'WallsLv1.png'");
+        problemLoading("'TownHallLv1.png'");
         return false;
     }
 

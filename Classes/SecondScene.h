@@ -11,10 +11,17 @@
 #include "ArmyCamp.h"
 #include "Walls.h"
 #include "TownHall.h"
+#include "BuilderHut.h"
 #include "ZoomScrollManager.h"
 #include "DiamondGridManager.h"
+#include "WebSocketManager.h"
+#include "network/WebSocket.h"
+#include "json/document.h"
+#include "json/stringbuffer.h"
+#include "json/writer.h"
 
 USING_NS_CC;
+using namespace network;
 
 class SecondScene :public cocos2d::Scene
 {
@@ -25,6 +32,10 @@ public:
 	bool virtual init();
 	void menuFirstCallback(cocos2d::Ref* pSender);
 	void menuBuildCallback(Ref* pSender);
+
+	void menuAttackCallback(Ref* pSender);
+	void menuBoss1Callback(Ref* pSender);
+	void menuBoss2Callback(Ref* pSender);
 
 	void update(float delta);
 
@@ -50,19 +61,51 @@ public:
 
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
+
+	//返回未满
+	Building* getGoldStorage() {
+		for (auto building : placedBuildings) {
+			if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+				return building;
+			}
+		}
+	}
+	Building* getElixirStorage() {
+		for (auto building : placedBuildings) {
+			if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+				return building;
+			}
+		}
+	}
+	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
 	//new判断
 	CREATE_FUNC(SecondScene);
+
+	// WebSocket callbacks
+	void setupWebSocketCallbacks();
+	void setupWebSocketAndRequestResources();
+	void onWebSocketMessage(const std::string& message);
+	void sendGetResourceRequest();
+	void sendUpdateResourceRequest(float dt);
+	void sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level);
+	void sendDeleteBuildingRequest(float x, float y);
+	void sendGetBuildingsRequest();
+	void onWebSocketBuildingsMessage(const std::string& message);
+	void onEnter() override;
+	void onExit() override;
+
 private:
-	// 双击检测相关
+	// WebSocket回调相关成员变量
+	bool _sceneIsDestroyed;
+	// 双击检测相�?
 	double _lastClickTime; // 上一次点击的时间（使用double类型更精确）
 	cocos2d::Vec2 _lastClickPos; // 上一次点击的位置
-	bool _isDoubleClick; // 是否为双击
+	bool _isDoubleClick; // 是否为双�?
 	const double DOUBLE_CLICK_INTERVAL = 0.3; // 双击时间间隔阈值（秒）
 
-	//碰撞判断
-	bool isPointInBuilding(const cocos2d::Vec2& point, cocos2d::Node* building);
+	bool isPointInBuilding(const cocos2d::Vec2& point, Building* building);
 
-	Node* buildPanel;//建造建筑面板
+	Node* buildPanel;
 	Node* attackPanel;
 
 	BuildingInfoPanel* _curOpenInfoPanel = nullptr;// 建筑信息面板
@@ -74,7 +117,7 @@ private:
 
 	cocos2d::Label* coordinate_label_;
 
-	//圣水、金币、宝石
+	//圣水、金币、宝�?
 	cocos2d::Sprite* elixirIcon; 
 	cocos2d::Label* elixirLabel; 
 	cocos2d::Label* elixirNameLabel; 
@@ -90,6 +133,9 @@ private:
 	DiamondGridManager* grid_manager_;
 
 	std::vector<std::vector<cocos2d::Vec2>>* grids_;
+	//�ؿ���ť
+	cocos2d::MenuItemImage* boss1Btn;
+	cocos2d::MenuItemImage* boss2Btn;
 
 	// 拖拽相关成员变量
 	cocos2d::MenuItemImage* goldMineBtn;
@@ -98,27 +144,29 @@ private:
 	cocos2d::MenuItemImage* elixirStorageBtn;
 	cocos2d::MenuItemImage* armyCampBtn;
 	cocos2d::MenuItemImage* wallsBtn;
+	cocos2d::MenuItemImage* builderHutBtn;
 
 	cocos2d::MenuItemImage* draggingItem; // 当前正在拖拽的项
-	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
+	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位�?
 	bool isDragging; // 是否正在拖拽
     
     // 建筑移动相关成员变量
 	Building* movingBuilding;
     bool isMovingBuilding; // 是否正在移动建筑
+	cocos2d::Vec2 _movingBuildingOriginalPos; // 移动建筑时的原始位置
 
-	std::vector<Building*> placedBuildings;
+	static std::vector<Building*> placedBuildings;
 	int baseGoldRate; // 基础产金速率
 	int baseElixirRate;
+
+	bool _buildingsInitialized; // 防止重复初始化建�?
+
+	Building* createBuildingByType(const std::string& buildingType);
+	void initDefaultBuildingsAndSave();
 };
 
-//圣水
-extern int g_elixirCount;
-//金币
-extern int g_goldCount;
-//宝石
-extern int g_gemCount;
-//上限
 extern int maxLevel, maxGoldVolum, maxElixirVolum;
+extern int g_elixirCount, g_goldCount, g_gemCount, hutNum;
+
 #endif
 
