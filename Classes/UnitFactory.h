@@ -20,6 +20,7 @@
 
 //12/16 下一步把别的角色工厂也添加，然后试着提取共有部分批量创建
 //（但是初始位置还是得从scene读取，这里对角色自己的工厂而已）
+//12/27 重构，漂亮了
 #ifndef UNITFACTORY_H
 #define UNITFACTORY_H
 #include "BattleUnit.h"
@@ -39,14 +40,43 @@ namespace cocos2d
 
 class UnitFactory
 {
-public:
-    // 创建带有视觉效果的完整单位（用于场景直接使用）
-    static BattleUnit* CreateBarbarian(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
-    static BattleUnit* CreateArcher(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
-    static BattleUnit* CreateCannon(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
-    static BattleUnit* CreateArcherTower(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
-    static BattleUnit* CreateGoldMine(int level = 1, cocos2d::Node* parent = nullptr, cocos2d::Sprite* background = nullptr);
+private:
+    //专门负责处理防守建筑通用逻辑：创建、初始化Data、绑定Component、设置HP条、设置Behavior
+    static BattleUnit* CreateBaseBuilding(DefenderData data,
+        const std::string& spritePath,
+        cocos2d::Node* parent,
+        cocos2d::Sprite* background,
+        bool canAttack = false);
 
+    //专门负责处理小兵通用逻辑
+    static BattleUnit* CreateBaseAttacker(AttackerData data,
+        const std::string& spritePath,
+        cocos2d::Node* parent,
+        cocos2d::Sprite* background);
+public:
+    //根据UnitType创建进攻方
+    static BattleUnit* CreateAttackerByType(UnitType type, int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    //根据 BuildingType创建防守方
+    static BattleUnit* CreateBuildingByType(BuildingType type, int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    //创建带有视觉效果的完整单位
+    static BattleUnit* CreateBarbarian(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateArcher(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateGiant(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateGoblin(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateBomber(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateBalloon(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+
+    static BattleUnit* CreateCannon(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateArcherTower(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateMortar(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateWall(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateGoldMine(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateGoldStorage(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateElixir(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateElixirStorage(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateTownHall(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    static BattleUnit* CreateBuildersHut(int level, cocos2d::Node* parent, cocos2d::Sprite* background);
+    
 };
 
 #endif

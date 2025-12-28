@@ -19,6 +19,7 @@
 #ifndef UNITSTATE_H
 #define UNITSTATE_H
 #include "BaseUnitData.h"
+#include "cocos2d.h"
 #include <memory>
 
 class UnitState
@@ -26,22 +27,32 @@ class UnitState
 private:
 	std::unique_ptr<BaseUnitData> base_data_ptr_;
 
-	//实时状态
+	// --- 实时动态状态 (战斗中会改变的量) ---
 	float current_health_;
+	float max_health_;          // 缓存最大血量，方便 UI 计算比例
 	float position_X_, position_Y_;
 	float attack_cool_down_;
 	bool is_alive_;
+	float search_range_;
+
+	// 动态资源库存：重点！
+	// 战斗开始时从 Data 拷贝初始值，之后随受击减少
+	float current_gold_inventory_ = 0;
+	float current_elixir_inventory_ = 0;
+
+	bool is_attacker_ = false;
 
 public:
 	//构造函数
-	UnitState();
+	UnitState():
+		current_health_(0), max_health_(0),
+		position_X_(0), position_Y_(0),
+		attack_cool_down_(0), is_alive_(false),
+		search_range_(0)
+	{}
 	~UnitState() = default;
-
-	//禁止拷贝
 	UnitState(const UnitState&) = delete;
 	UnitState& operator=(const UnitState&) = delete;
-
-	//允许移动
 	UnitState(UnitState&&) = default;
 	UnitState& operator=(UnitState&&) = default;
 
@@ -50,21 +61,48 @@ public:
 	template<typename T>
 	void Init(const T& data)
 	{
+		// 1. 深度拷贝静态配置
 		base_data_ptr_ = std::make_unique<T>(data);
-		current_health_ = base_data_ptr_->health;
+
+		// 2. 初始化动态数值快照
+		current_health_ = data.health;
+		max_health_ = current_health_;
+		search_range_ = data.search_range;
 		is_alive_ = true;
 		attack_cool_down_ = 0;
 		position_X_ = 0;
 		position_Y_ = 0;
+
+		// 3. 区分处理建筑与角色
+		if constexpr (std::is_same_v<T, DefenderData>)
+		{
+			is_attacker_ = false;
+			// 提取建筑初始资源
+			current_gold_inventory_ = static_cast<float>(data.gold_reward);
+			current_elixir_inventory_ = static_cast<float>(data.elixir_reward);
+		}
+		else
+		{
+			is_attacker_ = true;
+			current_gold_inventory_ = 0;
+			current_elixir_inventory_ = 0;
+		}
 	}
 	
 	//类型判断
 	bool IsAttacker() const;
-	bool IsDefender() const;
+	bool IsResourceBuilding()const;
+	bool IsDefenderBuilding()const;
+	bool IsWall()const;
+	bool IsTownHall()const;
+
+	//资源
+	void ConsumeResources(float gold, float elixir);
 
 	//位置
 	float GetPositionX() const;
 	float GetPositionY() const;
+	cocos2d::Vec2 GetLogicalPosition()const;
 	void SetPosition(float x, float y);
 
 	//血量
@@ -85,14 +123,20 @@ public:
 	float GetDamage() const;
 	float GetAttackInterval() const;
 	float GetMaxHealth() const;
-	AttackTargetType GetAttackTargetType() const;     //攻击目标类型（地面/空中/两者）
+	float GetSearchRange()const;
+	UnitType GetUnitType()const;					//直接获取自己是谁(角色）
+	BuildingType GetBuildingType()const;					//直接获取自己是谁(建筑）
+	AttackTargetType GetAttackTargetType() const;   //攻击目标类型（地面/空中/两者）
 	UnitTargetType GetUnitTargetType()const;		//获取自身类型（空中/地面）
-	AttackType GetAttackType() const;   //攻击类型（单体/范围/连锁）
-	CombatType GetCombatType() const;   //近战/远程
+	AttackType GetAttackType() const;				//攻击类型（单体/范围/连锁）
+	CombatType GetCombatType() const;				//近战/远程
+	TargetPriority GetTargetPriority() const;		//偏好
 	int GetTileWidth()const;
 	int GetTileHeight()const;
-	TargetPriority GetPreferredTarget()const;
-	bool IsResourceBuilding()const;
+	int GetTotalGoldStatic() const;
+	int GetTotalElixirStatic() const;
+	int GetCurrentGoldInventory() const;
+	int GetCurrentElixirInventory() const;
 };
 
 #endif

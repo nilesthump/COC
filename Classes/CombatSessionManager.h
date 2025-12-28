@@ -6,22 +6,27 @@
 class CombatSessionManager
 {
 public:
+    BattleStartParams battle_start_params;
+    std::string mapBackgroundPath;
     static CombatSessionManager* getInstance()
     {
         static CombatSessionManager instance;
         return &instance;
     }
-
-    BattleStartParams battle_start_params;
-
-    // ª∑æ≥≈‰÷√
-    std::string mapBackgroundPath;
-
     void reset()
     {
         battle_start_params.attackerInventory.clear();
         battle_start_params.buildings.clear();
         mapBackgroundPath = "normal(winter).jpg";
+    }
+  
+    void setAttackerInventory(const std::map<UnitType, int>& inventory)
+    {
+        battle_start_params.attackerInventory = inventory;
+    }
+    void setBuildings(const std::vector<BuildingSnapshot>& buildings)
+    {
+        battle_start_params.buildings = buildings;
     }
 
 private:

@@ -19,9 +19,9 @@ float UnitNavigation::CalculateDistance(BattleUnit* a, BattleUnit* b)
 {
     cocos2d::Vec2 posA(a->GetPositionX(), a->GetPositionY());
     cocos2d::Vec2 posB(b->GetPositionX(), b->GetPositionY());
-
+    bool isDefender = (b->GetState().IsDefenderBuilding() || b->GetState().IsResourceBuilding() || b->GetState().IsWall()||b->GetState().IsTownHall());
     // 如果目标是防御建筑，计算点到矩形边缘的距离
-    if (b->GetState().IsDefender())
+    if (isDefender)
     {
         // 注意：COC中距离计算通常是基于格子的。这里tile_width 是占地格子数
         float halfW = b->GetState().GetTileWidth() * 0.5f;

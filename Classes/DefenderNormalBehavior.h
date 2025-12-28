@@ -1,16 +1,16 @@
 #ifndef _DEFENDER_NORMAL_BEHAVIOR_H_
 #define _DEFENDER_NORMAL_BEHAVIOR_H_
 
-#include "BaseBehavior.h"
+#include "UnitBehavior.h"
 
-class DefenderNormalBehavior : public BaseBehavior
+class DefenderNormalBehavior : public UnitBehavior
 {
 public:
-    std::string GetBehaviorType() const override;
-
-    //·ÀÓù½¨ÖþµÄ¹¥»÷¼ì²é
-    bool CanAttack(BattleUnit* attacker, BattleUnit* defender) override;
-
+    virtual void OnUpdate(BattleUnit* unit, float dt) override;
+    virtual void OnDeath(BattleUnit* unit) override;
+    virtual void OnDamageTaken(BattleUnit* unit, float damage, BattleUnit* attacker) override;
+    virtual void OnAttack(BattleUnit* attacker, BattleUnit* defender) override;
+    virtual std::string GetBehaviorType() const override { return "DefenderNormal"; }
 };
 
 #endif 

@@ -4,6 +4,8 @@
 // 2.每个单位有生命值，攻击伤害，伤害范围（单体、连锁、范围）
 // 3.考虑攻击偏好
 // 4.哪些属性是战斗相关哪些是资源相关
+// 
+// 添加气球兵的部分
 // Classes/Data/AttackerData.h
 #ifndef _ATTACKER_DATA_H
 #define _ATTACKER_DATA_H
@@ -17,7 +19,8 @@
 //? NOTE ：实验室等级和大本营等级的约束是不是可以不在这里体现，而是在主scene体现
 struct AttackerData : public BaseUnitData
 {	
-	TargetPriority preferred_target; // 优先目标
+	UnitType unit_type;         //角色标识，其实和id功能差不多但是id更多是文字而不是真正标识
+	TargetPriority target_priority; // 优先目标
 	int housing_space;             // 占用兵营人口数
 
 	//Bomber特殊数据
@@ -27,12 +30,12 @@ struct AttackerData : public BaseUnitData
 	AttackerData() : BaseUnitData()
 	{
 		housing_space = 1;
+		target_priority = TargetPriority::ANY;
 	}
 
 	//拷贝构造
-	AttackerData(const AttackerData& other):BaseUnitData(other),preferred_target(other.preferred_target)
-		,housing_space(other.housing_space)
-	{
+	AttackerData(const AttackerData& other):BaseUnitData(other),target_priority(other.target_priority)
+		,housing_space(other.housing_space){
 		if (other.bomber_data)
 		{
 			bomber_data = std::make_unique<BomberBehaviorData>(*other.bomber_data);
@@ -45,7 +48,7 @@ struct AttackerData : public BaseUnitData
 		if (this != &data)
 		{
 			BaseUnitData::operator=(data);
-			preferred_target = data.preferred_target;
+			target_priority = data.target_priority;
 			housing_space = data.housing_space;
 
 			if (data.bomber_data)
@@ -60,8 +63,6 @@ struct AttackerData : public BaseUnitData
 		return *this;
 	}
 
-	virtual bool IsAttacker() const override { return true; }
-	TargetPriority GetPreferredTarget() const override { return preferred_target; }
 	int GetHousingSpace() const override { return housing_space; }
 
 	static AttackerData CreateBarbarianData(int level = 1);	//野蛮人
@@ -69,6 +70,7 @@ struct AttackerData : public BaseUnitData
 	static AttackerData CreateGiantData(int level = 1);		//巨人
 	static AttackerData CreateGoblinData(int level = 1);	//哥布林
 	static AttackerData CreateBomberData(int level = 1);	//炸弹人
+	static AttackerData CreateBalloonData(int level = 1);	//气球兵
 
 };
 

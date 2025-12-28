@@ -10,6 +10,7 @@ BuildingComponent::BuildingComponent(int tileW, int tileH)
 
 void BuildingComponent::AttachTo(Node* parent)
 {
+    if (!parent) return;
     root_ = Node::create();
     root_->setAnchorPoint(Vec2(0.5f, 0.5f));
     parent->addChild(root_);

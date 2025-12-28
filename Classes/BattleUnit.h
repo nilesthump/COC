@@ -35,6 +35,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+class BattleManager;
 
 class BattleUnit
 {
@@ -61,8 +62,7 @@ private:
 	std::string death_sound_;
 
 	//防御建筑类相关（用于适配图片和位置）
-	std::unique_ptr<BuildingComponent> building_;
-	
+	std::unique_ptr<BuildingComponent> building_;	
 
 public:
 	BattleUnit();
@@ -91,6 +91,9 @@ public:
 	//受到伤害
 	void TakeDamage(float damage, BattleUnit* source);
 
+	//切换目标
+	void ForceAttackTarget(BattleUnit* target);
+
 	//Getter接口
 	UnitState& GetState();
 	const UnitState& GetState() const;
@@ -98,6 +101,7 @@ public:
 	bool IsAlive() const;
 	float GetPositionX() const;
 	float GetPositionY() const;
+	Vec2 GetLogicalPosition()const;
 	void SetPositionAttacker(float x, float y);
 	void SetPositionDefender(float x, float y);
 
@@ -113,10 +117,11 @@ public:
 	UnitTargetType GetUnitTargetType() const;
 	AttackType GetAttackType() const;
 	CombatType GetCombatType() const;
+	TargetPriority GetTargetPriority() const;
 	BattleUnit* GetTarget() const;
 	UnitNavigation* GetNavigation() const;
 	UnitBehavior* GetBehavior() const;
-
+	BuildingComponent* GetBuildingComponent() const;
 	//获取parent
 	cocos2d::Node* GetParentNode() const;
 
@@ -139,7 +144,8 @@ public:
 
 	void OnBattleStart();
 	bool IsInBattle() const { return in_battle_; }
-
+	void ClearTarget() { target_ = nullptr; }
+	
 };
 
 #endif
