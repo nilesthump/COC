@@ -21,13 +21,6 @@ protected:
 public:
 	// 初始化函数
 	virtual bool init(const std::string& textureName, int hp, int lv, float x0, float y0) = 0;
-	//修改Building坐标
-	void changeX(float t) {
-		x = t;
-	}
-	void changeY(float t) {
-		y = t;
-	}
 	//建造相关
 	virtual int getGoldCost() const { return 0; }
 	virtual int getElixirCost() const { return 0; }
