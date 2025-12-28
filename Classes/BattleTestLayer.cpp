@@ -260,12 +260,6 @@ void BattleTestLayer::setupBattleSession()
 	}
 
 	// --- 6. ±øÁ¦ÓëÆô¶¯ ---
-	auto& inv = config->battle_start_params.attackerInventory;
-	inv[UnitType::BARBARIAN] = 20;
-	inv[UnitType::ARCHER] = 15;
-	inv[UnitType::GIANT] = 5;
-	inv[UnitType::GOBLIN] = 10;
-	inv[UnitType::BALLOON] = 3;
 
 	bm->PrepareBattle(config->battle_start_params);
 	placeDefender();

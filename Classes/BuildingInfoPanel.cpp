@@ -224,17 +224,8 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _hpLabel->setPosition(bgWidth / 2, bgHeight - 70);
     _hpLabel->setColor(Color3B::GREEN);
     panelBg->addChild(_hpLabel);
-    
-    //4.网格坐标
-    _positionLabel = Label::createWithTTF(
-        StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()),
-        "fonts/Marker Felt.ttf", 24
-    );
-    _positionLabel->setPosition(bgWidth / 2, bgHeight - 110);
-    panelBg->addChild(_positionLabel);
 
-
-    // 5. 资源信息显示
+    // 4. 资源信息显示
     // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源和生产速度，有收集按钮
     // 存钱罐和圣水瓶显示的是容量/上限，有收集按钮
     //兵营显示各个士兵的信息，城墙、建筑小屋不需要显示
@@ -360,7 +351,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if(dynamic_cast<BuilderHut*>(building)){}
     
-    // 6. 升级按钮,最高等级15
+    // 5. 升级按钮,最高等级15
     _upgradeBtn = MenuItemImage::create(
         "5.png",  // 正常状态图
         "5.png", // 按下状态图
@@ -391,7 +382,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _upgradeBtn->setScale(0.75f);
     _upgradeBtn->setPosition(bgWidth / 2, 70);
     
-    //7. 加速按钮
+    //6. 加速按钮
     if (_targetBuilding->getIsUpgrade()) {
         _speedUpBtn = MenuItemImage::create(
             "5.png",  // 正常状态图
@@ -407,7 +398,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         _speedUpBtn->setPosition(bgWidth / 2, 170); // 位置在升级按钮上方
     }
 
-    // 8. 收集按钮
+    // 7. 收集按钮
     _collectBtn = MenuItemImage::create(
         "5.png",  // 正常状态图
         "5.png", // 按下状态图
@@ -484,7 +475,6 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     //公共标签
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
     
 }
 
@@ -604,7 +594,7 @@ void BuildingInfoPanel::showSoldierInfo(int lv){
         AttackerData::CreateGiantData(lv >= 12 ? 12 : lv),
         AttackerData::CreateGoblinData(lv >= 12 ? 12 : lv),
         AttackerData::CreateBomberData(lv >= 12 ? 12 : lv),
-        AttackerData::CreateGoblinData(lv >= 12 ? 12 : lv) };
+        AttackerData::CreateBalloonData(lv >= 12 ? 12 : lv) };
 
     int L = 160, H = 300;
     for (int i = 0; i < 6; i++) {

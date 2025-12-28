@@ -796,12 +796,28 @@ void SecondScene::menuAttackCallback(Ref* pSender)
 
 void SecondScene::menuBoss1Callback(Ref* pSender)
 {
-    Director::getInstance()->replaceScene(HelloWorld::createScene());
+    auto config = CombatSessionManager::getInstance();
+    config->reset(); 
+
+    std::map<UnitType, int>army;
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<ArmyCamp*>(building)) {
+            army[UnitType::BARBARIAN] += building->getArmy(0);
+            army[UnitType::ARCHER] += building->getArmy(1);
+            army[UnitType::GIANT] += building->getArmy(2);
+            army[UnitType::GOBLIN] += building->getArmy(3);
+            army[UnitType::BOMBER] += building->getArmy(4);
+            army[UnitType::BALLOON] += building->getArmy(5);
+        }
+    }
+    config->setAttackerInventory(army);
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
+
 }
 
 void SecondScene::menuBoss2Callback(Ref* pSender)
 {
-    Director::getInstance()->replaceScene(HelloWorld::createScene());
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
 }
 
 
@@ -2211,6 +2227,56 @@ void SecondScene::initDefaultBuildingsAndSave() {
         maxGoldVolum = townHall->getMaxGoldNum();
         maxElixirVolum = townHall->getMaxElixirNum();
         maxLevel = townHall->getLv();
+    }
+
+    auto goldMine = GoldMine::create("GoldMineLv1.png");
+    if (goldMine) {
+        goldMine->updatePosition(Vec2(1918, 1625));
+        if (background_sprite_) {
+            background_sprite_->addChild(goldMine, 15);
+        }
+        placedBuildings.push_back(goldMine);
+        goldMine->setScale(0.9f);
+    }
+
+    auto elixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
+    if (elixirCollector) {
+        elixirCollector->updatePosition(Vec2(1918, 1121));
+        if (background_sprite_) {
+            background_sprite_->addChild(elixirCollector, 15);
+        }
+        placedBuildings.push_back(elixirCollector);
+        elixirCollector->setScale(0.9f);
+    }
+
+    auto goldStorage = GoldStorage::create("GoldStorageLv1.png");
+    if (goldStorage) {
+        goldStorage->updatePosition(Vec2(1918, 869));
+        if (background_sprite_) {
+            background_sprite_->addChild(goldStorage, 15);
+        }
+        placedBuildings.push_back(goldStorage);
+        goldStorage->setScale(0.9f);
+    }
+
+    auto elixirStorage = GoldStorage::create("ElixirStorageLv1.png");
+    if (elixirStorage) {
+        elixirStorage->updatePosition(Vec2(1918, 1877));
+        if (background_sprite_) {
+            background_sprite_->addChild(elixirStorage, 15);
+        }
+        placedBuildings.push_back(elixirStorage);
+        elixirStorage->setScale(1.1f);
+    }
+
+    auto armyCamp = ArmyCamp::create("ArmyCampLv1.png");
+    if (armyCamp) {
+        armyCamp->updatePosition(Vec2(2142, 1625));
+        if (background_sprite_) {
+            background_sprite_->addChild(armyCamp, 15);
+        }
+        placedBuildings.push_back(armyCamp);
+        armyCamp->setScale(1.1f);
     }
 
     auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");

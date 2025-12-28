@@ -49,7 +49,6 @@ private:
     cocos2d::Label* _hpLabel;
     cocos2d::Label* _levelLabel;
     cocos2d::Label* _speedLabel;
-    cocos2d::Label* _positionLabel;
     cocos2d::Label* _resourceLabel;
     cocos2d::MenuItemImage* _upgradeBtn;
     cocos2d::MenuItemImage* _collectBtn;
