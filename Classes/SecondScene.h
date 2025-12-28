@@ -65,7 +65,7 @@ public:
 	// Check if position is inside diamond
 	bool isInDiamond(const cocos2d::Vec2& diamondPos);
 
-	//è¿”å›æœªæ»¡
+	//·µ»ØÎ´Âú
 	Building* getGoldStorage() {
 		for (auto building : placedBuildings) {
 			if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
@@ -81,7 +81,7 @@ public:
 		}
 	}
 	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
-	//newåˆ¤æ–­
+	//newÅĞ¶Ï
 	CREATE_FUNC(SecondScene);
 
 	// WebSocket callbacks
@@ -93,7 +93,7 @@ public:
 	void sendCollectProductionRequest(Building* building, int collectedAmount,
 		int remainingStock, int resourceType);
 
-	// å…¬å¼€æ–¹æ³•ï¼šæ›´æ–°èµ„æº UI æ˜¾ç¤º
+	// ¹«¿ª·½·¨£º¸üĞÂ×ÊÔ´ UI ÏÔÊ¾
 	void updateResourceLabels() {
 		if (goldLabel) {
 			goldLabel->setString(StringUtils::format("%d", g_goldCount));
@@ -112,28 +112,28 @@ public:
 	void onEnter() override;
 	void onExit() override;
 
-	// å¤„ç†å‡çº§å®Œæˆäº‹ä»¶
+	// ´¦ÀíÉı¼¶Íê³ÉÊÂ¼ş
 	void onUpgradeComplete(UpgradeCompleteData* data);
 	void handleUpgradeCompleteEvent(cocos2d::EventCustom* event);
 
 private:
-	// å‡çº§å®Œæˆäº‹ä»¶ç›‘å¬å™¨
+	// Éı¼¶Íê³ÉÊÂ¼ş¼àÌıÆ÷
 	cocos2d::EventListenerCustom* _upgradeCompleteListener;
 
-	// WebSocketå›è°ƒç›¸å…³æˆå‘˜å˜é‡
+	// WebSocket»Øµ÷Ïà¹Ø³ÉÔ±±äÁ¿
 	bool _sceneIsDestroyed;
-	// åŒå‡»æ£€æµ‹ç›¸å…?
-	double _lastClickTime; // ä¸Šä¸€æ¬¡ç‚¹å‡»çš„æ—¶é—´ï¼ˆä½¿ç”¨doubleç±»å‹æ›´ç²¾ç¡®ï¼‰
-	cocos2d::Vec2 _lastClickPos; // ä¸Šä¸€æ¬¡ç‚¹å‡»çš„ä½ç½®
-	bool _isDoubleClick; // æ˜¯å¦ä¸ºåŒå‡?
-	const double DOUBLE_CLICK_INTERVAL = 0.3; // åŒå‡»æ—¶é—´é—´éš”é˜ˆå€¼ï¼ˆç§’ï¼‰
+	// Ë«»÷¼ì²âÏà¹Ø
+	double _lastClickTime; // ÉÏÒ»´Îµã»÷µÄÊ±¼ä£¨Ê¹ÓÃdoubleÀàĞÍ¸ü¾«È·£©
+	cocos2d::Vec2 _lastClickPos; // ÉÏÒ»´Îµã»÷µÄÎ»ÖÃ
+	bool _isDoubleClick; // ÊÇ·ñÎªË«»÷
+	const double DOUBLE_CLICK_INTERVAL = 0.3; // Ë«»÷Ê±¼ä¼ä¸ôãĞÖµ£¨Ãë£©
 
 	bool isPointInBuilding(const cocos2d::Vec2& point, Building* building);
 
 	Node* buildPanel;
 	Node* attackPanel;
 
-	BuildingInfoPanel* _curOpenInfoPanel = nullptr;// å»ºç­‘ä¿¡æ¯é¢æ¿
+	BuildingInfoPanel* _curOpenInfoPanel = nullptr;// ½¨ÖşĞÅÏ¢Ãæ°å
 	Building* _curOpenBuilding = nullptr;
 
 	cocos2d::Sprite* background_sprite_;
@@ -142,7 +142,7 @@ private:
 
 	cocos2d::Label* coordinate_label_;
 
-	//åœ£æ°´ã€é‡‘å¸ã€å®çŸ?
+	//Ê¥Ë®¡¢½ğ±Ò¡¢±¦Ê¯
 	cocos2d::Sprite* elixirIcon; 
 	cocos2d::Label* elixirLabel; 
 	cocos2d::Label* elixirNameLabel; 
@@ -162,7 +162,7 @@ private:
 	cocos2d::MenuItemImage* boss1Btn;
 	cocos2d::MenuItemImage* boss2Btn;
 
-	// æ‹–æ‹½ç›¸å…³æˆå‘˜å˜é‡
+	// ÍÏ×§Ïà¹Ø³ÉÔ±±äÁ¿
 	cocos2d::MenuItemImage* goldMineBtn;
 	cocos2d::MenuItemImage* elixirCollectorBtn;
 	cocos2d::MenuItemImage* goldStorageBtn;
@@ -171,20 +171,20 @@ private:
 	cocos2d::MenuItemImage* wallsBtn;
 	cocos2d::MenuItemImage* builderHutBtn;
 
-	cocos2d::MenuItemImage* draggingItem; // å½“å‰æ­£åœ¨æ‹–æ‹½çš„é¡¹
-	cocos2d::Vec2 dragStartPosition; // æ‹–æ‹½å¼€å§‹æ—¶çš„ä½ç½?
-	bool isDragging; // æ˜¯å¦æ­£åœ¨æ‹–æ‹½
+	cocos2d::MenuItemImage* draggingItem; // µ±Ç°ÕıÔÚÍÏ×§µÄÏî
+	cocos2d::Vec2 dragStartPosition; // ÍÏ×§¿ªÊ¼Ê±µÄÎ»ÖÃ
+	bool isDragging; // ÊÇ·ñÕıÔÚÍÏ×§
     
-	// å»ºç­‘ç§»åŠ¨ç›¸å…³æˆå‘˜å˜é‡
+	// ½¨ÖşÒÆ¶¯Ïà¹Ø³ÉÔ±±äÁ¿
 	Building* movingBuilding;
-	bool isMovingBuilding; // æ˜¯å¦æ­£åœ¨ç§»åŠ¨å»ºç­‘
-	cocos2d::Vec2 _movingBuildingOriginalPos; // ç§»åŠ¨å»ºç­‘æ—¶çš„åŸå§‹ä½ç½®
+	bool isMovingBuilding; // ÊÇ·ñÕıÔÚÒÆ¶¯½¨Öş
+	cocos2d::Vec2 _movingBuildingOriginalPos; // ÒÆ¶¯½¨ÖşÊ±µÄÔ­Ê¼Î»ÖÃ
 
 	static std::vector<Building*> placedBuildings;
-	int baseGoldRate; // åŸºç¡€äº§é‡‘é€Ÿç‡
+	int baseGoldRate; // »ù´¡²ú½ğËÙÂÊ
 	int baseElixirRate;
 
-	bool _buildingsInitialized; // é˜²æ­¢é‡å¤åˆå§‹åŒ–å»ºç­?
+	bool _buildingsInitialized; // ·ÀÖ¹ÖØ¸´³õÊ¼»¯½¨Öş
 
 	Building* createBuildingByType(const std::string& buildingType, float x = 667.0f, 
 		float y = 2074.0f, int level = 1,
