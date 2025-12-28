@@ -112,7 +112,7 @@ BattleUnit* UnitFactory::CreateBomber(int level, Node* parent, Sprite* backgroun
 	return CreateBaseAttacker(AttackerData::CreateBomberData(level), "BomberLv1.png", parent, background);
 }
 
-//! 气球兵高度问题
+//气球兵高度问题
 BattleUnit* UnitFactory::CreateBalloon(int level, Node* parent, Sprite* background)
 {
 	auto unit = CreateBaseAttacker(AttackerData::CreateBalloonData(level), "BalloonLv1.png", parent, background);
@@ -172,7 +172,6 @@ BattleUnit* UnitFactory::CreateBuildersHut(int level, Node* parent, Sprite* back
 	return CreateBaseBuilding(DefenderData::CreateBuildersHutData(level), "BuildersHut.png", parent, background, false);
 }
 
-//! 城墙特殊处理
 BattleUnit* UnitFactory::CreateWall(int level, Node* parent, Sprite* background)
 {
 	auto unit = CreateBaseBuilding(DefenderData::CreateWallData(level), "WallsLv1.png", parent, background, false);

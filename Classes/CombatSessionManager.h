@@ -15,14 +15,14 @@ public:
     }
     void reset()
     {
-        battle_start_params.attackerInventory.clear();
+        battle_start_params.army.clear();
         battle_start_params.buildings.clear();
         mapBackgroundPath = "normal(winter).jpg";
     }
   
-    void setAttackerInventory(const std::map<UnitType, int>& inventory)
+    void setAttackerInventory(const std::vector<Army>& army)
     {
-        battle_start_params.attackerInventory = inventory;
+        battle_start_params.army = army;
     }
     void setBuildings(const std::vector<BuildingSnapshot>& buildings)
     {

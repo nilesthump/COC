@@ -28,7 +28,7 @@ void BattleManager::PrepareBattle(const BattleStartParams& params)
 	}
 
 	// 3. 兵力初始化
-	this->SetInitialUnits(params.attackerInventory);
+	this->SetInitialUnits(params.army);
 }
 
 void BattleManager::clear()
@@ -47,7 +47,7 @@ void BattleManager::clear()
 	all_units_.clear();
 	attackers_.clear();
 	defenders_.clear();
-	unit_counts_.clear();
+	army_pool_.clear();
 
 	// 3. 重置所有胜负判定和时间
 	battle_active_ = false;
@@ -110,12 +110,16 @@ void BattleManager::AddUnit(std::unique_ptr<BattleUnit> unit, bool is_attacker)
 }
 
 //初始化时传入英雄及其数量
-void BattleManager::SetInitialUnits(const std::map<UnitType, int>& units)
+void BattleManager::SetInitialUnits(const std::vector<Army>& army)
 {
-	unit_counts_ = units;
+	army_pool_.clear();
 	total_heroes_ = 0;
-	for (auto const& unit : units)
-		total_heroes_ += unit.second;
+
+	for (auto const& unit : army)
+	{
+		army_pool_[unit.type] = unit;
+		total_heroes_ += unit.amount;
+	}
 }
 
 //获取敌人的列表

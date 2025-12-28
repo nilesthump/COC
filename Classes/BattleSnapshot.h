@@ -13,9 +13,16 @@ struct BuildingSnapshot
     cocos2d::Vec2 logicalPos; // 存的是逻辑中心坐标 (-0.5 到 49.5)
 };
 
+struct Army
+{
+    UnitType type;
+    int level;
+    int amount;
+};
+
 // 战斗开始前的完整数据包
 struct BattleStartParams
 {
-    std::vector<BuildingSnapshot> buildings; // 敌方阵型
-    std::map<UnitType, int> attackerInventory; // 我方携带的兵力
+    std::vector<BuildingSnapshot> buildings; //敌方阵型
+    std::vector<Army>army; //我方携带的兵力
 };

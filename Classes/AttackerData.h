@@ -31,10 +31,11 @@ struct AttackerData : public BaseUnitData
 	{
 		housing_space = 1;
 		target_priority = TargetPriority::ANY;
+		unit_type = UnitType::NONE;
 	}
 
 	//øΩ±¥ππ‘Ï
-	AttackerData(const AttackerData& other):BaseUnitData(other),target_priority(other.target_priority)
+	AttackerData(const AttackerData& other):BaseUnitData(other),target_priority(other.target_priority),unit_type(other.unit_type)
 		,housing_space(other.housing_space){
 		if (other.bomber_data)
 		{
