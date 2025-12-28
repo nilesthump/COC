@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include"ConvertTest.h"
+#include "SessionManager.h"
 
 class Building : public cocos2d::Node {
 protected:
@@ -36,10 +37,23 @@ public:
 	virtual int getUpgradeElixirCost()const { return 0; }
 	virtual void update() { return; }
 	virtual void cutTime() { return; }
-	virtual int getRemainTime() { return 0; }
-	virtual void finishUpgrade() {return;}
+	virtual int getRemainTime() {
+		if (!isUpgrade) return 0;
+
+		UpgradeData upgradeData;
+		if (SessionManager::getInstance()->getUpgradeDataForBuilding(x, y, upgradeData)) {
+			return upgradeData.remainingTime;
+		}
+
+		return 0;
+	}
+	virtual int getUpgradeDuration() const { return 0; }
+	virtual void finishUpgrade() { return; }
 	bool getIsUpgrade() {
 		return isUpgrade;
+	}
+	void setIsUpgrade(bool upgrade) {
+		isUpgrade = upgrade;
 	}
 	void startUpgrade() {
 		isUpgrade = true;
@@ -78,6 +92,9 @@ public:
 	}
 	int getHp() {
 		return _hp;
+	}
+	void setHp(int hp) {
+		_hp = hp;
 	}
 	float getXX() {
 		Vec2 you = ConvertTest::myConvertLocalToGrid(Vec2(x, y));

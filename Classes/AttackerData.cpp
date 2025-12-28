@@ -19,6 +19,7 @@ AttackerData AttackerData::CreateBarbarianData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.target_priority = TargetPriority::ANY;
+	data.unit_type = UnitType::BARBARIAN;
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
 	data.attack_distance = 0.4;		// 0.4格
@@ -61,6 +62,7 @@ AttackerData AttackerData::CreateArcherData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.target_priority = TargetPriority::ANY;
+	data.unit_type = UnitType::ARCHER;
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
 	data.attack_distance = 3.5;		// 3.5格
@@ -104,6 +106,7 @@ AttackerData AttackerData::CreateGiantData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.target_priority = TargetPriority::DEFENSES;
+	data.unit_type = UnitType::GIANT;
 	data.search_range = 999.0;		//找防御设施
 	data.housing_space = 5;
 	data.attack_interval = 2.0;     // 2s
@@ -147,10 +150,11 @@ AttackerData AttackerData::CreateBalloonData(int level)
 	data.unit_target_type = UnitTargetType::AIR;
 	data.attack_type = AttackType::AREA_DAMAGE;
 	data.target_priority = TargetPriority::DEFENSES;
+	data.unit_type = UnitType::BALLOON;
 	data.search_range = 999.0;		//找防御设施
 	data.housing_space = 5;
 	data.attack_interval = 3.0;     // 3s
-	data.attack_distance = 0.05;		// 
+	data.attack_distance = 0;		 
 	data.damage_radius = 1.2;		//1.2格
 	data.move_speed = 1.3;			// 1.3格/s
 	static const std::vector<std::pair<int, int>> klevel_stats = {
@@ -190,6 +194,7 @@ AttackerData AttackerData::CreateGoblinData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
 	data.target_priority = TargetPriority::RESOURCES;
+	data.unit_type = UnitType::GOBLIN;
 	data.search_range = 30.0;		//资源型的找大一点
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
@@ -221,8 +226,7 @@ AttackerData AttackerData::CreateGoblinData(int level)
 }
 
 //炸弹人Bomber
-//! 炸弹人有特殊的寻路机制和爆炸伤害机制，参考社区
-//! 架构还没有想清楚
+//炸弹人有特殊的寻路机制和爆炸伤害机制，参考社区
 AttackerData AttackerData::CreateBomberData(int level)
 {
 	AttackerData data;
@@ -235,6 +239,7 @@ AttackerData AttackerData::CreateBomberData(int level)
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::AREA_DAMAGE;
 	data.target_priority = TargetPriority::WALLS;
+	data.unit_type = UnitType::BOMBER;
 	data.search_range = 18.0;		//寻找最近墙
 	data.housing_space = 2;
 	data.damage_radius = 0.8;		//这是主动半径爆炸0.8，死亡伤害半径是0.8我们就直接用数据加上0.7了，不单独写一个变量了

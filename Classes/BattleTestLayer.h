@@ -33,6 +33,7 @@ private:
 	bool result_layer_shown_ = false;
 	//保留用于选角色逻辑判断
 	UnitType current_selected_unit_ = UnitType::NONE;
+	
 
 public:
 	static cocos2d::Scene* createScene();

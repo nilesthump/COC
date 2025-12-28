@@ -36,7 +36,7 @@ private:
     bool battle_active_;
     int total_heroes_;
     int heroes_deployed;
-    std::map<UnitType, int> unit_counts_; // 存储每种英雄的剩余数量
+    std::map<UnitType, Army> army_pool_;
     float battle_time_elapsed_;     //战斗已进行时间
     const float MAX_BATTLE_TIME_ = 180.0f;
     std::unique_ptr<IndexSystem> index_system_;
@@ -54,27 +54,28 @@ public:
 
     //获取当前账本（供UI
     const LiveBattleScore& getCurrentScore() const { return current_score_; }
+    std::map<UnitType, Army>GetArmyPool()const { return army_pool_; }
 
     //添加单位
     void AddUnit(std::unique_ptr<BattleUnit> unit, bool is_attacker);
 
     //初始化时传入英雄及其数量
-    void SetInitialUnits(const std::map<UnitType, int>& units);
+    void SetInitialUnits(const std::vector<Army> &army);
 
     // 检查特定英雄是否还能放置，对于个体
     bool CanDeployUnit(UnitType type)
     {
-        return unit_counts_[type] > 0;
+        return army_pool_[type].amount > 0;
     }
 
     // 减少计数
     void decrementUnitCount(UnitType type)
     {
-        if (unit_counts_[type] > 0) unit_counts_[type]--;
+        if (army_pool_[type].amount > 0) army_pool_[type].amount--;
     }
 
     //获取当前剩余类型英雄数量
-    int getRemainingUnitCount(UnitType type) { return unit_counts_[type]; }
+    int getRemainingUnitCount(UnitType type) { return army_pool_[type].amount; }
     
     //获取放置了多少英雄/攻击者
     int GetHeroesPlaced()const { return heroes_deployed; }

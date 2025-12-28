@@ -260,6 +260,22 @@ void BattleTestLayer::setupBattleSession()
 	}
 
 	// --- 6. 兵力与启动 ---
+	auto& inv = config->battle_start_params.army;
+	inv.clear(); // 确保是空的
+
+	// 创建第一个兵种
+	Army barbarian;
+	barbarian.type = UnitType::BARBARIAN;
+	barbarian.level = 2;
+	barbarian.amount = 5;
+	inv.push_back(barbarian); // 存入数组
+
+	// 如果有气球兵
+	Army balloon;
+	balloon.type = UnitType::BALLOON;
+	balloon.level = 1;
+	balloon.amount = 3;
+	inv.push_back(balloon);
 
 	bm->PrepareBattle(config->battle_start_params);
 	placeDefender();
@@ -301,7 +317,9 @@ void BattleTestLayer::placeUnitAt(float gridX, float gridY)
 
 	if(bm->GetIndexSystem()->CanDeployAt(gridX, gridY))
 	{
-		auto unit = UnitFactory::CreateAttackerByType(current_selected_unit_, 1, game_world_, background_sprite_);
+		auto army_pool1 = bm->GetArmyPool();
+		int deployLevel = army_pool1[current_selected_unit_].level;
+		auto unit = UnitFactory::CreateAttackerByType(current_selected_unit_, deployLevel, game_world_, background_sprite_);
 		if (unit)
 		{
 			unit->SetPositionAttacker(gridX, gridY);
@@ -313,7 +331,7 @@ void BattleTestLayer::placeUnitAt(float gridX, float gridY)
 	}
 	else
 	{
-		auto tempUnit = UnitFactory::CreateAttackerByType(current_selected_unit_, 0, game_world_, background_sprite_);
+		auto tempUnit = UnitFactory::CreateAttackerByType(current_selected_unit_, 1, game_world_, background_sprite_);
 		if (tempUnit)
 		{
 			tempUnit->SetPositionAttacker(gridX, gridY);
@@ -324,7 +342,6 @@ void BattleTestLayer::placeUnitAt(float gridX, float gridY)
 	}
 	return;
 }
-
 
 //以下是触摸和鼠标事件
 //重置点击

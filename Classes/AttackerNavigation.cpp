@@ -12,7 +12,7 @@ void AttackerNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, flo
 		return;
 	}
 
-	// 1. 攻击范围判定：采用磁滞/容差判定，防止边缘抖动
+	//攻击范围判定：采用磁滞/容差判定，防止边缘抖动
 	if (this->IsInAttackRange(self, target))
 	{
 		_currentPath.clear();
@@ -20,15 +20,39 @@ void AttackerNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, flo
 	}
 
 	_pathRefreshTimer -= deltaTime;
-	cocos2d::Vec2 myLogPos = self->GetLogicalPosition(); // 使用纯逻辑坐标
+	cocos2d::Vec2 myLogPos = self->GetLogicalPosition();
 
-	// 2. 动态扰动：根据单位内存地址偏移目标点，解决扎堆问题
+	//动态扰动：根据单位内存地址偏移目标点，解决扎堆问题
 	unsigned int seed = (unsigned int)(uintptr_t)self + (unsigned int)(_pathRefreshTimer * 1000);
 	float offsetX = ((seed % 13) - 6) * 0.35f;  // 范围 [-2.1, 2.1]
 	float offsetY = ((seed % 17) - 8) * 0.35f;  // 范围 [-2.8, 2.8]
 	cocos2d::Vec2 targetLogPos(target->GetPositionX() + offsetX, target->GetPositionY() + offsetY);
 
-	// 3. 寻路决策
+	//气球兵不用a*，特判
+	if (self->GetState().GetUnitType() == UnitType::BALLOON)
+	{
+		// 飞行单位直接锁定目标中心点（不需要扰动，也不需要A*）
+		cocos2d::Vec2 targetPos(target->GetPositionX(), target->GetPositionY());
+		cocos2d::Vec2 direction = targetPos - myLogPos;
+		float distToTarget = direction.length();
+		float moveDist = self->GetState().GetMoveSpeed() * deltaTime;
+
+		if (moveDist >= distToTarget)
+		{
+			self->SetPositionAttacker(targetPos.x, targetPos.y);
+		}
+		else
+		{
+			direction.normalize();
+			cocos2d::Vec2 newPos = myLogPos + direction * moveDist;
+			self->SetPositionAttacker(newPos.x, newPos.y);
+		}
+
+		// 飞行单位处理完毕，直接返回，不走下面的 A* 和 物理拦截逻辑
+		return;
+	}
+
+	//寻路决策
 	if (target != _lastTarget || _currentPath.empty() || _pathRefreshTimer <= 0)
 	{
 		_pathRefreshTimer = REFRESH_INTERVAL;
@@ -54,7 +78,7 @@ void AttackerNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, flo
 		_currentPath.push_back(cocos2d::Vec2(target->GetPositionX(), target->GetPositionY()));
 	}
 
-	// 4. 执行移动与物理拦截
+	// 执行移动与物理拦截
 	cocos2d::Vec2 nextWaypoint = _currentPath.front();
 
 	// 终点冲锋：若为最后一个路点，直接对准建筑中心而非格中心
@@ -64,7 +88,7 @@ void AttackerNavigation::CalculateMove(BattleUnit* self, BattleUnit* target, flo
 	}
 
 	// --- 物理拦截检查 (飞行单位免检) ---
-	if (self->GetState().GetUnitType()!=UnitType::BALLOON)
+	if (self->GetState().GetUnitType() != UnitType::BALLOON)
 	{
 		int wpX = IndexSystem::PosToIndex(nextWaypoint.x);
 		int wpY = IndexSystem::PosToIndex(nextWaypoint.y);
@@ -148,14 +172,13 @@ BattleUnit* AttackerNavigation::FindTarget(BattleUnit* self, const std::vector<B
 		}
 	}
 
-	// --- 第二轮：退化逻辑（全局寻找非墙目标，解决发呆） ---
+	// --- 第二轮：如果全图都没有偏好目标了，才寻找最近的任何非墙建筑 ---
 	if (!bestTarget)
 	{
 		minDistance = FLT_MAX;
 		for (auto target : allTargets)
 		{
 			if (!target || !target->IsAlive() || target->GetState().IsWall()) continue;
-			if (!CanPhysicallyAttack(self, target)) continue;
 
 			float dist = CalculateDistance(self, target);
 			if (dist < minDistance)
@@ -166,23 +189,23 @@ BattleUnit* AttackerNavigation::FindTarget(BattleUnit* self, const std::vector<B
 		}
 	}
 
-	// --- 第三轮：特殊拦截逻辑（仅当被堵路且周围没目标时，打眼前的墙） ---
-	if (!bestTarget)
-	{
-		minDistance = FLT_MAX;
-		for (auto target : allTargets)
-		{
-			if (!target || !target->IsAlive() || !target->GetState().IsWall()) continue;
+	//// --- 第三轮：特殊拦截逻辑（仅当被堵路且周围没目标时，打眼前的墙） ---
+	//if (!bestTarget)
+	//{
+	//	minDistance = FLT_MAX;
+	//	for (auto target : allTargets)
+	//	{
+	//		if (!target || !target->IsAlive() || !target->GetState().IsWall()) continue;
 
-			float dist = CalculateDistance(self, target);
-			// 只有离得非常近（撞上了）才打墙，防止连环拆墙
-			if (dist < 1.2f && dist < minDistance)
-			{
-				minDistance = dist;
-				bestTarget = target;
-			}
-		}
-	}
+	//		float dist = CalculateDistance(self, target);
+	//		// 只有离得非常近（撞上了）才打墙，防止连环拆墙
+	//		if (dist < 1.2f && dist < minDistance)
+	//		{
+	//			minDistance = dist;
+	//			bestTarget = target;
+	//		}
+	//	}
+	//}
 
 	return bestTarget;
 }
@@ -195,6 +218,11 @@ bool AttackerNavigation::IsInAttackRange(BattleUnit* self, BattleUnit* target)
 	float attackRange = self->GetAttackDistance();
 
 	//近战给予微小容差，保证贴合感
-	float tolerance = (attackRange <= 1.0f) ? -0.2f : 0.2f;
-	return realDist <= (attackRange + tolerance);
+	if (self->GetState().GetUnitType() != UnitType::BALLOON)
+	{
+		float tolerance = (attackRange <= 1.0f) ? -0.25f : 0.2f;
+		return realDist <= (attackRange + tolerance);
+	}
+	else
+		return realDist < 0.1f;
 }

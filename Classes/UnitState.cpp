@@ -117,9 +117,40 @@ float UnitState::GetSearchRange() const
 	return search_range_;
 }
 
-UnitType UnitState::GetUnitType()const
+UnitType UnitState::GetUnitType() const
 {
+	if (!base_data_ptr_)
+	{
+		CCLOG("--- [UNIT ERROR] --- base_data_ptr_ is NULL!");
+		return UnitType::NONE;
+	}
+
+	// 1. 尝试转换
 	auto a = dynamic_cast<const AttackerData*>(base_data_ptr_.get());
+
+	// 2. 如果失败，通过 RTTI 打印底层真实的类名
+	if (!a)
+	{
+		// typeid(xxx).name() 可以直接告诉你底层到底是哪个类
+		const char* realClassName = typeid(*base_data_ptr_.get()).name();
+
+		CCLOG("--- [CAST FAILED] --- Name: %s | Real Class: %s",
+			base_data_ptr_->name.c_str(),
+			realClassName);
+
+		// 顺便检查一下是不是被错当成了防御建筑数据
+		auto d = dynamic_cast<const DefenderData*>(base_data_ptr_.get());
+		if (d)
+		{
+			CCLOG("--- [INFO] --- This unit is actually using DefenderData!");
+		}
+	}
+	else
+	{
+		// 如果成功，打印一次确认，防止是枚举值赋值错了
+		CCLOG("--- [CAST SUCCESS] --- Unit: %s | TypeID: %d", base_data_ptr_->name.c_str(), (int)a->unit_type);
+	}
+
 	return a ? a->unit_type : UnitType::NONE;
 }
 

@@ -12,6 +12,10 @@ public:
    bool init(Building* building, cocos2d::Sprite* background_sprite_);
     // 更新面板信息（如升级后调用）
     void updateInfo(Building* building, cocos2d::Sprite* background_sprite_);
+    void refreshUpgradeButton(Building* building);
+    void updateUpgradeCountdown();
+    void startUpgradeCountdownScheduler();
+    void stopUpgradeCountdownScheduler();
     // 按钮回调
     void onUpgradeClicked(cocos2d::Ref* sender);
     //成功放置

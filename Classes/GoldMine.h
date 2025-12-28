@@ -9,6 +9,7 @@ class GoldMine : public Building
 protected:
     int _generateSpeed=1;//金矿生产速度
     int maxSize = 100,currentSize=0;//金矿最大储量和现储量
+    bool _productionDataSynced = false;
     int establishCost[2] = { 100,0 };//消耗的金币和圣水数量
     int upgradeCost[2] = { 50,50 };
     int upgradeTime = 5;
@@ -59,7 +60,13 @@ public:
         currentSize = 0;
     }
     void updateCurrentStock(int n) override {
-        currentSize +=n;
+        currentSize += n;
+    }
+    void addCurrent(int n) override {
+        currentSize += n;
+        if (currentSize > maxSize) {
+            currentSize = maxSize;
+        }
     }
     int getGoldCost() const override {
         return establishCost[0];
@@ -77,6 +84,9 @@ public:
         }
     }
     int getRemainTime() override {
+        return upgradeTime;
+    }
+    int getUpgradeDuration() const override {
         return upgradeTime;
     }
     std::string getBuildingType() const override {

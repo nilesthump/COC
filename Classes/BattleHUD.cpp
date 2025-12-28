@@ -144,7 +144,7 @@ void BattleHUD::updateHUD(float dt)
     }
 
     //更新兵种数量
-    auto attackerMap = CombatSessionManager::getInstance()->battle_start_params.attackerInventory;
+    auto attackerMap = CombatSessionManager::getInstance()->battle_start_params.army;
     // 这里需要同步 Manager 内部实时剩余的兵力，建议 Manager 提供 GetRemainingCount(type)
     // 暂时用这种逻辑：
     for (int i = (int)UnitType::BARBARIAN; i <= (int)UnitType::BALLOON; i++)
