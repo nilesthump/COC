@@ -1,25 +1,17 @@
 #include "BomberBehavior.h"
 #include "BattleUnit.h"
 #include "BattleManager.h"
-#include "AttackerData.h" // 必须包含这个来识别结构
+#include "AttackerData.h"
 
 void BomberBehavior::OnAttack(BattleUnit* attacker, BattleUnit* defender)
 {
     if (!defender || !defender->IsAlive() || _hasExploded || _isFusing) return;
 
     // 炸弹人核心逻辑：获取数据中的引信时间
-    // 效仿你 UnitState 里的 dynamic_cast 逻辑
+
     auto& state = attacker->GetState();
 
-    // 这里需要通过某种方式拿到基类指针，如果 state 没提供接口，
-    // 我们假设你的 AttackerData 结构在你的项目中是可访问的
-    // 由于你之前的代码显示 CreateBomberData 返回的是 AttackerData
-    // 我们这里直接通过转换来获取炸弹人特有的 behavior 数据
-
-    // 注意：这里需要确保你能访问到 AttackerData 的 bomber_data 成员
-    // 我们假设你把数据存在了基类的 base_data_ptr_ 里
-    // 下面这段逻辑是关键：
-    auto baseData = state.GetBaseData(); // 如果没有这个接口，请在 UnitState 加一个返回 base_data_ptr_.get() 的接口
+    auto baseData = state.GetBaseData();
     auto aData = dynamic_cast<const AttackerData*>(baseData);
 
     if (aData && aData->bomber_data)
