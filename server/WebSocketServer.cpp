@@ -41,6 +41,7 @@ bool broadcastUpgradeComplete(const std::string& username, const std::string& bu
 void processCompletedUpgrades();
 bool updateBuildingLevel(const std::string& username, const std::string& buildingType,
     float x, float y, int newLevel);
+bool getRandomBuildings(const std::string& currentUsername, std::string& buildingsJson);
 
 // 客户端连接结构
 struct ClientConnection {
@@ -378,9 +379,16 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
                 else if (action == "getBuildings") {
                     std::string username = jsonData["username"];
 
-                    std::cout << "getBuildings request received - username: " << username << std::endl;
+                    bool getRandomUser = false;
+                    auto it = jsonData.find("getRandomUser");
+                    if (it != jsonData.end() && it->second == "true") {
+                        getRandomUser = true;
+                        std::cout << "getRandomUser flag is set to: true" << std::endl;
+                    }
 
-                    if (username.empty()) {
+                    std::cout << "getBuildings request received - username: " << username << ", getRandomUser: " << (getRandomUser ? "true" : "false") << std::endl;
+
+                    if (username.empty() && !getRandomUser) {
                         result = false;
                         message = u8"用户名为空";
                         jsonResponse = "{\"action\":\"getBuildings\", \"result\":false, \"message\":\"" +
@@ -392,7 +400,15 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
                     }
                     else {
                         std::string buildingsJson;
-                        bool success = getBuildings(username, buildingsJson);
+                        bool success = false;
+
+                        if (getRandomUser) {
+                            std::cout << "Requesting random user buildings (excluding: " << username << ")" << std::endl;
+                            success = getRandomBuildings(username, buildingsJson);
+                        }
+                        else {
+                            success = getBuildings(username, buildingsJson);
+                        }
 
                         result = true;
                         message = success ? u8"获取建筑成功" : u8"建筑数据为空";
@@ -400,12 +416,33 @@ static int callback_server(struct lws* wsi, enum lws_callback_reasons reason, vo
                         jsonResponse = "{\"action\":\"getBuildings\", \"result\":true, \"message\":\"" +
                             escapeJSONString(message) + "\", \"buildings\":" + buildingsJson + "}";
 
-                        std::cout << "Sending buildings response for user " << username << ": " << jsonResponse << std::endl;
+                        std::cout << "Sending buildings response: " << jsonResponse << std::endl;
 
                         std::vector<unsigned char> buf(LWS_PRE + jsonResponse.size() + 1);
                         memcpy(&buf[LWS_PRE], jsonResponse.c_str(), jsonResponse.size());
                         lws_write(wsi, &buf[LWS_PRE], jsonResponse.size(), LWS_WRITE_TEXT);
                     }
+                    goto skip_send_response;
+                }
+                else if (action == "getRandomBuildings") {
+                    std::string currentUsername = jsonData["username"];
+
+                    std::cout << "getRandomBuildings request received - current username: " << currentUsername << std::endl;
+
+                    std::string buildingsJson;
+                    bool success = getRandomBuildings(currentUsername, buildingsJson);
+
+                    result = true;
+                    message = success ? u8"获取随机用户建筑成功" : u8"随机用户建筑数据为空";
+
+                    jsonResponse = "{\"action\":\"getRandomBuildings\", \"result\":true, \"message\":\"" +
+                        escapeJSONString(message) + "\", \"buildings\":" + buildingsJson + "}";
+
+                    std::cout << "Sending random user buildings response: " << jsonResponse << std::endl;
+
+                    std::vector<unsigned char> buf(LWS_PRE + jsonResponse.size() + 1);
+                    memcpy(&buf[LWS_PRE], jsonResponse.c_str(), jsonResponse.size());
+                    lws_write(wsi, &buf[LWS_PRE], jsonResponse.size(), LWS_WRITE_TEXT);
                     goto skip_send_response;
                 }
                 else if (action == "getBuildingProduction") {
@@ -1388,6 +1425,89 @@ bool getBuildings(const std::string& username, std::string& buildingsJson) {
     buildingsJson += "]";
 
     std::cout << "Loaded " << buildings.size() << " buildings for user " << username << std::endl;
+    return true;
+}
+
+// 获取随机用户的建筑数据（排除当前用户）
+bool getRandomBuildings(const std::string& currentUsername, std::string& buildingsJson) {
+    std::lock_guard<std::mutex> lock(serverState.dbMutex);
+
+    const char* selectRandomSQL = "SELECT username FROM users WHERE username != ? ORDER BY RANDOM() LIMIT 1;";
+    sqlite3_stmt* randomStmt = nullptr;
+
+    int rc = sqlite3_prepare_v2(serverState.db, selectRandomSQL, -1, &randomStmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "SQL prepare error (getRandomUsername): " << sqlite3_errmsg(serverState.db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(randomStmt, 1, currentUsername.c_str(), -1, SQLITE_TRANSIENT);
+
+    std::string randomUsername;
+    rc = sqlite3_step(randomStmt);
+    if (rc == SQLITE_ROW) {
+        randomUsername = reinterpret_cast<const char*>(sqlite3_column_text(randomStmt, 0));
+    }
+    sqlite3_finalize(randomStmt);
+
+    if (randomUsername.empty()) {
+        std::cout << "No other users found in database for random selection" << std::endl;
+        buildingsJson = "[]";
+        return false;
+    }
+
+    std::cout << "Selected random user: " << randomUsername << " for building data" << std::endl;
+
+    const char* selectSQL = "SELECT building_type, position_x, position_y, level, hp, max_hp, production_rate, max_stock, attack FROM buildings WHERE username = ?;";
+    sqlite3_stmt* stmt = nullptr;
+
+    rc = sqlite3_prepare_v2(serverState.db, selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "SQL prepare error (getRandomBuildings): " << sqlite3_errmsg(serverState.db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, randomUsername.c_str(), -1, SQLITE_TRANSIENT);
+
+    std::vector<std::string> buildings;
+    rc = sqlite3_step(stmt);
+    while (rc == SQLITE_ROW) {
+        std::string buildingType = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        float x = static_cast<float>(sqlite3_column_double(stmt, 1));
+        float y = static_cast<float>(sqlite3_column_double(stmt, 2));
+        int level = sqlite3_column_int(stmt, 3);
+        int hp = sqlite3_column_int(stmt, 4);
+        int maxHp = sqlite3_column_int(stmt, 5);
+        int productionRate = sqlite3_column_int(stmt, 6);
+        int maxStock = sqlite3_column_int(stmt, 7);
+        int attack = sqlite3_column_int(stmt, 8);
+
+        std::string buildingStr = "{\"type\":\"" + escapeJSONString(buildingType) +
+            "\", \"x\":" + std::to_string(x) +
+            ", \"y\":" + std::to_string(y) +
+            ", \"level\":" + std::to_string(level) +
+            ", \"hp\":" + std::to_string(hp) +
+            ", \"maxHp\":" + std::to_string(maxHp) +
+            ", \"productionRate\":" + std::to_string(productionRate) +
+            ", \"maxStock\":" + std::to_string(maxStock) +
+            ", \"attack\":" + std::to_string(attack) + "}";
+        buildings.push_back(buildingStr);
+
+        rc = sqlite3_step(stmt);
+    }
+
+    sqlite3_finalize(stmt);
+
+    buildingsJson = "[";
+    for (size_t i = 0; i < buildings.size(); i++) {
+        buildingsJson += buildings[i];
+        if (i < buildings.size() - 1) {
+            buildingsJson += ", ";
+        }
+    }
+    buildingsJson += "]";
+
+    std::cout << "Loaded " << buildings.size() << " buildings for random user " << randomUsername << std::endl;
     return true;
 }
 

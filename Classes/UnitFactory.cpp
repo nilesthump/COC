@@ -184,7 +184,7 @@ BattleUnit* UnitFactory::CreateTownHall(int level, Node* parent, Sprite* backgro
 
 BattleUnit* UnitFactory::CreateBuildersHut(int level, Node* parent, Sprite* background)
 {
-	return CreateBaseBuilding(DefenderData::CreateBuildersHutData(level), makeSpritePath("BuildersHut", level), parent, background, false);
+	return CreateBaseBuilding(DefenderData::CreateBuildersHutData(level), makeSpritePath("BuilderHut", level), parent, background, false);
 }
 
 BattleUnit* UnitFactory::CreateArmyCamp(int level, Node* parent, Sprite* background)
