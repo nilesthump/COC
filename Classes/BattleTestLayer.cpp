@@ -259,24 +259,6 @@ void BattleTestLayer::setupBattleSession()
 		}
 	}
 
-	// --- 6. 兵力与启动 ---
-	auto& inv = config->battle_start_params.army;
-	inv.clear(); // 确保是空的
-
-	// 创建第一个兵种
-	Army barbarian;
-	barbarian.type = UnitType::BARBARIAN;
-	barbarian.level = 2;
-	barbarian.amount = 5;
-	inv.push_back(barbarian); // 存入数组
-
-	// 如果有气球兵
-	Army balloon;
-	balloon.type = UnitType::BALLOON;
-	balloon.level = 1;
-	balloon.amount = 3;
-	inv.push_back(balloon);
-
 	bm->PrepareBattle(config->battle_start_params);
 	placeDefender();
 	//计算禁放区（内部以及外部一圈）

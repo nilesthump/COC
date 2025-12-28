@@ -792,22 +792,51 @@ void SecondScene::menuAttackCallback(Ref* pSender)
 void SecondScene::menuBoss1Callback(Ref* pSender)
 {
     auto config = CombatSessionManager::getInstance();
-    config->reset(); 
+    config->reset();
 
-    std::map<UnitType, int>army;
-    for (auto building : placedBuildings) {
-        if (dynamic_cast<ArmyCamp*>(building)) {
-            army[UnitType::BARBARIAN] += building->getArmy(0);
-            army[UnitType::ARCHER] += building->getArmy(1);
-            army[UnitType::GIANT] += building->getArmy(2);
-            army[UnitType::GOBLIN] += building->getArmy(3);
-            army[UnitType::BOMBER] += building->getArmy(4);
-            army[UnitType::BALLOON] += building->getArmy(5);
+    // 建立临时 Map 进行累加 (Key: 兵种, Value: 兵力数据结构)
+    // 使用 Map 可以自动合并多个军营中相同的兵种
+    std::map<UnitType, Army> combinedArmy;
+
+    for (auto building : placedBuildings)
+    {
+        auto camp = dynamic_cast<ArmyCamp*>(building);
+        if (camp)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                int count = camp->getArmy(i);
+                if (count > 0)
+                {
+                    UnitType t = static_cast<UnitType>(static_cast<int>(UnitType::BARBARIAN) + i);
+
+                    if (combinedArmy.find(t) == combinedArmy.end())
+                    {
+                        combinedArmy[t].type = t;
+                        combinedArmy[t].level = camp->getLv(); 
+                        combinedArmy[t].amount = 0;
+                    }
+                    combinedArmy[t].amount += count;
+
+                    //如果不同军营等级不同，这里可以取最高等级
+                    if (camp->getLv() > combinedArmy[t].level)
+                    {
+                        combinedArmy[t].level = camp->getLv();
+                    }
+                }
+            }
         }
     }
-    config->setAttackerInventory(army);
-    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
 
+    auto& finalInv = config->battle_start_params.army;
+    finalInv.clear();
+
+    for (auto const& pair : combinedArmy)
+    {
+        finalInv.push_back(pair.second);
+    }
+
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
 }
 
 void SecondScene::menuBoss2Callback(Ref* pSender)
