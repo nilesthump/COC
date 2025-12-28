@@ -28,9 +28,11 @@
 #include "DefenderData.h"
 #include "AttackerNavigation.h"
 #include "DefenderNavigation.h"
+#include "BomberNavigation.h"
 #include "AttackerNormalBehavior.h"
 #include "DefenderNormalBehavior.h"
 #include "StaticBuildingBehavior.h"
+#include "BomberBehavior.h"
 #include "cocos2d.h" 
 
 namespace cocos2d

@@ -5,7 +5,7 @@
 //由于game_word是background的孩子，所以BattleUnit更新显示位置时调用convertGridToLocal就可以正确显示
 //12/27 重构封装了整个文件，更加清晰
 #include "BattleTestLayer.h"
-#include "HelloWorldScene.h"
+#include "SecondScene.h"
 #include "UnitFactory.h"
 #include "ConvertTest.h"
 #include "BattleResultLayer.h"
@@ -73,7 +73,7 @@ void BattleTestLayer::setupUserInterface()
 {
 	//创建 HUD 并添加到 Layer (这是唯一的入口)
 	hud_ = BattleHUD::create(
-		CC_CALLBACK_1(BattleTestLayer::menuFirstCallback, this), // 返回逻辑
+		CC_CALLBACK_1(BattleTestLayer::menuMainCallback, this), // 返回逻辑
 		[this](UnitType type)
 		{                                  // 选兵逻辑
 			this->current_selected_unit_ = type;
@@ -464,12 +464,12 @@ void BattleTestLayer::showBattleResultLayer(BattleResult result)
 }
 
 //返回HelloWorldScene触发
-void BattleTestLayer::menuFirstCallback(Ref* pSender)
+void BattleTestLayer::menuMainCallback(Ref* pSender)
 {
 	BattleManager* battleManager = BattleManager::getInstance();
 	battleManager->clear(); // 重置战斗管理器状态
 	this->unscheduleUpdate(); // 停止更新
-	Director::getInstance()->replaceScene(HelloWorld::createScene());
+	Director::getInstance()->replaceScene(SecondScene::createScene());
 }
 
 //Debug用的放置条格子，辅助用

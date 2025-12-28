@@ -3,7 +3,7 @@
 
 struct BomberBehaviorData
 {
-    double fuse_time = 1.0;          // 到达目标后的引爆时间
+    double fuse_time = 0.5;          // 到达目标后的引爆时间
     double active_radius = 0.8;      // 主动爆炸半径
     double death_radius = 1.5;       // 死亡爆炸半径
     int wall_damage_multiplier = 40; // 对城墙的倍伤

@@ -118,6 +118,7 @@ public:
 	float GetAttackCooldown() const;
 
 	//部分静态数据访问
+	const BaseUnitData* GetBaseData() const;
 	float GetMoveSpeed() const;
 	float GetAttackDistance() const;
 	float GetDamage() const;
