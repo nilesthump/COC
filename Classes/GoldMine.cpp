@@ -38,7 +38,6 @@ bool GoldMine::init(const std::string& textureName, int hp,int lv, float x0, flo
     // 初始化储量属性
     maxSize = 100 + (level - 1) * 100;
     currentSize = 0;
-    _productionDataSynced = false;
 
     // 不再在建筑初始化时同步生产数据，改为由 SecondScene 统一管理
     // 这样可以避免重复同步和数据竞争问题

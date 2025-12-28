@@ -44,6 +44,7 @@ bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float 
 
     size = 3;
     this->setPosition(Vec2(x0, y0));
+
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))
     {
