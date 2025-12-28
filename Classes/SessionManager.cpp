@@ -11,7 +11,11 @@ SessionManager::SessionManager() :
     _gold(0),
     _elixir(0),
     _gems(0),
-    _hasResourceData(false) {
+    _hasResourceData(false),
+    _isProducingGold(false),
+    _isProducingElixir(false),
+    _goldProductionCompletionTime(0),
+    _elixirProductionCompletionTime(0) {
 }
 
 // 获取单例实例
@@ -105,3 +109,85 @@ void SessionManager::clearResourceData()
     _hasResourceData = false;
 }
 
+void SessionManager::setProductionData(const std::vector<ProductionData>& data)
+{
+    _productionData = data;
+}
+
+bool SessionManager::getProductionData(std::vector<ProductionData>& data) const
+{
+    data = _productionData;
+    return !_productionData.empty();
+}
+
+void SessionManager::clearProductionData()
+{
+    _productionData.clear();
+}
+
+void SessionManager::setUpgradeData(const std::vector<UpgradeData>& data)
+{
+    _upgradeData = data;
+}
+
+bool SessionManager::getUpgradeData(std::vector<UpgradeData>& data) const
+{
+    data = _upgradeData;
+    return !_upgradeData.empty();
+}
+
+bool SessionManager::getUpgradeDataForBuilding(float x, float y, UpgradeData& data) const
+{
+    for (const auto& upgrade : _upgradeData) {
+        if (std::abs(upgrade.x - x) < 0.01f && std::abs(upgrade.y - y) < 0.01f) {
+            data = upgrade;
+            return true;
+        }
+    }
+    return false;
+}
+
+void SessionManager::clearUpgradeData()
+{
+    _upgradeData.clear();
+}
+
+bool SessionManager::isProducingGold() const
+{
+    return _isProducingGold;
+}
+
+bool SessionManager::isProducingElixir() const
+{
+    return _isProducingElixir;
+}
+
+void SessionManager::startProducingGold()
+{
+    _isProducingGold = true;
+}
+
+void SessionManager::stopProducingGold()
+{
+    _isProducingGold = false;
+}
+
+void SessionManager::startProducingElixir()
+{
+    _isProducingElixir = true;
+}
+
+void SessionManager::stopProducingElixir()
+{
+    _isProducingElixir = false;
+}
+
+long long SessionManager::getGoldProductionCompletionTime() const
+{
+    return _goldProductionCompletionTime;
+}
+
+long long SessionManager::getElixirProductionCompletionTime() const
+{
+    return _elixirProductionCompletionTime;
+}

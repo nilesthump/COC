@@ -1,5 +1,6 @@
 //战斗配置单例，管理一次完整的战斗会话
 #pragma once
+#include "cocos2d.h"
 #include "BattleSnapshot.h"
 #include <string>
 

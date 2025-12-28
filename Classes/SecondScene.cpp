@@ -5,10 +5,12 @@
 #include "SessionManager.h"
 #include "cocos2d.h"
 #include <cmath>
-#include<ctime>
+#include <ctime>
+#include <algorithm>
+#include <functional>
 
 // 初始化全局变量
-int maxLevel, maxGoldVolum, maxElixirVolum;
+int maxLevel, maxGoldVolum = 1000, maxElixirVolum = 1000;
 int g_elixirCount = 750, g_goldCount = 750;
 int g_gemCount = 15, hutNum = 2;
 
@@ -60,12 +62,6 @@ bool SecondScene::init()
 
     auto session_manager = SessionManager::getInstance();
     std::string username = session_manager->getCurrentUsername();
-
-    if (session_manager->isAccountLogin()) {
-        this->scheduleOnce([this](float dt) {
-            setupWebSocketAndRequestResources();
-            }, 0.2f, "setupWebSocketDelay");
-    }
 
     // 初始化拖拽状态
     isDragging = false;
@@ -696,7 +692,7 @@ void SecondScene::update(float delta)
             else if (dynamic_cast<GoldMine*>(building)) {
                 //两个临时变量存储
                 int tempGold = building->getSpeed();
-                while (tempGold>0) {
+                while (tempGold > 0) {
                     //金矿非常未满
                     if (building->getMaxStock() - building->getCurrentStock() >= tempGold) {
                         building->updateCurrentStock(tempGold);
@@ -724,7 +720,7 @@ void SecondScene::update(float delta)
                     }
                     else {
                         break;
-                    }               
+                    }
                 }
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
@@ -778,7 +774,6 @@ void SecondScene::update(float delta)
         elapsedTime = 0.0f;
     }
 }
-
 void SecondScene::menuFirstCallback(Ref* pSender)
 {
     Director::getInstance()->replaceScene(HelloWorld::createScene());
@@ -796,12 +791,28 @@ void SecondScene::menuAttackCallback(Ref* pSender)
 
 void SecondScene::menuBoss1Callback(Ref* pSender)
 {
-    Director::getInstance()->replaceScene(HelloWorld::createScene());
+    auto config = CombatSessionManager::getInstance();
+    config->reset(); 
+
+    std::map<UnitType, int>army;
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<ArmyCamp*>(building)) {
+            army[UnitType::BARBARIAN] += building->getArmy(0);
+            army[UnitType::ARCHER] += building->getArmy(1);
+            army[UnitType::GIANT] += building->getArmy(2);
+            army[UnitType::GOBLIN] += building->getArmy(3);
+            army[UnitType::BOMBER] += building->getArmy(4);
+            army[UnitType::BALLOON] += building->getArmy(5);
+        }
+    }
+    config->setAttackerInventory(army);
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
+
 }
 
 void SecondScene::menuBoss2Callback(Ref* pSender)
 {
-    Director::getInstance()->replaceScene(HelloWorld::createScene());
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
 }
 
 
@@ -1198,7 +1209,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         placedBuildings.push_back(placedGoldMine);
                         placedGoldMine->setScale(0.8f);
                         placedGoldMine->playSuccessBlink();
-                        sendSaveBuildingRequest("GoldMine", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("GoldMine", snappedPos.x, snappedPos.y, 1,
+                            placedGoldMine->getHp(), placedGoldMine->getHp(),
+                            placedGoldMine->getSpeed(), placedGoldMine->getMaxStock(), 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1228,7 +1241,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         placedBuildings.push_back(placedElixirCollector);
                         placedElixirCollector->setScale(0.8f);
                         placedElixirCollector->playSuccessBlink();
-                        sendSaveBuildingRequest("ElixirCollector", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("ElixirCollector", snappedPos.x, snappedPos.y, 1,
+                            placedElixirCollector->getHp(), placedElixirCollector->getHp(),
+                            placedElixirCollector->getSpeed(), placedElixirCollector->getMaxStock(), 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1258,7 +1273,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         placedBuildings.push_back(placedGoldStorage);
                         placedGoldStorage->setScale(0.8f);
                         placedGoldStorage->playSuccessBlink();
-                        sendSaveBuildingRequest("GoldStorage", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("GoldStorage", snappedPos.x, snappedPos.y, 1,
+                            placedGoldStorage->getHp(), placedGoldStorage->getHp(),
+                            0, placedGoldStorage->getMaxStock(), 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1288,7 +1305,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         placedBuildings.push_back(placedElixirStorage);
                         placedElixirStorage->setScale(1.1f);
                         placedElixirStorage->playSuccessBlink();
-                        sendSaveBuildingRequest("ElixirStorage", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("ElixirStorage", snappedPos.x, snappedPos.y, 1,
+                            placedElixirStorage->getHp(), placedElixirStorage->getHp(),
+                            0, placedElixirStorage->getMaxStock(), 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1318,7 +1337,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         placedBuildings.push_back(placedArmyCamp);
                         placedArmyCamp->setScale(1.1f);
                         placedArmyCamp->playSuccessBlink();
-                        sendSaveBuildingRequest("ArmyCamp", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("ArmyCamp", snappedPos.x, snappedPos.y, 1,
+                            placedArmyCamp->getHp(), placedArmyCamp->getHp(),
+                            0, placedArmyCamp->getMaxStock(), 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1347,7 +1368,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         }
                         placedBuildings.push_back(placedWalls);
                         placedWalls->playSuccessBlink();
-                        sendSaveBuildingRequest("Walls", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("Walls", snappedPos.x, snappedPos.y, 1,
+                            placedWalls->getHp(), placedWalls->getHp(),
+                            0, 0, 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1377,7 +1400,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         placedBuildings.push_back(placedBuilderhut);
                         placedBuilderhut->setScale(0.8f);
                         placedBuilderhut->playSuccessBlink();
-                        sendSaveBuildingRequest("BuilderHut", snappedPos.x, snappedPos.y, 1);
+                        sendSaveBuildingRequest("BuilderHut", snappedPos.x, snappedPos.y, 1,
+                            placedBuilderhut->getHp(), placedBuilderhut->getHp(),
+                            0, 0, 0);
                     }
                     //扣除资源
                     g_goldCount -= goldCost;
@@ -1510,7 +1535,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             sendDeleteBuildingRequest(_movingBuildingOriginalPos.x, _movingBuildingOriginalPos.y);
             // 保存建筑位置到数据库
             sendSaveBuildingRequest(movingBuilding->getBuildingType(),
-                snappedX, snappedY, movingBuilding->getLv());
+                snappedX, snappedY, movingBuilding->getLv(),
+                movingBuilding->getHp(), movingBuilding->getHp(),
+                movingBuilding->getSpeed(), movingBuilding->getMaxStock(), 0);
             movingBuilding->setOpacity(255);
             if (background_sprite_) {
                 background_sprite_->reorderChild(movingBuilding, 15);
@@ -1754,8 +1781,14 @@ void SecondScene::setupWebSocketCallbacks() {
     auto wsManager = WebSocketManager::getInstance();
 
     wsManager->setOnMessageCallback([this](const std::string& message) {
-        if (_sceneIsDestroyed)
+        CCLOG("SecondScene: WebSocket callback invoked, _sceneIsDestroyed=%s",
+            _sceneIsDestroyed ? "true" : "false");
+
+        if (_sceneIsDestroyed) {
+            CCLOG("SecondScene: Scene destroyed, ignoring WebSocket message");
             return;
+        }
+
         CCLOG("SecondScene: WebSocket message received: %s", message.c_str());
         onWebSocketMessage(message);
         });
@@ -1888,6 +1921,13 @@ void SecondScene::onWebSocketMessage(const std::string& message) {
         CCLOG("SecondScene: Processing getBuildings response");
         onWebSocketBuildingsMessage(message);
     }
+    else if (action == "getBuildingProduction") {
+        CCLOG("SecondScene: Processing getBuildingProduction response");
+        if (result) {
+            CCLOG("SecondScene: Production data loaded, applying to buildings");
+            applyProductionDataToBuildings();
+        }
+    }
 }
 
 void SecondScene::sendGetResourceRequest() {
@@ -1968,7 +2008,63 @@ void SecondScene::sendUpdateResourceRequest(float dt) {
     }
 }
 
-void SecondScene::sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level) {
+void SecondScene::sendCollectProductionRequest(Building* building, int collectedAmount,
+    int remainingStock, int resourceType) {
+    auto wsManager = WebSocketManager::getInstance();
+    WebSocket::State readyState = wsManager->getReadyState();
+
+    if (readyState != WebSocket::State::OPEN) {
+        CCLOG("SecondScene: WebSocket not connected, cannot send collect production request");
+        return;
+    }
+
+    if (!building) {
+        CCLOG("SecondScene: Building is null for collect production request");
+        return;
+    }
+
+    auto session = SessionManager::getInstance();
+    std::string username = session->getCurrentUsername();
+
+    if (username.empty()) {
+        CCLOG("SecondScene: No username available for collect production");
+        return;
+    }
+
+    std::string buildingType = building->getBuildingType();
+    float x = building->getX();
+    float y = building->getY();
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+    doc.AddMember("action", "collectProduction", allocator);
+    doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
+    doc.AddMember("buildingType", rapidjson::Value(buildingType.c_str(), allocator), allocator);
+    doc.AddMember("x", x, allocator);
+    doc.AddMember("y", y, allocator);
+    doc.AddMember("collectedAmount", collectedAmount, allocator);
+    doc.AddMember("remainingStock", remainingStock, allocator);
+    doc.AddMember("resourceType", resourceType, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    std::string message = buffer.GetString();
+    if (wsManager->send(message)) {
+        CCLOG("SecondScene: Collect production sent - user: %s, type: %s, x: %.2f, y: %.2f, collected: %d, remaining: %d",
+            username.c_str(), buildingType.c_str(), x, y, collectedAmount, remainingStock);
+    }
+    else {
+        CCLOG("SecondScene: Failed to send collect production request");
+    }
+}
+
+
+void SecondScene::sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level,
+    int hp, int maxHp, int productionRate, int maxStock, int attack) {
     auto wsManager = WebSocketManager::getInstance();
     WebSocket::State readyState = wsManager->getReadyState();
 
@@ -1995,6 +2091,11 @@ void SecondScene::sendSaveBuildingRequest(const std::string& buildingType, float
     doc.AddMember("x", x, allocator);
     doc.AddMember("y", y, allocator);
     doc.AddMember("level", level, allocator);
+    doc.AddMember("hp", hp, allocator);
+    doc.AddMember("maxHp", maxHp, allocator);
+    doc.AddMember("productionRate", productionRate, allocator);
+    doc.AddMember("maxStock", maxStock, allocator);
+    doc.AddMember("attack", attack, allocator);
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -2002,8 +2103,8 @@ void SecondScene::sendSaveBuildingRequest(const std::string& buildingType, float
 
     std::string message = buffer.GetString();
     if (wsManager->send(message)) {
-        CCLOG("SecondScene: Save building request sent for user: %s - type=%s, x=%.2f, y=%.2f, level=%d",
-            username.c_str(), buildingType.c_str(), x, y, level);
+        CCLOG("SecondScene: Save building request sent for user: %s - type=%s, x=%.2f, y=%.2f, level=%d, hp=%d, maxHp=%d, prod=%d, maxStock=%d, attack=%d",
+            username.c_str(), buildingType.c_str(), x, y, level, hp, maxHp, productionRate, maxStock, attack);
     }
     else {
         CCLOG("SecondScene: Failed to send save building request");
@@ -2088,13 +2189,20 @@ void SecondScene::sendGetBuildingsRequest() {
 }
 
 void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
-    CCLOG("SecondScene: Buildings message received: %s", message.c_str());
+    CCLOG("SecondScene: Buildings message received, length=%zu", message.length());
 
-    rapidjson::Document doc;
-    if (doc.Parse(message.c_str()).HasParseError()) {
-        CCLOG("SecondScene: Failed to parse buildings JSON");
+    if (_sceneIsDestroyed) {
+        CCLOG("SecondScene: Scene destroyed, ignoring buildings message");
         return;
     }
+
+    rapidjson::Document doc;
+    rapidjson::ParseResult parseResult = doc.Parse(message.c_str());
+    if (!parseResult) {
+        CCLOG("SecondScene: Failed to parse buildings JSON, error offset=%u", parseResult.Offset());
+        return;
+    }
+    CCLOG("SecondScene: Buildings JSON parsed successfully");
 
     std::string action;
     bool result = false;
@@ -2115,43 +2223,20 @@ void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
     if (action == "getBuildings") {
         if (result && doc.HasMember("buildings") && doc["buildings"].IsArray()) {
             const rapidjson::Value& buildingsArray = doc["buildings"];
+            int totalBuildings = static_cast<int>(buildingsArray.Size());
 
-            if (buildingsArray.Size() > 0) {
-                CCLOG("SecondScene: Loading %d buildings from server", buildingsArray.Size());
+            if (totalBuildings > 0) {
+                CCLOG("SecondScene: Loading %d buildings from server", totalBuildings);
 
-            for (rapidjson::SizeType i = 0; i < buildingsArray.Size(); i++) {
-                const rapidjson::Value& building = buildingsArray[i];
-
-                if (!building.HasMember("type") || !building["type"].IsString() ||
-                    !building.HasMember("x") || !building["x"].IsNumber() ||
-                    !building.HasMember("y") || !building["y"].IsNumber() ||
-                    !building.HasMember("level") || !building["level"].IsInt()) {
-                    CCLOG("SecondScene: Invalid building data at index %d", i);
-                    continue;
-                }
-
-                std::string buildingType = building["type"].GetString();
-                float x = static_cast<float>(building["x"].GetDouble());
-                float y = static_cast<float>(building["y"].GetDouble());
-                int level = building["level"].GetInt();
-
-                CCLOG("SecondScene: Creating building - type=%s, x=%.2f, y=%.2f, level=%d",
-                    buildingType.c_str(), x, y, level);
-
-                Building* newBuilding = createBuildingByType(buildingType);
-                if (newBuilding) {
-                    newBuilding->updatePosition(Vec2(x, y));
-                    if (background_sprite_) {
-                        background_sprite_->addChild(newBuilding, 15);
-                    }
-                    placedBuildings.push_back(newBuilding);
-                    CCLOG("SecondScene: Building placed successfully");
+                if (totalBuildings > 10) {
+                    CCLOG("SecondScene: Large number of buildings, using async creation");
+                    createBuildingsAsync(buildingsArray);
                 }
                 else {
-                    CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
+                    CCLOG("SecondScene: Small number of buildings, using sync creation");
+                    createBuildingsSync(buildingsArray);
                 }
-            }
-            return;
+                return;
             }
         }
 
@@ -2169,32 +2254,412 @@ void SecondScene::onWebSocketBuildingsMessage(const std::string& message) {
     }
 }
 
-Building* SecondScene::createBuildingByType(const std::string& buildingType) {
+void SecondScene::createBuildingsSync(const rapidjson::Value& buildingsArray) {
+    if (_sceneIsDestroyed) return;
+
+    int createdCount = 0;
+    for (rapidjson::SizeType i = 0; i < buildingsArray.Size(); i++) {
+        if (_sceneIsDestroyed) break;
+
+        const rapidjson::Value& building = buildingsArray[i];
+
+                if (!building.HasMember("type") || !building["type"].IsString() ||
+                    !building.HasMember("x") || !building["x"].IsNumber() ||
+                    !building.HasMember("y") || !building["y"].IsNumber() ||
+                    !building.HasMember("level") || !building["level"].IsInt()) {
+                    CCLOG("SecondScene: Invalid building data at index %d", i);
+                    continue;
+                }
+
+                std::string buildingType = building["type"].GetString();
+                float x = static_cast<float>(building["x"].GetDouble());
+                float y = static_cast<float>(building["y"].GetDouble());
+                int level = building["level"].GetInt();
+                int hp = building.HasMember("hp") ? building["hp"].GetInt() : 100;
+                int maxHp = building.HasMember("maxHp") ? building["maxHp"].GetInt() : hp;
+                int productionRate = building.HasMember("productionRate") ? building["productionRate"].GetInt() : 1;
+                int maxStock = building.HasMember("maxStock") ? building["maxStock"].GetInt() : 100;
+                int attack = building.HasMember("attack") ? building["attack"].GetInt() : 0;
+
+                CCLOG("SecondScene: Creating building - type=%s, x=%.2f, y=%.2f, level=%d, hp=%d, maxHp=%d",
+                    buildingType.c_str(), x, y, level, hp, maxHp);
+
+                Building* newBuilding = createBuildingByType(buildingType, x, y,
+                    level, hp, maxHp, productionRate, maxStock, attack);
+                if (newBuilding) {
+                    newBuilding->updatePosition(Vec2(x, y));
+
+                    if (background_sprite_) {
+                        background_sprite_->addChild(newBuilding, 15);
+                    }
+                    placedBuildings.push_back(newBuilding);
+                    createdCount++;
+                    CCLOG("SecondScene: Building placed successfully (count=%d)", createdCount);
+                }
+                else {
+                    CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
+                }
+    }
+
+    CCLOG("SecondScene: Sync creation complete, %d buildings created", createdCount);
+    _buildingsInitialized = true;
+}
+
+void SecondScene::createBuildingsAsync(const rapidjson::Value& buildingsArray) {
+    if (_sceneIsDestroyed) return;
+
+    int totalBuildings = static_cast<int>(buildingsArray.Size());
+    int currentIndex = 0;
+
+    CCLOG("SecondScene: Starting async building creation, total=%d", totalBuildings);
+
+    auto createNextBatch = [this, &buildingsArray, totalBuildings, currentIndex]() mutable {
+        if (_sceneIsDestroyed) {
+            CCLOG("SecondScene: Async creation aborted - scene destroyed");
+            return;
+        }
+
+        if (currentIndex >= totalBuildings) {
+            CCLOG("SecondScene: Async creation complete, all buildings created");
+            _buildingsInitialized = true;
+            return;
+        }
+
+        int batchEnd = std::min(currentIndex + 5, totalBuildings);
+        int createdInBatch = 0;
+
+        for (int i = currentIndex; i < batchEnd; i++) {
+            if (_sceneIsDestroyed) break;
+
+            const rapidjson::Value& building = buildingsArray[i];
+
+            if (!building.HasMember("type") || !building["type"].IsString() ||
+                !building.HasMember("x") || !building["x"].IsNumber() ||
+                !building.HasMember("y") || !building["y"].IsNumber() ||
+                !building.HasMember("level") || !building["level"].IsInt()) {
+                CCLOG("SecondScene: Invalid building data at index %d", i);
+                continue;
+            }
+
+            std::string buildingType = building["type"].GetString();
+            float x = static_cast<float>(building["x"].GetDouble());
+            float y = static_cast<float>(building["y"].GetDouble());
+            int level = building["level"].GetInt();
+            int hp = building.HasMember("hp") ? building["hp"].GetInt() : 100;
+            int maxHp = building.HasMember("maxHp") ? building["maxHp"].GetInt() : hp;
+            int productionRate = building.HasMember("productionRate") ? building["productionRate"].GetInt() : 1;
+            int maxStock = building.HasMember("maxStock") ? building["maxStock"].GetInt() : 100;
+            int attack = building.HasMember("attack") ? building["attack"].GetInt() : 0;
+
+            CCLOG("SecondScene: Async creating building %d/%d - type=%s, level=%d",
+                i + 1, totalBuildings, buildingType.c_str(), level);
+
+            Building* newBuilding = createBuildingByType(buildingType, x, y,
+                level, hp, maxHp, productionRate, maxStock, attack);
+            if (newBuilding) {
+                newBuilding->updatePosition(Vec2(x, y));
+
+                if (background_sprite_) {
+                    background_sprite_->addChild(newBuilding, 15);
+                }
+                placedBuildings.push_back(newBuilding);
+                createdInBatch++;
+                CCLOG("SecondScene: Async building placed (batch progress: %d/%d)",
+                    i + 1, batchEnd);
+            }
+            else {
+                CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
+            }
+        }
+
+        currentIndex = batchEnd;
+        CCLOG("SecondScene: Batch complete, %d/%d buildings created", currentIndex, totalBuildings);
+
+        std::function<void(float)> nextBatchCallback;
+        nextBatchCallback = [this, &nextBatchCallback, &buildingsArray, totalBuildings, currentIndex](float dt) mutable {
+            if (_sceneIsDestroyed) {
+                CCLOG("SecondScene: Async creation aborted - scene destroyed");
+                return;
+            }
+
+            if (currentIndex >= totalBuildings) {
+                CCLOG("SecondScene: Async creation complete, all buildings created");
+                _buildingsInitialized = true;
+                return;
+            }
+
+            int batchEnd = std::min(currentIndex + 5, totalBuildings);
+            int createdInBatch = 0;
+
+            for (int i = currentIndex; i < batchEnd; i++) {
+                if (_sceneIsDestroyed) break;
+
+                const rapidjson::Value& building = buildingsArray[i];
+
+                if (!building.HasMember("type") || !building["type"].IsString() ||
+                    !building.HasMember("x") || !building["x"].IsNumber() ||
+                    !building.HasMember("y") || !building["y"].IsNumber() ||
+                    !building.HasMember("level") || !building["level"].IsInt()) {
+                    CCLOG("SecondScene: Invalid building data at index %d", i);
+                    continue;
+                }
+
+                std::string buildingType = building["type"].GetString();
+                float x = static_cast<float>(building["x"].GetDouble());
+                float y = static_cast<float>(building["y"].GetDouble());
+                int level = building["level"].GetInt();
+                int hp = building.HasMember("hp") ? building["hp"].GetInt() : 100;
+                int maxHp = building.HasMember("maxHp") ? building["maxHp"].GetInt() : hp;
+                int productionRate = building.HasMember("productionRate") ? building["productionRate"].GetInt() : 1;
+                int maxStock = building.HasMember("maxStock") ? building["maxStock"].GetInt() : 100;
+                int attack = building.HasMember("attack") ? building["attack"].GetInt() : 0;
+
+                CCLOG("SecondScene: Async creating building %d/%d - type=%s",
+                    i + 1, totalBuildings, buildingType.c_str());
+
+                Building* newBuilding = createBuildingByType(buildingType, x, y, level,
+                    hp, maxHp, productionRate, maxStock, attack);
+                if (newBuilding) {
+                    newBuilding->updatePosition(Vec2(x, y));
+
+                    if (background_sprite_) {
+                        background_sprite_->addChild(newBuilding, 15);
+                    }
+                    placedBuildings.push_back(newBuilding);
+                    createdInBatch++;
+                    CCLOG("SecondScene: Async building placed (batch progress: %d/%d)",
+                        i + 1, batchEnd);
+                }
+                else {
+                    CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
+                }
+            }
+
+            currentIndex = batchEnd;
+            CCLOG("SecondScene: Batch complete, %d/%d buildings created", currentIndex, totalBuildings);
+
+            std::function<void(float)> nextBatchCallback;
+            nextBatchCallback = [this, &nextBatchCallback, &buildingsArray, totalBuildings, currentIndex](float dt) mutable {
+                if (_sceneIsDestroyed) {
+                    CCLOG("SecondScene: Async creation aborted - scene destroyed");
+                    return;
+                }
+
+                if (currentIndex >= totalBuildings) {
+                    CCLOG("SecondScene: Async creation complete, all buildings created");
+                    _buildingsInitialized = true;
+                    return;
+                }
+
+                int batchEnd = std::min(currentIndex + 5, totalBuildings);
+                int createdInBatch = 0;
+
+                for (int i = currentIndex; i < batchEnd; i++) {
+                    if (_sceneIsDestroyed) break;
+
+                    const rapidjson::Value& building = buildingsArray[i];
+
+                    if (!building.HasMember("type") || !building["type"].IsString() ||
+                        !building.HasMember("x") || !building["x"].IsNumber() ||
+                        !building.HasMember("y") || !building["y"].IsNumber() ||
+                        !building.HasMember("level") || !building["level"].IsInt()) {
+                        CCLOG("SecondScene: Invalid building data at index %d", i);
+                        continue;
+                    }
+
+                    std::string buildingType = building["type"].GetString();
+                    float x = static_cast<float>(building["x"].GetDouble());
+                    float y = static_cast<float>(building["y"].GetDouble());
+                    int level = building["level"].GetInt();
+                    int hp = building.HasMember("hp") ? building["hp"].GetInt() : 100;
+                    int maxHp = building.HasMember("maxHp") ? building["maxHp"].GetInt() : hp;
+                    int productionRate = building.HasMember("productionRate") ? building["productionRate"].GetInt() : 1;
+                    int maxStock = building.HasMember("maxStock") ? building["maxStock"].GetInt() : 100;
+                    int attack = building.HasMember("attack") ? building["attack"].GetInt() : 0;
+
+                    CCLOG("SecondScene: Async creating building %d/%d - type=%s, level=%d",
+                        i + 1, totalBuildings, buildingType.c_str(), level);
+
+                    Building* newBuilding = createBuildingByType(buildingType, x, y, level, 
+                        hp, maxHp, productionRate, maxStock, attack);
+                    if (newBuilding) {
+                        newBuilding->updatePosition(Vec2(x, y));
+
+                        if (background_sprite_) {
+                            background_sprite_->addChild(newBuilding, 15);
+                        }
+                        placedBuildings.push_back(newBuilding);
+                        createdInBatch++;
+                        CCLOG("SecondScene: Async building placed (batch progress: %d/%d)",
+                            i + 1, batchEnd);
+                    }
+                    else {
+                        CCLOG("SecondScene: Failed to create building of type: %s", buildingType.c_str());
+                    }
+                }
+
+                currentIndex = batchEnd;
+                CCLOG("SecondScene: Batch complete, %d/%d buildings created", currentIndex, totalBuildings);
+
+                Director::getInstance()->getScheduler()->schedule([nextBatchCallback](float dt) {
+                    nextBatchCallback(dt);
+                    }, this, 0.0f, 0, 0.05f, false, "asyncCreateBuildings");
+                };
+
+            Director::getInstance()->getScheduler()->schedule(nextBatchCallback, this, 0.0f, 0, 0.05f, false, "asyncCreateBuildings");
+            };
+        };
+}
+
+Building* SecondScene::createBuildingByType(const std::string& buildingType, float x, float y, int level,
+    int hp, int maxHp, int productionRate, int maxStock, int attack) {
     if (buildingType == "GoldMine") {
-        return GoldMine::create("GoldMineLv1.png");
+        GoldMine* building = GoldMine::create(StringUtils::format("GoldMineLv%d.png", level), hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "ElixirCollector") {
-        return ElixirCollector::create("ElixirCollectorLv1.png");
+        ElixirCollector* building = ElixirCollector::create(StringUtils::format("ElixirCollectorLv%d.png", 
+            level), hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "GoldStorage") {
-        return GoldStorage::create("GoldStorageLv1.png");
+        GoldStorage* building = GoldStorage::create(StringUtils::format("GoldStorageLv%d.png", level),
+            hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "ElixirStorage") {
-        return ElixirStorage::create("ElixirStorageLv1.png");
+        ElixirStorage* building = ElixirStorage::create(StringUtils::format("ElixirStorageLv%d.png", level),
+            hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "ArmyCamp") {
-        return ArmyCamp::create("ArmyCampLv1.png");
+        ArmyCamp* building = ArmyCamp::create(StringUtils::format("ArmyCampLv%d.png", level),
+            hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "Walls") {
-        return Walls::create("WallsLv1.png");
+        Walls* building = Walls::create(StringUtils::format("WallsLv%d.png", level), hp, 
+            level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "BuilderHut") {
-        return BuilderHut::create("BuilderHutLv1.png");
+        BuilderHut* building = BuilderHut::create(StringUtils::format("BuilderHutLv%d.png", level), 
+            hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     else if (buildingType == "TownHall") {
-        return TownHall::create("TownHallLv1.png");
+        TownHall* building = TownHall::create(StringUtils::format("TownHallLv%d.png", level), 
+            hp, level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
     }
     return nullptr;
+}
+
+bool SecondScene::trySyncProductionDataToBuilding(Building* building) {
+    if (!building) return false;
+
+    std::string btype = building->getBuildingType();
+    float bx = building->getX();
+    float by = building->getY();
+
+    std::vector<ProductionData> productions;
+    if (!SessionManager::getInstance()->getProductionData(productions)) {
+        CCLOG("SecondScene: trySyncProductionDataToBuilding - No production data available");
+        return false;
+    }
+
+    for (const auto& prod : productions) {
+        if (prod.buildingType == btype &&
+            fabs(prod.x - bx) < 1.0f &&
+            fabs(prod.y - by) < 1.0f) {
+            building->addCurrent(prod.currentStock);
+            CCLOG("SecondScene: trySyncProductionDataToBuilding success - type=%s, x=%.2f, y=%.2f, stock=%d",
+                btype.c_str(), bx, by, prod.currentStock);
+            return true;
+        }
+    }
+
+    CCLOG("SecondScene: trySyncProductionDataToBuilding - No matching production data for %s at (%.2f, %.2f)",
+        btype.c_str(), bx, by);
+    return false;
+}
+
+void SecondScene::applyProductionDataToBuildings() {
+    CCLOG("SecondScene: applyProductionDataToBuildings called");
+
+    std::vector<ProductionData> productions;
+    if (!SessionManager::getInstance()->getProductionData(productions)) {
+        CCLOG("SecondScene: No production data available in SessionManager, scheduling retry");
+        this->unschedule("retryApplyProductionData");
+        this->scheduleOnce([this](float dt) {
+            if (_sceneIsDestroyed) {
+                CCLOG("SecondScene: Scene destroyed, skipping retry");
+                return;
+            }
+            CCLOG("SecondScene: Retry applying production data");
+            applyProductionDataToBuildings();
+            }, 0.3f, "retryApplyProductionData");
+        return;
+    }
+
+    CCLOG("SecondScene: Applying production data to %zu buildings, productions count: %zu",
+        placedBuildings.size(), productions.size());
+
+    if (productions.empty()) {
+        CCLOG("SecondScene: Production data is empty array");
+        return;
+    }
+
+    int appliedCount = 0;
+    for (auto building : placedBuildings) {
+        if (!building) continue;
+
+        std::string btype = building->getBuildingType();
+
+        float bx = building->getX();
+        float by = building->getY();
+
+        CCLOG("SecondScene: Checking building - type=%s, x=%.2f, y=%.2f",
+            btype.c_str(), bx, by);
+
+        for (const auto& prod : productions) {
+            if (prod.buildingType == btype &&
+                fabs(prod.x - bx) < 1.0f &&
+                fabs(prod.y - by) < 1.0f) {
+                building->addCurrent(prod.currentStock);
+                CCLOG("SecondScene: Applied production data - type=%s, x=%.2f, y=%.2f, stock=%d",
+                    btype.c_str(), bx, by, prod.currentStock);
+                appliedCount++;
+                break;
+            }
+        }
+    }
+
+    CCLOG("SecondScene: Applied production data to %d buildings", appliedCount);
 }
 
 void SecondScene::initDefaultBuildingsAndSave() {
@@ -2211,6 +2676,56 @@ void SecondScene::initDefaultBuildingsAndSave() {
         maxGoldVolum = townHall->getMaxGoldNum();
         maxElixirVolum = townHall->getMaxElixirNum();
         maxLevel = townHall->getLv();
+    }
+
+    auto goldMine = GoldMine::create("GoldMineLv1.png");
+    if (goldMine) {
+        goldMine->updatePosition(Vec2(1918, 1625));
+        if (background_sprite_) {
+            background_sprite_->addChild(goldMine, 15);
+        }
+        placedBuildings.push_back(goldMine);
+        goldMine->setScale(0.9f);
+    }
+
+    auto elixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
+    if (elixirCollector) {
+        elixirCollector->updatePosition(Vec2(1918, 1121));
+        if (background_sprite_) {
+            background_sprite_->addChild(elixirCollector, 15);
+        }
+        placedBuildings.push_back(elixirCollector);
+        elixirCollector->setScale(0.9f);
+    }
+
+    auto goldStorage = GoldStorage::create("GoldStorageLv1.png");
+    if (goldStorage) {
+        goldStorage->updatePosition(Vec2(1918, 869));
+        if (background_sprite_) {
+            background_sprite_->addChild(goldStorage, 15);
+        }
+        placedBuildings.push_back(goldStorage);
+        goldStorage->setScale(0.9f);
+    }
+
+    auto elixirStorage = GoldStorage::create("ElixirStorageLv1.png");
+    if (elixirStorage) {
+        elixirStorage->updatePosition(Vec2(1918, 1877));
+        if (background_sprite_) {
+            background_sprite_->addChild(elixirStorage, 15);
+        }
+        placedBuildings.push_back(elixirStorage);
+        elixirStorage->setScale(1.1f);
+    }
+
+    auto armyCamp = ArmyCamp::create("ArmyCampLv1.png");
+    if (armyCamp) {
+        armyCamp->updatePosition(Vec2(2142, 1625));
+        if (background_sprite_) {
+            background_sprite_->addChild(armyCamp, 15);
+        }
+        placedBuildings.push_back(armyCamp);
+        armyCamp->setScale(1.1f);
     }
 
     auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
@@ -2239,6 +2754,10 @@ void SecondScene::onEnter() {
     _sceneIsDestroyed = false;
     setupWebSocketCallbacks();
 
+    auto eventDispatcher = Director::getInstance()->getEventDispatcher();
+    _upgradeCompleteListener = eventDispatcher->addCustomEventListener("upgrade_complete",
+        CC_CALLBACK_1(SecondScene::handleUpgradeCompleteEvent, this));
+
     auto sessionManager = SessionManager::getInstance();
     if (sessionManager->isAccountLogin()) {
         CCLOG("SecondScene: onEnter - user logged in, requesting resources");
@@ -2246,6 +2765,8 @@ void SecondScene::onEnter() {
             auto wsManager = WebSocketManager::getInstance();
             if (wsManager->getReadyState() == WebSocket::State::OPEN) {
                 sendGetResourceRequest();
+                sendGetBuildingsRequest();
+                wsManager->syncProductionData();
             }
             else {
                 CCLOG("SecondScene: WebSocket not open in onEnter, connecting...");
@@ -2253,9 +2774,14 @@ void SecondScene::onEnter() {
             }
             }, 0.5f, "requestResourceDelay");
 
+        this->scheduleOnce([this](float dt) {
+            CCLOG("SecondScene: Delayed production data sync check");
+            applyProductionDataToBuildings();
+            }, 0.5f, "syncProductionDataFinal");
+
         this->schedule([this](float dt) {
             sendUpdateResourceRequest(dt);
-            }, 3.0f, "resourceUpdateInterval");
+            }, 0.5f, "resourceUpdateInterval");
     }
 }
 
@@ -2263,8 +2789,99 @@ void SecondScene::onExit() {
     CCLOG("SecondScene: Exiting, cleaning up...");
     this->unschedule("requestResourceDelay");
     this->unschedule("resourceUpdateInterval");
+    this->unschedule("syncProductionDataFinal");
+    this->unschedule("retryApplyProductionData");
+    this->unschedule("asyncCreateBuildings");
+    this->unscheduleAllCallbacks();
     _sceneIsDestroyed = true;
+
+    auto eventDispatcher = Director::getInstance()->getEventDispatcher();
+    eventDispatcher->removeEventListener(_upgradeCompleteListener);
+
+    if (_curOpenInfoPanel) {
+        _curOpenInfoPanel->removeFromParent();
+        _curOpenInfoPanel = nullptr;
+    }
+    _curOpenBuilding = nullptr;
+
+    if (_curOpenInfoPanel) {
+        _curOpenInfoPanel->removeFromParent();
+        _curOpenInfoPanel = nullptr;
+    }
+    _curOpenBuilding = nullptr;
+
+    if (background_sprite_) {
+        background_sprite_->removeAllChildren();
+    }
+
+    placedBuildings.clear();
+
+    if (background_sprite_) {
+        background_sprite_->removeFromParent();
+        background_sprite_ = nullptr;
+    }
+
     Scene::onExit();
+}
+
+void SecondScene::handleUpgradeCompleteEvent(cocos2d::EventCustom* event) {
+    if (_sceneIsDestroyed) {
+        return;
+    }
+
+    UpgradeCompleteData* data = static_cast<UpgradeCompleteData*>(event->getUserData());
+    if (data) {
+        onUpgradeComplete(data);
+        delete data;
+    }
+}
+
+void SecondScene::onUpgradeComplete(UpgradeCompleteData* data) {
+    CCLOG("SecondScene: Upgrade completed - buildingType=%s, x=%.1f, y=%.1f, newLevel=%d",
+        data->buildingType.c_str(), data->x, data->y, data->newLevel);
+
+    for (auto building : placedBuildings) {
+        if (building &&
+            std::abs(building->getX() - data->x) < 0.1f &&
+            std::abs(building->getY() - data->y) < 0.1f) {
+
+            building->setIsUpgrade(false);
+
+            CCLOG("SecondScene: Updated building %s to level %d",
+                building->getBuildingType().c_str(), data->newLevel);
+
+            if (_curOpenInfoPanel && _curOpenBuilding == building) {
+                _curOpenInfoPanel->refreshUpgradeButton(building);
+            }
+
+            std::string oldImage = StringUtils::format("%sLv1.png", building->getBuildingType().c_str());
+            std::string newImage = StringUtils::format("%sLv%d.png", building->getBuildingType().c_str(), data->newLevel);
+
+            if (FileUtils::getInstance()->isFileExist(newImage)) {
+                building->updateTexture(newImage);
+                CCLOG("SecondScene: Updated building image from %s to %s",
+                    oldImage.c_str(), newImage.c_str());
+            }
+            else {
+                CCLOG("SecondScene: New image %s not found, keeping current image", newImage.c_str());
+            }
+
+            break;
+        }
+    }
+
+    auto sessionManager = SessionManager::getInstance();
+    std::vector<UpgradeData> allUpgrades;
+    if (sessionManager->getUpgradeData(allUpgrades)) {
+        std::vector<UpgradeData> remainingUpgrades;
+        for (const auto& upgrade : allUpgrades) {
+            if (!(std::abs(upgrade.x - data->x) < 0.1f && std::abs(upgrade.y - data->y) < 0.1f)) {
+                remainingUpgrades.push_back(upgrade);
+            }
+        }
+        sessionManager->setUpgradeData(remainingUpgrades);
+        CCLOG("SecondScene: Cleared completed upgrade from session data, remaining: %zu", remainingUpgrades.size());
+    }
 }
 
 #endif

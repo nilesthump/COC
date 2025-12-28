@@ -1,6 +1,8 @@
 #include "BuildingInfoPanel.h"
 #include "AttackerData.h"
 #include "SecondScene.h" // 用于访问全局变量 g_goldCount 等
+#include "WebSocketManager.h"
+#include "SessionManager.h"
 
 using namespace cocos2d;
 
@@ -224,17 +226,8 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _hpLabel->setPosition(bgWidth / 2, bgHeight - 70);
     _hpLabel->setColor(Color3B::GREEN);
     panelBg->addChild(_hpLabel);
-    
-    //4.网格坐标
-    _positionLabel = Label::createWithTTF(
-        StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()),
-        "fonts/Marker Felt.ttf", 24
-    );
-    _positionLabel->setPosition(bgWidth / 2, bgHeight - 110);
-    panelBg->addChild(_positionLabel);
 
-
-    // 5. 资源信息显示
+    // 4. 资源信息显示
     // 判断建筑类型并显示对应资源，金矿和圣水收集器显示的是当前存贮的资源和生产速度，有收集按钮
     // 存钱罐和圣水瓶显示的是容量/上限，有收集按钮
     //兵营显示各个士兵的信息，城墙、建筑小屋不需要显示
@@ -360,7 +353,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if(dynamic_cast<BuilderHut*>(building)){}
     
-    // 6. 升级按钮,最高等级15
+    // 5. 升级按钮,最高等级15
     _upgradeBtn = MenuItemImage::create(
         "5.png",  // 正常状态图
         "5.png", // 按下状态图
@@ -391,7 +384,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _upgradeBtn->setScale(0.75f);
     _upgradeBtn->setPosition(bgWidth / 2, 70);
     
-    //7. 加速按钮
+    //6. 加速按钮
     if (_targetBuilding->getIsUpgrade()) {
         _speedUpBtn = MenuItemImage::create(
             "5.png",  // 正常状态图
@@ -407,7 +400,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         _speedUpBtn->setPosition(bgWidth / 2, 170); // 位置在升级按钮上方
     }
 
-    // 8. 收集按钮
+    // 7. 收集按钮
     _collectBtn = MenuItemImage::create(
         "5.png",  // 正常状态图
         "5.png", // 按下状态图
@@ -484,8 +477,62 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     //公共标签
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
-    
+  
+    refreshUpgradeButton(building);
+
+    startUpgradeCountdownScheduler();
+
+    return;
+}
+
+void BuildingInfoPanel::refreshUpgradeButton(Building* building) {
+    if (!building || !_upgradeBtn) return;
+
+    _upgradeBtn->removeAllChildren();
+
+    if (!building->getIsUpgrade()) {
+        if (building->getLv() < 15) {
+            auto upGradeLabel = Label::createWithSystemFont("UpGrade", "fonts/Marker Felt.ttf", 24);
+            upGradeLabel->setColor(Color3B::MAGENTA);
+            upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+            _upgradeBtn->addChild(upGradeLabel);
+        }
+        else {
+            auto upGradeLabel = Label::createWithSystemFont("MaxGrade", "fonts/Marker Felt.ttf", 24);
+            upGradeLabel->setColor(Color3B::RED);
+            upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+            _upgradeBtn->addChild(upGradeLabel);
+        }
+    }
+    else {
+        int remainingTime = building->getRemainTime();
+        auto upGradeLabel = Label::createWithSystemFont(StringUtils::format("please wait %d s!", remainingTime), "fonts/Marker Felt.ttf", 24);
+        upGradeLabel->setColor(Color3B::RED);
+        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+        _upgradeBtn->addChild(upGradeLabel);
+    }
+}
+
+void BuildingInfoPanel::updateUpgradeCountdown() {
+    if (!_targetBuilding) return;
+
+    if (_targetBuilding->getIsUpgrade()) {
+        refreshUpgradeButton(_targetBuilding);
+    }
+}
+
+void BuildingInfoPanel::startUpgradeCountdownScheduler() {
+    Director::getInstance()->getScheduler()->schedule(
+        CC_CALLBACK_0(BuildingInfoPanel::updateUpgradeCountdown, this),
+        this,
+        1.0f,
+        false,
+        "upgradeCountdown"
+    );
+}
+
+void BuildingInfoPanel::stopUpgradeCountdownScheduler() {
+    Director::getInstance()->getScheduler()->unschedule("upgradeCountdown", this);
 }
 
 //升级
@@ -505,6 +552,15 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
 
         _targetBuilding->playSuccessBlink();// 播放开始升级动画
         _targetBuilding->startUpgrade();
+
+        // 发送升级开始事件到服务器
+        WebSocketManager::getInstance()->sendUpgradeStart(
+            _targetBuilding->getBuildingType(),
+            _targetBuilding->getX(),
+            _targetBuilding->getY(),
+            _targetBuilding->getLv() + 1,
+            _targetBuilding->getUpgradeDuration()
+        );
     }
     updateInfo(_targetBuilding, temp);
 }
@@ -519,60 +575,155 @@ void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
 
 //收集
 void BuildingInfoPanel::onCollectClicked(Ref* sender) {
-    if (!_targetBuilding) return;
+    CCLOG("BuildingInfoPanel: onCollectClicked called");
+    if (!_targetBuilding) {
+        CCLOG("BuildingInfoPanel: _targetBuilding is null!");
+        return;
+    }
+
+    // 检查建筑对象是否有效 (0xDDDDDDDD 表示已释放)
+    auto checkPtr = reinterpret_cast<uintptr_t>(_targetBuilding);
+    if (checkPtr == 0xDDDDDDDD || checkPtr == 0xCCCCCCCC || checkPtr < 0x10000) {
+        CCLOG("BuildingInfoPanel: _targetBuilding is invalid pointer: %p", _targetBuilding);
+        return;
+    }
+
+    // 检查标签是否有效
+    if (!_resourceLabel || !_speedLabel) {
+        CCLOG("BuildingInfoPanel: UI labels are null!");
+        return;
+    }
 
     int collected = 0;
+    bool resourceUpdated = false;
     // 判断建筑类型并执行对应收集逻辑
     if (dynamic_cast<GoldMine*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
-        if (collected > 0&&collected+ g_goldCount<=maxGoldVolum) {
+        CCLOG("BuildingInfoPanel: GoldMine current stock: %d, g_goldCount: %d, max: %d",
+            collected, g_goldCount, maxGoldVolum);
+        if (collected > 0 && collected + g_goldCount <= maxGoldVolum) {
             g_goldCount += collected;
+            resourceUpdated = true;
             collected = 0;
+            CCLOG("BuildingInfoPanel: Gold collected, new g_goldCount: %d", g_goldCount);
         }
         else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
-            g_goldCount = maxGoldVolum;
-            collected -= (maxGoldVolum - g_goldCount);//剩余未存的
+            int spaceAvailable = maxGoldVolum - g_goldCount;
+            if (spaceAvailable > 0) {
+                g_goldCount = maxGoldVolum;
+                collected -= spaceAvailable;
+                resourceUpdated = true;
+            }
         }
     }
     else if (dynamic_cast<ElixirCollector*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
-        if (collected > 0 && collected + g_goldCount <= maxElixirVolum) {
+        CCLOG("BuildingInfoPanel: ElixirCollector current stock: %d, g_elixirCount: %d, max: %d",
+            collected, g_elixirCount, maxElixirVolum);
+        if (collected > 0 && collected + g_elixirCount <= maxElixirVolum) {
             g_elixirCount += collected;
+            resourceUpdated = true;
             collected = 0;
         }
-        else if (collected > 0 && collected + g_goldCount > maxElixirVolum) {
-            g_elixirCount = maxElixirVolum;
-            collected -= (maxElixirVolum - g_elixirCount);//剩余未存的
+        else if (collected > 0 && collected + g_elixirCount > maxElixirVolum) {
+            int spaceAvailable = maxElixirVolum - g_elixirCount;
+            if (spaceAvailable > 0) {
+                g_elixirCount = maxElixirVolum;
+                collected -= spaceAvailable;
+                resourceUpdated = true;
+            }
         }
     }
     else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
         if (collected > 0 && collected + g_goldCount <= maxGoldVolum) {
             g_goldCount += collected;
+            resourceUpdated = true;
             collected = 0;
         }
         else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
-            g_goldCount = maxGoldVolum;
-            collected -= (maxGoldVolum - g_goldCount);//剩余未存的
+            int spaceAvailable = maxGoldVolum - g_goldCount;
+            if (spaceAvailable > 0) {
+                g_goldCount = maxGoldVolum;
+                collected -= spaceAvailable;
+                resourceUpdated = true;
+            }
         }
     }
     else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
         if (collected > 0 && collected + g_elixirCount <= maxElixirVolum) {
             g_elixirCount += collected;
+            resourceUpdated = true;
             collected = 0;
         }
         else if (collected > 0 && collected + g_elixirCount > maxElixirVolum) {
-            g_elixirCount = maxElixirVolum;
-            collected -= (maxElixirVolum - g_elixirCount);//剩余未存的
+            int spaceAvailable = maxElixirVolum - g_elixirCount;
+            if (spaceAvailable > 0) {
+                g_elixirCount = maxElixirVolum;
+                collected -= spaceAvailable;
+                resourceUpdated = true;
+            }
         }
     }
+
+    CCLOG("BuildingInfoPanel: Before updating building stock, collected: %d", collected);
+    // 发送收集生产请求到服务器（清空建筑存量之前发送，确保数据一致性）
+    int originalStock = _targetBuilding->getCurrentStock();
+    if (originalStock > 0) {
+        auto director = cocos2d::Director::getInstance();
+        auto scene = director->getRunningScene();
+        if (scene) {
+            auto secondScene = dynamic_cast<SecondScene*>(scene);
+            if (secondScene) {
+                int resourceType = 0;
+                if (dynamic_cast<GoldMine*>(_targetBuilding) || dynamic_cast<GoldStorage*>(_targetBuilding)) {
+                    resourceType = 1; // 金币
+                }
+                else if (dynamic_cast<ElixirCollector*>(_targetBuilding) || dynamic_cast<ElixirStorage*>(_targetBuilding)) {
+                    resourceType = 2; // 圣水
+                }
+                if (resourceType > 0) {
+                    // 计算收集后剩余的存储量
+                    int remainingStock = originalStock - collected;
+                    if (remainingStock < 0) remainingStock = 0;
+                    secondScene->sendCollectProductionRequest(_targetBuilding, collected, 
+                        remainingStock, resourceType);
+                }
+            }
+        }
+    }
+
     // 更新面板显示的资源数量
     _targetBuilding->clearCurrentStock();
     if (collected > 0) {
         _targetBuilding->updateCurrentStock(collected);
     }
+    CCLOG("BuildingInfoPanel: Before updateInfo");
     updateInfo(_targetBuilding, temp); // 刷新信息显示
+    CCLOG("BuildingInfoPanel: After updateInfo, resourceUpdated: %d", resourceUpdated);
+
+    // 发送资源更新请求到服务器
+    if (resourceUpdated) {
+        CCLOG("BuildingInfoPanel: Resource collected, sending update...");
+        auto director = cocos2d::Director::getInstance();
+        auto scene = director->getRunningScene();
+        if (!scene) {
+            CCLOG("BuildingInfoPanel: Running scene is null!");
+            return;
+        }
+        CCLOG("BuildingInfoPanel: Scene class: %s", typeid(*scene).name());
+        auto secondScene = dynamic_cast<SecondScene*>(scene);
+        if (secondScene) {
+            // 立即更新 UI 标签
+            secondScene->updateResourceLabels();
+            secondScene->sendUpdateResourceRequest(0.0f);
+        }
+        else {
+            CCLOG("BuildingInfoPanel: Failed to cast scene to SecondScene!");
+        }
+    }
+    CCLOG("BuildingInfoPanel: onCollectClicked finished");
 }
 
 //展示士兵信息
@@ -604,7 +755,7 @@ void BuildingInfoPanel::showSoldierInfo(int lv){
         AttackerData::CreateGiantData(lv >= 12 ? 12 : lv),
         AttackerData::CreateGoblinData(lv >= 12 ? 12 : lv),
         AttackerData::CreateBomberData(lv >= 12 ? 12 : lv),
-        AttackerData::CreateGoblinData(lv >= 12 ? 12 : lv) };
+        AttackerData::CreateBalloonData(lv >= 12 ? 12 : lv) };
 
     int L = 160, H = 300;
     for (int i = 0; i < 6; i++) {

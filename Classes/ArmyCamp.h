@@ -78,6 +78,9 @@ public:
     int getRemainTime() override{
         return upgradeTime;
     }
+    int getUpgradeDuration() const override {
+        return upgradeTime;
+    }
     std::string getBuildingType() const override {
         return "ArmyCamp";
     }
