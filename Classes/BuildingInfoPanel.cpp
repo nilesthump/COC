@@ -1,6 +1,8 @@
 #include "BuildingInfoPanel.h"
 #include "AttackerData.h"
 #include "SecondScene.h" // 用于访问全局变量 g_goldCount 等
+#include "WebSocketManager.h"
+#include "SessionManager.h"
 
 using namespace cocos2d;
 
@@ -485,7 +487,62 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
     _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
-    
+  
+    refreshUpgradeButton(building);
+
+    startUpgradeCountdownScheduler();
+
+    return;
+}
+
+void BuildingInfoPanel::refreshUpgradeButton(Building* building) {
+    if (!building || !_upgradeBtn) return;
+
+    _upgradeBtn->removeAllChildren();
+
+    if (!building->getIsUpgrade()) {
+        if (building->getLv() < 15) {
+            auto upGradeLabel = Label::createWithSystemFont("UpGrade", "fonts/Marker Felt.ttf", 24);
+            upGradeLabel->setColor(Color3B::MAGENTA);
+            upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+            _upgradeBtn->addChild(upGradeLabel);
+        }
+        else {
+            auto upGradeLabel = Label::createWithSystemFont("MaxGrade", "fonts/Marker Felt.ttf", 24);
+            upGradeLabel->setColor(Color3B::RED);
+            upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+            _upgradeBtn->addChild(upGradeLabel);
+        }
+    }
+    else {
+        int remainingTime = building->getRemainTime();
+        auto upGradeLabel = Label::createWithSystemFont(StringUtils::format("please wait %d s!", remainingTime), "fonts/Marker Felt.ttf", 24);
+        upGradeLabel->setColor(Color3B::RED);
+        upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
+        _upgradeBtn->addChild(upGradeLabel);
+    }
+}
+
+void BuildingInfoPanel::updateUpgradeCountdown() {
+    if (!_targetBuilding) return;
+
+    if (_targetBuilding->getIsUpgrade()) {
+        refreshUpgradeButton(_targetBuilding);
+    }
+}
+
+void BuildingInfoPanel::startUpgradeCountdownScheduler() {
+    Director::getInstance()->getScheduler()->schedule(
+        CC_CALLBACK_0(BuildingInfoPanel::updateUpgradeCountdown, this),
+        this,
+        1.0f,
+        false,
+        "upgradeCountdown"
+    );
+}
+
+void BuildingInfoPanel::stopUpgradeCountdownScheduler() {
+    Director::getInstance()->getScheduler()->unschedule("upgradeCountdown", this);
 }
 
 //升级
@@ -505,6 +562,15 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
 
         _targetBuilding->playSuccessBlink();// 播放开始升级动画
         _targetBuilding->startUpgrade();
+
+        // 发送升级开始事件到服务器
+        WebSocketManager::getInstance()->sendUpgradeStart(
+            _targetBuilding->getBuildingType(),
+            _targetBuilding->getX(),
+            _targetBuilding->getY(),
+            _targetBuilding->getLv() + 1,
+            _targetBuilding->getUpgradeDuration()
+        );
     }
     updateInfo(_targetBuilding, temp);
 }
@@ -612,6 +678,32 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     }
 
     CCLOG("BuildingInfoPanel: Before updating building stock, collected: %d", collected);
+    // 发送收集生产请求到服务器（清空建筑存量之前发送，确保数据一致性）
+    int originalStock = _targetBuilding->getCurrentStock();
+    if (originalStock > 0) {
+        auto director = cocos2d::Director::getInstance();
+        auto scene = director->getRunningScene();
+        if (scene) {
+            auto secondScene = dynamic_cast<SecondScene*>(scene);
+            if (secondScene) {
+                int resourceType = 0;
+                if (dynamic_cast<GoldMine*>(_targetBuilding) || dynamic_cast<GoldStorage*>(_targetBuilding)) {
+                    resourceType = 1; // 金币
+                }
+                else if (dynamic_cast<ElixirCollector*>(_targetBuilding) || dynamic_cast<ElixirStorage*>(_targetBuilding)) {
+                    resourceType = 2; // 圣水
+                }
+                if (resourceType > 0) {
+                    // 计算收集后剩余的存储量
+                    int remainingStock = originalStock - collected;
+                    if (remainingStock < 0) remainingStock = 0;
+                    secondScene->sendCollectProductionRequest(_targetBuilding, collected, 
+                        remainingStock, resourceType);
+                }
+            }
+        }
+    }
+
     // 更新面板显示的资源数量
     _targetBuilding->clearCurrentStock();
     if (collected > 0) {

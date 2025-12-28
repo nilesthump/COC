@@ -85,6 +85,8 @@ public:
 	void onWebSocketMessage(const std::string& message);
 	void sendGetResourceRequest();
 	void sendUpdateResourceRequest(float dt);
+	void sendCollectProductionRequest(Building* building, int collectedAmount,
+		int remainingStock, int resourceType);
 
 	// 公开方法：更新资源 UI 显示
 	void updateResourceLabels() {
@@ -95,14 +97,24 @@ public:
 			elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
 		}
 	}
-	void sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level);
+	void sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level,
+		int hp = 100, int maxHp = 100, int productionRate = 1, int maxStock = 100, int attack = 0);
 	void sendDeleteBuildingRequest(float x, float y);
 	void sendGetBuildingsRequest();
 	void onWebSocketBuildingsMessage(const std::string& message);
+	void createBuildingsSync(const rapidjson::Value& buildingsArray);
+	void createBuildingsAsync(const rapidjson::Value& buildingsArray);
 	void onEnter() override;
 	void onExit() override;
 
+	// 处理升级完成事件
+	void onUpgradeComplete(UpgradeCompleteData* data);
+	void handleUpgradeCompleteEvent(cocos2d::EventCustom* event);
+
 private:
+	// 升级完成事件监听器
+	cocos2d::EventListenerCustom* _upgradeCompleteListener;
+
 	// WebSocket回调相关成员变量
 	bool _sceneIsDestroyed;
 	// 双击检测相关
@@ -156,9 +168,9 @@ private:
 	cocos2d::Vec2 dragStartPosition; // 拖拽开始时的位置
 	bool isDragging; // 是否正在拖拽
     
-    // 建筑移动相关成员变量
+	// 建筑移动相关成员变量
 	Building* movingBuilding;
-    bool isMovingBuilding; // 是否正在移动建筑
+	bool isMovingBuilding; // 是否正在移动建筑
 	cocos2d::Vec2 _movingBuildingOriginalPos; // 移动建筑时的原始位置
 
 	static std::vector<Building*> placedBuildings;
@@ -167,8 +179,12 @@ private:
 
 	bool _buildingsInitialized; // 防止重复初始化建筑
 
-	Building* createBuildingByType(const std::string& buildingType);
+	Building* createBuildingByType(const std::string& buildingType, float x = 667.0f, 
+		float y = 2074.0f, int level = 1,
+		int hp = 100, int maxHp = 100, int productionRate = 1, int maxStock = 100, int attack = 0);
+	bool trySyncProductionDataToBuilding(Building* building);
 	void initDefaultBuildingsAndSave();
+	void applyProductionDataToBuildings();
 };
 
 extern int maxLevel, maxGoldVolum, maxElixirVolum;

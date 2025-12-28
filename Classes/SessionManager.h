@@ -2,11 +2,31 @@
 #define __SESSION_MANAGER_H__
 
 #include <string>
+#include <vector>
 
 enum class LoginType {
     NONE,
     GUEST,
     ACCOUNT
+};
+
+struct ProductionData {
+    std::string buildingType;
+    float x;
+    float y;
+    int level;
+    int currentStock;
+    long long lastProductionTime;
+};
+
+struct UpgradeData {
+    std::string buildingType;
+    float x;
+    float y;
+    int targetLevel;
+    long long startTime;
+    int duration;
+    int remainingTime;
 };
 
 class SessionManager 
@@ -27,6 +47,14 @@ private:
     int _elixir;
     int _gems;
     bool _hasResourceData;
+
+    std::vector<ProductionData> _productionData;
+    std::vector<UpgradeData> _upgradeData;
+
+    bool _isProducingGold;
+    bool _isProducingElixir;
+    long long _goldProductionCompletionTime;
+    long long _elixirProductionCompletionTime;
 
 public:
     // 获取单例实例
@@ -54,6 +82,24 @@ public:
     void getResourceData(int& gold, int& elixir, int& gems) const;
     bool hasResourceData() const;
     void clearResourceData();
+
+    void setProductionData(const std::vector<ProductionData>& data);
+    bool getProductionData(std::vector<ProductionData>& data) const;
+    void clearProductionData();
+
+    void setUpgradeData(const std::vector<UpgradeData>& data);
+    bool getUpgradeData(std::vector<UpgradeData>& data) const;
+    bool getUpgradeDataForBuilding(float x, float y, UpgradeData& data) const;
+    void clearUpgradeData();
+
+    bool isProducingGold() const;
+    bool isProducingElixir() const;
+    void startProducingGold();
+    void stopProducingGold();
+    void startProducingElixir();
+    void stopProducingElixir();
+    long long getGoldProductionCompletionTime() const;
+    long long getElixirProductionCompletionTime() const;
 };
 
 #endif // __SESSION_MANAGER_H__
