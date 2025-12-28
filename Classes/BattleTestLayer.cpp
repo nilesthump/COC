@@ -689,8 +689,11 @@ void BattleTestLayer::showBattleResultLayer(BattleResult result)
 //返回HelloWorldScene触发
 void BattleTestLayer::menuMainCallback(Ref* pSender)
 {
+	auto config = CombatSessionManager::getInstance();
+	config->battle_start_params.army.clear();
 	BattleManager* battleManager = BattleManager::getInstance();
 	battleManager->clear(); // 重置战斗管理器状态
+
 	this->unscheduleUpdate(); // 停止更新
 	Director::getInstance()->replaceScene(SecondScene::createScene());
 }
