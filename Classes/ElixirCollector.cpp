@@ -34,7 +34,6 @@ bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float 
     x = x0;
     y = y0;
     level = lv;
-<<<<<<< HEAD
 
     // 初始化储量属性
     maxSize = 100 + (level - 1) * 50;
@@ -43,9 +42,7 @@ bool ElixirCollector::init(const std::string& textureName, int hp,int lv, float 
     // 不再在建筑初始化时同步生产数据，改为由 SecondScene 统一管理
     // 这样可以避免重复同步和数据竞争问题
 
-=======
     size = 3;
->>>>>>> 663d826ac427855dd4ac5e32c99aac542ee983a2
     this->setPosition(Vec2(x0, y0));
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))

@@ -477,8 +477,6 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     //公共标签
     _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
     _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
-<<<<<<< HEAD
-    _positionLabel->setString(StringUtils::format("(x,y):(%.1f,%.1f)", building->getX(), building->getY()));
   
     refreshUpgradeButton(building);
 
@@ -535,9 +533,6 @@ void BuildingInfoPanel::startUpgradeCountdownScheduler() {
 
 void BuildingInfoPanel::stopUpgradeCountdownScheduler() {
     Director::getInstance()->getScheduler()->unschedule("upgradeCountdown", this);
-=======
-    
->>>>>>> 663d826ac427855dd4ac5e32c99aac542ee983a2
 }
 
 //升级

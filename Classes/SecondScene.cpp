@@ -668,17 +668,7 @@ void SecondScene::update(float delta)
     // 累计时间并每秒增加圣水数量
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
-    Building* notFullGoldStorage = nullptr, * notFullElixirStorage = nullptr;
-    for (auto building : placedBuildings) {
-        if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
-            notFullGoldStorage = building;
-        }
-    }
-    for (auto building : placedBuildings) {
-        if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
-            notFullElixirStorage = building;
-        }
-    }
+
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
@@ -699,7 +689,6 @@ void SecondScene::update(float delta)
             }
             //下均为非升级中
             else if (dynamic_cast<GoldMine*>(building)) {
-<<<<<<< HEAD
                 Building* t = building;
                 int tempGold = building->getSpeed();
                 int maxIterations = 100;
@@ -752,71 +741,6 @@ void SecondScene::update(float delta)
                             break;
                         }
                         t2 = nextStorage;
-=======
-                //两个临时变量存储
-                int tempGold = building->getSpeed();
-                while (tempGold>0) {
-                    //金矿非常未满
-                    if (building->getMaxStock() - building->getCurrentStock() >= tempGold) {
-                        building->updateCurrentStock(tempGold);
-                        tempGold = 0;//接下来肯定会退出循环
-                        break;
-                    }
-                    //金矿将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存钱罐
-                    else if (building->getMaxStock() - building->getCurrentStock() < tempGold && building->getMaxStock() - building->getCurrentStock() > 0) {
-                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());//尽量存
-                        tempGold -= (building->getMaxStock() - building->getCurrentStock());//剩余未存
-                        continue;//金矿已满，下次while循环会直接跳到下面对于存钱罐的判断
-                    }
-                    //有
-                    if (notFullGoldStorage != nullptr) {
-                        if (notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock() >= tempGold) {
-                            notFullGoldStorage->addCurrent(tempGold);
-                            tempGold = 0;
-                            break;
-                        }
-                        else {
-                            notFullGoldStorage->addCurrent(notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock());
-                            tempGold -= notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock();//剩余未存
-                            break;
-                        }
-                    }
-                    else {
-                        break;
-                    }               
-                }
-            }
-            else if (dynamic_cast<ElixirCollector*>(building)) {
-                int tempElixir = building->getSpeed();
-                while (tempElixir > 0) {
-                    //非常未满
-                    if (building->getMaxStock() - building->getCurrentStock() >= tempElixir) {
-                        building->updateCurrentStock(tempElixir);
-                        tempElixir = 0;//接下来肯定会退出循环
-                        break;
-                    }
-                    //将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存罐
-                    else if (building->getMaxStock() - building->getCurrentStock() < tempElixir && building->getMaxStock() - building->getCurrentStock() > 0) {
-                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());
-                        tempElixir -= (building->getMaxStock() - building->getCurrentStock());
-                        continue;
-                    }
-                    //有
-                    else if (notFullElixirStorage != nullptr) {
-                        if (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock() >= tempElixir) {
-                            notFullElixirStorage->addCurrent(tempElixir);
-                            tempElixir = 0;
-                            break;
-                        }
-                        else {
-                            notFullElixirStorage->addCurrent(notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());
-                            tempElixir -= (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());//剩余未存
-                            break;
-                        }
-                    }
-                    else {
-                        break;
->>>>>>> 663d826ac427855dd4ac5e32c99aac542ee983a2
                     }
                     else {
                         Building* nextStorage = getElixirStorage();
