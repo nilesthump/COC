@@ -1,166 +1,196 @@
 #include"UnitFactory.h"
 
-BattleUnit* UnitFactory::CreateBarbarian(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
+BattleUnit* UnitFactory::CreateAttackerByType(UnitType type, int level, cocos2d::Node* parent, cocos2d::Sprite* background)
 {
-    AttackerData data = AttackerData::CreateBarbarianData(level);
-    BattleUnit* unit = new BattleUnit();
-    unit->Init(data);
-    unit->SetBehavior(std::make_unique<AttackerNormalBehavior>()); //先用通用行为
-    unit->SetNavigation(std::make_unique <AttackerNavigation>());
-
-    unit->SetBackgroundSprite(background);
-    // 设置精灵
-    auto sprite = cocos2d::Sprite::create("BarbarianLv1.png");
-    if (sprite)
-    {
-        sprite->setScale(0.5f);
-        unit->SetSprite(sprite, parent); //这里会调用UpdateSpritePosition
-    }
-
-    // 设置血条
-    unit->SetupHealthBar(parent);
-
-    // 设置音效
-    unit->SetAttackSound("sounds/barbarian_attack.mp3");
-    unit->SetDeathSound("sounds/barbarian_death.mp3");
-
-    return unit;
+	switch (type)
+	{
+	case UnitType::BARBARIAN: return CreateBarbarian(level, parent, background);
+	case UnitType::ARCHER:    return CreateArcher(level, parent, background);
+	case UnitType::GIANT:     return CreateGiant(level, parent, background);
+	case UnitType::GOBLIN:    return CreateGoblin(level, parent, background);
+	case UnitType::BOMBER:    return CreateBomber(level, parent, background);
+	case UnitType::BALLOON:   return CreateBalloon(level, parent, background);
+	default: return nullptr;
+	}
 }
 
-BattleUnit* UnitFactory::CreateArcher(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
+BattleUnit* UnitFactory::CreateBuildingByType(BuildingType type, int level, cocos2d::Node* parent, cocos2d::Sprite* background)
 {
-    AttackerData data = AttackerData::CreateArcherData(level);
-    BattleUnit* unit = new BattleUnit();
-    unit->Init(data);
-    unit->SetBehavior(std::make_unique<AttackerNormalBehavior>()); //先用通用行为
-    unit->SetNavigation(std::make_unique <AttackerNavigation>());
+	switch (type)
+	{
+	case BuildingType::CANNON:				return CreateCannon(level, parent, background);
+	case BuildingType::ARCHER_TOWER:		return CreateArcherTower(level, parent, background);
+	case BuildingType::MORTAR:				return CreateMortar(level, parent, background);
+	case BuildingType::WALL:				return CreateWall(level, parent, background);
+	case BuildingType::GOLD_MINE:			return CreateGoldMine(level, parent, background);
+	case BuildingType::GOLD_STORAGE:   return CreateGoldStorage(level, parent, background);
+	case BuildingType::ELIXIR:				return CreateElixir(level, parent, background);
+	case BuildingType::ELIXIR_STORAGE:      return CreateElixirStorage(level, parent, background);
+	case BuildingType::TOWN_HALL:			return CreateTownHall(level, parent, background);
+	case BuildingType::BUILDERSHUT:			return CreateBuildersHut(level, parent, background);
 
-    unit->SetBackgroundSprite(background);
-    // 设置精灵
-    auto sprite = cocos2d::Sprite::create("ArcherLv1.png");
-    if (sprite)
-    {
-        sprite->setScale(0.5f);
-        unit->SetSprite(sprite, parent); //这里会调用UpdateSpritePosition
-    }
-
-    // 设置血条
-    unit->SetupHealthBar(parent);
-
-    // 设置音效
-    unit->SetAttackSound("sounds/barbarian_attack.mp3");
-    unit->SetDeathSound("sounds/barbarian_death.mp3");
-
-    return unit;
+	default: return nullptr;
+	}
 }
 
-BattleUnit* UnitFactory::CreateCannon(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
+//建筑创建模板
+BattleUnit* UnitFactory::CreateBaseBuilding(DefenderData data, const std::string& spritePath, Node* parent, Sprite* background, bool canAttack)
 {
-    DefenderData data = DefenderData::CreateCannonData(level);
-    BattleUnit* unit = new BattleUnit();
-    unit->Init(data);
-    unit->SetBehavior(std::make_unique <DefenderNormalBehavior>());
-    unit->SetNavigation(std::make_unique<DefenderNavigation>()); // 使用加农炮导航（固定，无移动）
+	auto unit = new BattleUnit();
+	unit->Init(data);
+	unit->SetBackgroundSprite(background);
 
-    unit->SetBackgroundSprite(background);
-    int tile_w = data.tile_width;
-    int tile_h = data.tile_height;
+	//表现层组装
+	auto building = std::make_unique<BuildingComponent>(data.tile_width, data.tile_height);
+	building->AttachTo(parent);
+	auto sprite = Sprite::create(spritePath);
+	if (sprite)
+	{
+		building->AttachSprite(sprite);
+		building->FitSpriteToFootprint();
+	}
+	unit->SetBuildingComponent(std::move(building));
 
-    //-----------------------------------------------调用BuildingComponent过程
-    //建筑组件
-    auto building = std::make_unique<BuildingComponent>(tile_w, tile_h);
-    building->AttachTo(parent);
+	//逻辑绑定
+	if (canAttack)
+	{
+		unit->SetBehavior(std::make_unique<DefenderNormalBehavior>());
+		unit->SetNavigation(std::make_unique<DefenderNavigation>());
+	}
+	else
+	{
+		unit->SetBehavior(std::make_unique<StaticBuildingBehavior>());
+		unit->SetNavigation(nullptr);
+	}
 
-    //图片
-    auto sprite = Sprite::create("CannonLv1.png");
-    building->AttachSprite(sprite);
-
-    //自动适配格子（关键）
-    building->FitSpriteToFootprint();
-
-    unit->SetBuildingComponent(std::move(building));
-    //-------------------------------------------------
-
-    // 设置血条
-    unit->SetupHealthBar(parent);
-
-    // 设置音效
-    unit->SetAttackSound("sounds/cannon_attack.mp3");
-    unit->SetDeathSound("sounds/cannon_death.mp3");
-
-    return unit;
+	unit->SetupHealthBar(parent);
+	return unit;
 }
 
-BattleUnit* UnitFactory::CreateArcherTower(int level, cocos2d::Node* parent, cocos2d::Sprite* background)
+//角色创建模板
+BattleUnit* UnitFactory::CreateBaseAttacker(AttackerData data, const std::string& spritePath, Node* parent, Sprite* background)
 {
-    DefenderData data = DefenderData::CreateArcherTowerData(level);
-    BattleUnit* unit = new BattleUnit();
-    unit->Init(data);
-    unit->SetBehavior(std::make_unique <DefenderNormalBehavior>());
-    unit->SetNavigation(std::make_unique<DefenderNavigation>());
+	auto unit = new BattleUnit();
+	unit->Init(data);
+	unit->SetBackgroundSprite(background);
+	unit->SetBehavior(std::make_unique<AttackerNormalBehavior>());
+	unit->SetNavigation(std::make_unique<AttackerNavigation>());
 
-    unit->SetBackgroundSprite(background);
-    int tile_w = data.tile_width;
-    int tile_h = data.tile_height;
+	auto sprite = Sprite::create(spritePath);
+	if (sprite)
+	{
+		sprite->setScale(0.5f);
+		unit->SetSprite(sprite, parent);
+	}
 
-    //-----------------------------------------------调用BuildingComponent过程
-    //建筑组件
-    auto building = std::make_unique<BuildingComponent>(tile_w, tile_h);
-    building->AttachTo(parent);
-
-    //图片
-    auto sprite = Sprite::create("ArcherTowerLv1.png");
-    building->AttachSprite(sprite);
-
-    //自动适配格子（关键）
-    building->FitSpriteToFootprint();
-
-    unit->SetBuildingComponent(std::move(building));
-    //-------------------------------------------------
-
-    // 设置血条
-    unit->SetupHealthBar(parent);
-
-    // 设置音效
-    unit->SetAttackSound("sounds/cannon_attack.mp3");
-    unit->SetDeathSound("sounds/cannon_death.mp3");
-
-    return unit;
+	unit->SetupHealthBar(parent);
+	return unit;
 }
 
+BattleUnit* UnitFactory::CreateBarbarian(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseAttacker(AttackerData::CreateBarbarianData(level), "BarbarianLv1.png", parent, background);
+}
+
+BattleUnit* UnitFactory::CreateArcher(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseAttacker(AttackerData::CreateArcherData(level), "ArcherLv1.png", parent, background);
+}
+
+BattleUnit* UnitFactory::CreateGiant(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseAttacker(AttackerData::CreateGiantData(level), "GiantLv1.png", parent, background);
+}
+
+BattleUnit* UnitFactory::CreateGoblin(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseAttacker(AttackerData::CreateGoblinData(level), "GoblinLv1.png", parent, background);
+}
+
+BattleUnit* UnitFactory::CreateBomber(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseAttacker(AttackerData::CreateBomberData(level), "BomberLv1.png", parent, background);
+}
+
+//! 气球兵高度问题
+BattleUnit* UnitFactory::CreateBalloon(int level, Node* parent, Sprite* background)
+{
+	auto unit = CreateBaseAttacker(AttackerData::CreateBalloonData(level), "BalloonLv1.png", parent, background);
+	auto sprite = unit->GetSprite();
+	if (sprite)
+	{
+		sprite->setUserData((void*)60);
+		auto shadow = Sprite::create("shadow.png"); // 找一个黑色半透明椭圆图片
+		if (shadow)
+		{
+			shadow->setOpacity(128); // 半透明
+			shadow->setScale(0.8f);
+			float centerX = sprite->getContentSize().width / 2;
+			float centerY = sprite->getContentSize().height / 2;
+
+			// 逻辑：父节点向上偏了 60，所以子节点相对于父中心向下偏 60
+			// 这样阴影就会刚好落在 basePos（逻辑地面）
+			shadow->setPosition(Vec2(centerX, centerY - 120));
+
+			shadow->setName("Shadow");
+			sprite->addChild(shadow, -1); // Z轴为-1，确保在气球下方
+		
+		}
+	}
+	return unit;
+}
+
+//资源类
 BattleUnit* UnitFactory::CreateGoldMine(int level, Node* parent, Sprite* background)
 {
-    auto unit = new BattleUnit();
-    auto data = DefenderData::CreateGoldMineData(level);
-    unit->Init(data);
-    unit->SetBackgroundSprite(background);
+	return CreateBaseBuilding(DefenderData::CreateGoldMineData(level), "GoldMineLv1.png", parent, background, false);
+}
 
-    int tile_w = data.tile_width;
-    int tile_h = data.tile_height;
+BattleUnit* UnitFactory::CreateGoldStorage(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateGoldStorageData(level), "GoldStorageLv1.png", parent, background, false);
+}
 
-    //-----------------------------------------------调用BuildingComponent过程
-    //建筑组件
-    auto building = std::make_unique<BuildingComponent>(tile_w, tile_h);
-    building->AttachTo(parent);
+BattleUnit* UnitFactory::CreateElixir(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateElixirData(level), "ElixirCollectorLv1.png", parent, background, false);
+}
 
-    //图片
-    auto sprite = Sprite::create("GoldMineLv1.png");
-    building->AttachSprite(sprite);
+BattleUnit* UnitFactory::CreateElixirStorage(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateElixirStorageData(level), "ElixirStorageLv1.png", parent, background, false);
+}
 
-    //自动适配格子（关键）
-    building->FitSpriteToFootprint();
+//功能类
+BattleUnit* UnitFactory::CreateTownHall(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateTownHallData(level), "TownHallLv1.png", parent, background, false);
+}
 
-    unit->SetBuildingComponent(std::move(building));
-    //-------------------------------------------------
+BattleUnit* UnitFactory::CreateBuildersHut(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateBuildersHutData(level), "BuildersHut.png", parent, background, false);
+}
 
-    unit->SetupHealthBar(parent);
+//! 城墙特殊处理
+BattleUnit* UnitFactory::CreateWall(int level, Node* parent, Sprite* background)
+{
+	auto unit = CreateBaseBuilding(DefenderData::CreateWallData(level), "WallsLv1.png", parent, background, false);
+	return unit;
+}
 
-    //核心：资源建筑的行为是“静态不动的”
-    //! 你可以创建一个通用的 StaticBuildingBehavior，它只实现 OnDeath
-    unit->SetBehavior(std::make_unique<StaticBuildingBehavior>());
+//防御攻击类
+BattleUnit* UnitFactory::CreateCannon(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateCannonData(level), "CannonLv1.png", parent, background, true);
+}
 
-    //资源建筑没有 Navigation (不需要找敌人)
-    unit->SetNavigation(nullptr);
+BattleUnit* UnitFactory::CreateArcherTower(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateArcherTowerData(level), "ArcherTowerLv1.png", parent, background, true);
+}
 
-    return unit;
+BattleUnit* UnitFactory::CreateMortar(int level, Node* parent, Sprite* background)
+{
+	return CreateBaseBuilding(DefenderData::CreateMortarData(level), "MortarLv1.png", parent, background, true);
 }

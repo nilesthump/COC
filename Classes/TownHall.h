@@ -44,11 +44,9 @@ public:
         maxElixirVolum = maxElixirNum;
         maxLevel = level;
         //»»Í¼
-        CCLOG("aaa");
         _textureName = StringUtils::format("TownHallLv%d.png", level);
         updateTexture(_textureName);
         playSuccessBlink();
-        CCLOG("BBB");
     }
     int getMaxGoldNum()override {
         return maxGoldNum;

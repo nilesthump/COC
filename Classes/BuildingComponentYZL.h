@@ -31,7 +31,8 @@ public:
     // === 预览（先写好，不强制用） ===
     void ShowPreview(bool valid);
     void HidePreview();
-
+    //建筑组件里原本就存着 sprite_，只需开放读取权限
+    cocos2d::Sprite* GetSprite() const { return sprite_; }
     cocos2d::Node* GetRootNode() const { return root_; }
 
 private:

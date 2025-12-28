@@ -33,6 +33,7 @@ bool ArmyCamp::init(const std::string& textureName, int hp, int lv, float x0, fl
     x = x0;
     y = y0;
     level = lv;
+    size = 4;
     this->setPosition(Vec2(x0, y0));
     std::fill(army, army + 6, 0);
     // 初始化精灵（关键：类内管理图像）

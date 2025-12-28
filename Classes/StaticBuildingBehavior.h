@@ -1,14 +1,18 @@
-#pragma once
-#include "BaseBehavior.h"
-class StaticBuildingBehavior :public BaseBehavior
+// StaticBuildingBehavior.h
+#ifndef STATIC_BUILDING_BEHAVIOR_H
+#define STATIC_BUILDING_BEHAVIOR_H
+#include "UnitEnums.h"
+#include "UnitBehavior.h"
+
+class StaticBuildingBehavior : public UnitBehavior
 {
 public:
-    //可以覆盖基类方法或添加新方法
-    std::string GetBehaviorType() const override
-    {
-        return "StaticBuildingBehavior";
-    }
-
+    // 必须要实现的纯虚函数
+    virtual void OnUpdate(BattleUnit* unit, float deltaTime) override;
+    virtual void OnDeath(BattleUnit* unit) override;
+    virtual void OnDamageTaken(BattleUnit* unit, float damage, BattleUnit* source) override;
+    void showLootAnimation(BattleUnit* unit, ResourceType type);
+    virtual std::string GetBehaviorType() const override { return "StaticBuilding"; }
 };
 
-
+#endif

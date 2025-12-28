@@ -8,23 +8,34 @@ public:
     {
         return "DefenderNormalNavigation";
     }
-    BattleUnit* FindTarget(BattleUnit* self, const std::vector<BattleUnit*>& allTargets) override
+
+    //只找攻击范围内的目标
+    BattleUnit* FindTarget(BattleUnit* self, const std::vector<BattleUnit*>& allTargets, float searchRadius)
     {
-        // 防御者不需要偏好，只找最近的攻击者
+        if (!self || allTargets.empty()) return nullptr;
+
         BattleUnit* bestTarget = nullptr;
-        float minDistance = self->GetAttackDistance(); // 必须在射程内
+        float minDistance = FLT_MAX;
 
         for (auto target : allTargets)
         {
-            if (!target->IsAlive() || !target->GetState().IsAttacker()) continue;
+            if (!target || !target->IsAlive() || !target->GetState().IsAttacker()) continue;
+            if (!CanPhysicallyAttack(self, target)) continue;
 
             float dist = CalculateDistance(self, target);
-            if (dist < minDistance) { minDistance = dist; bestTarget = target; }
+
+            // 防御建筑只看半径（射程）内的敌人
+            if (dist <= searchRadius && dist < minDistance)
+            {
+                minDistance = dist;
+                bestTarget = target;
+            }
         }
+
         return bestTarget;
     }
 
-    void CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime) override
+    void CalculateMove(BattleUnit* self, BattleUnit* target, float deltaTime,IndexSystem* indexSys) override
     {
         // 建筑不会动，留空即可
     }

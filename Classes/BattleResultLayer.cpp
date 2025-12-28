@@ -1,5 +1,6 @@
 #include "BattleResultLayer.h"
 #include "HelloWorldScene.h"
+#include "BattleManager.h"
 USING_NS_CC;
 
 BattleResultLayer* BattleResultLayer::create(BattleResult result)
@@ -20,34 +21,54 @@ bool BattleResultLayer::init(BattleResult result)
         return false;
 
     auto size = Director::getInstance()->getVisibleSize();
+    auto bm = BattleManager::getInstance();
 
-    std::string title;
-    Color3B color;
+    // 1. 获取星级（假设 BattleManager 已经根据 LiveBattleScore 计算好了）
+    BattleStar star = bm->CalculateStars();
 
+    std::string titleText;
+    Color3B titleColor;
+
+    // 2. 根据战斗评价决定颜色
+    if (star == BattleStar::ZERO)
+    {
+        titleText = "DEFEAT";
+        titleColor = Color3B::RED;
+    }
+    else
+    {
+        titleText = StringUtils::format("VICTORY (%d STARS)", (int)star);
+        titleColor = Color3B::YELLOW;
+    }
+
+    // 3. 根据战斗结束原因（你的 BattleResult）添加补充描述
+    std::string reasonText;
     switch (result)
     {
-    case BattleResult::ATTACKERS_WIN:
-        title = "VICTORY";
-        color = Color3B::GREEN;
+    case BattleResult::ALL_DESTROYED:
+        reasonText = "Total Destruction!";
         break;
-    case BattleResult::DEFENDERS_WIN:
-        title = "DEFEAT";
-        color = Color3B::RED;
+    case BattleResult::UNITS_EXHAUSTED:
+        reasonText = "No Units Left";
         break;
     case BattleResult::TIME_UP:
-        title = "TIME UP";
-        color = Color3B::YELLOW;
+        reasonText = "Time Is Up";
         break;
     default:
-        title = "BATTLE END";
-        color = Color3B::WHITE;
+        reasonText = "Battle Ended";
         break;
     }
 
-    auto label = Label::createWithSystemFont(title, "Arial", 64);
-    label->setColor(color);
-    label->setPosition(size.width / 2, size.height / 2 + 80);
-    this->addChild(label);
+    // 主标题 (胜利/失败)
+    auto titleLabel = Label::createWithSystemFont(titleText, "Arial", 64);
+    titleLabel->setColor(titleColor);
+    titleLabel->setPosition(size.width / 2, size.height / 2 + 100);
+    this->addChild(titleLabel);
+
+    // 副标题 (结束原因)
+    auto reasonLabel = Label::createWithSystemFont(reasonText, "Arial", 24);
+    reasonLabel->setPosition(size.width / 2, size.height / 2 + 30);
+    this->addChild(reasonLabel);
 
     auto exitItem = MenuItemLabel::create(
         Label::createWithSystemFont("EXIT", "Arial", 32),
@@ -71,6 +92,9 @@ void BattleResultLayer::playEnterAnimation()
 
 void BattleResultLayer::onExitClicked(Ref*)
 {
+    BattleManager* battleManager = BattleManager::getInstance();
+    battleManager->clear(); // 重置战斗管理器状态
+    this->unscheduleUpdate(); // 停止更新
     Director::getInstance()->replaceScene(HelloWorld::createScene());
 }
 

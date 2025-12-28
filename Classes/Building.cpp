@@ -1,6 +1,5 @@
 #include "Building.h"
-#include "SecondScene.h"
-
+#include"SecondScene.h"
 using namespace cocos2d;
 
 static void problemLoading(const char* filename)

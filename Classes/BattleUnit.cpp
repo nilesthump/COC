@@ -1,4 +1,5 @@
 #include "BattleUnit.h"
+#include "BattleManager.h"
 #include "cocos2d.h"
 
 using namespace cocos2d;
@@ -14,17 +15,46 @@ BattleUnit::BattleUnit()
 
 BattleUnit::~BattleUnit()
 {
+	CCLOG("BattleUnit destructor called");
+
+	// 逻辑清理
+	target_ = nullptr;
+
+	// ===== 渲染清理：只需removeFromParent，父节点会自动管理内存 =====
+
+	// 单位精灵
+	if (unit_sprite_)
+	{
+		unit_sprite_->stopAllActions();  // 停止动画防止回调崩溃
+		unit_sprite_->removeFromParent();
+		unit_sprite_ = nullptr;
+	}
+
+	// 血条背景 - 不需要release
+	if (health_bar_bg_)
+	{
+		health_bar_bg_->stopAllActions();
+		health_bar_bg_->removeFromParent();
+		health_bar_bg_ = nullptr;
+	}
+
+	// 血条进度条 - 不需要release
+	if (health_bar_)
+	{
+		health_bar_->stopAllActions();
+		health_bar_->removeFromParent();
+		health_bar_ = nullptr;
+	}
+
+	// 建筑组件清理
 	if (building_)
 	{
-		if (auto root = building_->GetRootNode())
+		auto root = building_->GetRootNode();
+		if (root)
+		{
 			root->removeFromParent();
+		}
 	}
-	//清理视觉组件
-	RemoveSprite();
-
-	target_ = nullptr;
-	background_sprite_ = nullptr;
-	parent_node_ = nullptr;
 }
 
 void BattleUnit::SetBehavior(std::unique_ptr<UnitBehavior> behavior)
@@ -44,64 +74,72 @@ void BattleUnit::SetBuildingComponent(std::unique_ptr<BuildingComponent> comp)
 
 void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 {
-	if (!in_battle_)
-		return;
-	if (!state_.IsAlive())
-		return;
-	
-	//0.更新冷却
+	static int logFrame = 0;
+	logFrame++;
+	if (!in_battle_ || !state_.IsAlive()) return;
+
+	// A. 环境获取：从上帝那里拿到唯一的网格
+	auto indexSys = BattleManager::getInstance()->GetIndexSystem();
+
+	// B. 状态更新
 	state_.UpdateCoolDowns(deltaTime);
+	// C. 目标管理
+	if (navigation_)
+	{
+		bool shouldFindNew = false;
+		bool isDefender = (state_.IsDefenderBuilding() || state_.IsResourceBuilding() || state_.IsWall());
+		// 情况 1: 没目标或者目标死了
+		if (!target_ || !target_->IsAlive())
+		{
+			shouldFindNew = true;
+		}
+		// 情况 2: (核心改进) 目标虽然活着，但已经跑出我的射程了
+		else if (isDefender)
+		{
+			float currentDist = navigation_->CalculateDistance(this, target_);
+			if (currentDist > state_.GetSearchRange())
+			{
+				shouldFindNew = true;
+				target_ = nullptr; // 强制清除旧目标
+			}
+		}
+		if (shouldFindNew)
+		{
+			auto enemies = BattleManager::getInstance()->GetEnemiesFor(this);
+			float searchRadius = state_.GetSearchRange();
+			target_ = navigation_->FindTarget(this, enemies, searchRadius);
+		}
+	}
 
-	//1.行为更新
+	// D. 导航与移动
+	if (target_ && navigation_)
+	{
+		bool in_range = navigation_->IsInAttackRange(this, target_);
+		if (!in_range)
+		{
+			// 没够着，移动
+			if (state_.IsAttacker())
+			{
+				navigation_->CalculateMove(this, target_, deltaTime, indexSys);
+			}
+		}
+		else
+		{
+			//够着了，尝试执行 Behavior 里的攻击逻辑
+			if (state_.CanAttack() && behavior_)
+			{
+				behavior_->OnAttack(this, target_);
+				state_.ResetAttackCooldown();
+				// PlayAttackSound(); // 如果每个兵音效不一样，这行也可以移入 behavior
+			}
+		}
+	}
+
+	// E. 行为补充更新 (如特效更新等)
 	if (behavior_)
-	{
 		behavior_->OnUpdate(this, deltaTime);
-	}
 
-	//2.寻找目标
-	if (navigation_ )
-	{
-		target_ = navigation_->FindTarget(this, enemies);
-		has_target_in_range_ = false;
-	}
-
-	//3.移动
-	if (state_.IsAttacker() && navigation_ && target_ && !navigation_->IsInAttackRange(this, target_))
-	{
-		navigation_->CalculateMove(this, target_, deltaTime);
-	}
-
-	//4.先做“是否进入攻击范围”的判定
-	bool in_range = false;
-	if (navigation_ && target_)
-	{
-		in_range = navigation_->IsInAttackRange(this, target_);
-		if (in_range)
-		{
-			// 只要进过范围，就记住
-			has_target_in_range_ = true;
-		}
-	}
-
-	//5. 攻击：消耗预约
-	if (behavior_ && target_ && in_range &&
-		has_target_in_range_ &&
-		state_.CanAttack())
-	{
-		if (behavior_->CanAttack(this, target_))
-		{
-			float damage = behavior_->CalculateDamage(this, target_);
-			target_->TakeDamage(damage, this);
-			behavior_->OnAttack(this, target_);
-			state_.ResetAttackCooldown();
-			PlayAttackSound();
-
-			// 攻击完成，清掉预约
-			has_target_in_range_ = false;
-		}
-	}
-
-	// 6. 更新视觉
+	// F. 视觉同步
 	if (state_.IsAttacker())
 		UpdateSpritePosition();
 	UpdateHealthBar();
@@ -110,17 +148,27 @@ void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
 //这里的takedamage组合了减伤+受伤反应（暂时没用)+死亡处理，behavior需要再考虑
 void BattleUnit::TakeDamage(float damage, BattleUnit* source)
 {
+	if (!state_.IsAlive()) return; // 已经死了就不处理
 	state_.TakeDamage(damage);
+
+	//行为钩子 (用于播放动画、特效、爆钱粒子)
 	if (behavior_)
 	{
 		behavior_->OnDamageTaken(this, damage, source);
+
 		if (!state_.IsAlive())
 		{
 			behavior_->OnDeath(this);
-			// 播放死亡音效
 			PlayDeathSound();
 		}
 	}
+}
+
+//切换目标，遇到墙时调用（attackernavigation）
+void BattleUnit::ForceAttackTarget(BattleUnit* target)
+{
+	if (!target || !target->IsAlive()) return;
+	target_ = target;
 }
 
 //Getter接口实现
@@ -147,6 +195,11 @@ float BattleUnit::GetPositionX() const
 float BattleUnit::GetPositionY() const
 {
 	return state_.GetPositionY();
+}
+
+Vec2 BattleUnit::GetLogicalPosition()const
+{
+	return state_.GetLogicalPosition();
 }
 
 float BattleUnit::GetHealthPercent() const
@@ -204,6 +257,11 @@ CombatType BattleUnit::GetCombatType() const
 	return state_.GetCombatType();
 }
 
+TargetPriority BattleUnit::GetTargetPriority() const
+{
+	return state_.GetTargetPriority();
+}
+
 BattleUnit* BattleUnit::GetTarget() const
 {
 	return target_;
@@ -219,13 +277,18 @@ UnitBehavior* BattleUnit::GetBehavior() const
 	return behavior_.get();
 }
 
+BuildingComponent* BattleUnit::GetBuildingComponent() const
+{
+	return building_.get();
+}
+
 //视觉组件设置
 void BattleUnit::SetSprite(cocos2d::Sprite* sprite, cocos2d::Node* parent)
 {
 	if (unit_sprite_ && unit_sprite_->getParent())
 	{
-		unit_sprite_->removeFromParentAndCleanup(true);
-		unit_sprite_ = nullptr;
+		unit_sprite_->stopAllActions();
+		unit_sprite_->removeFromParent();
 	}
 
 	unit_sprite_ = sprite;
@@ -244,62 +307,80 @@ void BattleUnit::SetSprite(cocos2d::Sprite* sprite, cocos2d::Node* parent)
 
 Sprite* BattleUnit::GetSprite() const
 {
-	return unit_sprite_;
+	if (unit_sprite_) return unit_sprite_;
+
+	// 如果是建筑，从组件里获取精灵
+	if (building_)
+	{
+		return building_->GetSprite();
+	}
+
+	return nullptr;
 }
 
 void BattleUnit::SetupHealthBar(Node* parent)
 {
 	parent_node_ = parent;
 
-	// 先移除旧的健康条（如果存在）
-	if (health_bar_bg_ && health_bar_bg_->getParent())
+	// 先清理旧的血条（如果存在）
+	if (health_bar_bg_)
 	{
 		health_bar_bg_->removeFromParent();
 		health_bar_bg_ = nullptr;
 	}
-
-	if (health_bar_ && health_bar_->getParent())
+	if (health_bar_)
 	{
 		health_bar_->removeFromParent();
 		health_bar_ = nullptr;
 	}
-	// 创建血条背景
-	health_bar_bg_ = Sprite::create("btn_disabled.png");
+
+	health_bar_bg_ = Sprite::create("healthbar1.png");
 	if (health_bar_bg_)
 	{
-		health_bar_bg_->setScale(0.5f);
-		parent_node_->addChild(health_bar_bg_, 10); // 设置较高的Z轴顺序
+		health_bar_bg_->setScale(0.05f);
+		parent_node_->addChild(health_bar_bg_, 10);  // 父节点会自动管理
 	}
 
-	// 创建血条
-	Sprite* health_sprite = Sprite::create("btn_normal.png");
+	Sprite* health_sprite = Sprite::create("healthbar0.png");
 	if (health_sprite)
 	{
 		health_bar_ = ProgressTimer::create(health_sprite);
 		health_bar_->setType(ProgressTimer::Type::BAR);
 		health_bar_->setMidpoint(Vec2(0, 0.5f));
 		health_bar_->setBarChangeRate(Vec2(1, 0));
-		health_bar_->setScale(0.5f);
+		health_bar_->setScale(0.05f);
 		health_bar_->setPercentage(100.0f);
-		parent_node_->addChild(health_bar_, 11); // 设置更高的Z轴顺序
+		parent_node_->addChild(health_bar_, 11);  // 父节点会自动管理
 	}
+	if (health_bar_bg_) health_bar_bg_->setVisible(false);
+	if (health_bar_) health_bar_->setVisible(false);
 }
 
 void BattleUnit::RemoveSprite()
 {
-	if (unit_sprite_ && unit_sprite_->getParent())
+	if (unit_sprite_)
 	{
-		unit_sprite_->removeFromParent();
+		// 核心修改：增加对运行状态的判断
+		// isRunning() 确保节点还在活动的场景树中且没有被销毁
+		if (unit_sprite_->isRunning())
+		{
+			unit_sprite_->stopAllActions();
+		}
+
+		if (unit_sprite_->getParent() != nullptr)
+		{
+			unit_sprite_->removeFromParentAndCleanup(true);
+		}
 		unit_sprite_ = nullptr;
 	}
-	
-	if (health_bar_bg_ && health_bar_bg_->getParent())
+
+	if (health_bar_bg_)
 	{
 		health_bar_bg_->removeFromParent();
 		health_bar_bg_ = nullptr;
 	}
 
-	if (health_bar_ && health_bar_->getParent())
+	if (health_bar_)
 	{
 		health_bar_->removeFromParent();
 		health_bar_ = nullptr;
@@ -375,52 +456,61 @@ Node* BattleUnit::GetParentNode() const
 
 void BattleUnit::UpdateSpritePosition()
 {
-	if (!unit_sprite_ || !background_sprite_ || !parent_node_)
-		return;
-	// 使用新的转换方法
-	// state_中存储的是网格坐标(0-49, 0-49)
+	if (!unit_sprite_) return;
 	Vec2 local_pos = ConvertTest::convertGridToLocal(
 		state_.GetPositionX(),
 		state_.GetPositionY(),
 		background_sprite_
 	);
 
-	// 设置相对于game_world_的本地坐标
-	// 这样当background缩放/移动时，单位会自动跟随
-	unit_sprite_->setPosition(local_pos);
+	// 从 userData 获取高度偏移量 (如果有的话)
+	float extraHeight = (float)(uintptr_t)unit_sprite_->getUserData();
+
+	// 设置精灵位置（逻辑位置 + 视觉高度）
+	unit_sprite_->setPosition(local_pos + Vec2(0, extraHeight));
 }
 
 void BattleUnit::UpdateHealthBar()
 {
+	if (!health_bar_bg_ || !health_bar_ || !background_sprite_) 
+		return;
+
 	if (!state_.IsAlive())
 	{
-		if (health_bar_bg_) 
-			health_bar_bg_->setVisible(false);
-		if (health_bar_) 
-			health_bar_->setVisible(false);
+		health_bar_bg_->setVisible(false);
+		health_bar_->setVisible(false);
 		return;
 	}
 
-	// 获取单位的本地坐标
-	Vec2 unit_local_pos = ConvertTest::convertGridToLocal(
-		state_.GetPositionX(),
-		state_.GetPositionY(),
-		background_sprite_
-	);
-
-	// 血条在单位上方30像素（本地坐标）
-	Vec2 health_bar_pos = unit_local_pos + Vec2(0, 30);
-
-	if (health_bar_bg_)
+	float healthPercent = GetHealthPercent();
+	bool shouldShow = true;
+	if (!state_.IsAttacker() && healthPercent >= 0.99f)
 	{
-		health_bar_bg_->setPosition(health_bar_pos);
+		shouldShow = false;
 	}
+	health_bar_bg_->setVisible(shouldShow);
+	health_bar_->setVisible(shouldShow);
 
-	if (health_bar_)
+	
+	if (shouldShow)
 	{
+		Vec2 unit_local_pos = ConvertTest::convertGridToLocal(
+			state_.GetPositionX(),
+			state_.GetPositionY(),
+			background_sprite_
+		);
+
+		float flightHeight = 0.0f;
+		if (state_.GetUnitType() == UnitType::BALLOON)
+		{
+			flightHeight = 60.0f; 
+		}
+
+		Vec2 health_bar_pos = unit_local_pos + Vec2(0, flightHeight + 40.0f);
+
+		health_bar_bg_->setPosition(health_bar_pos);
 		health_bar_->setPosition(health_bar_pos);
-		float healthPercent = GetHealthPercent() * 100.0f;
-		health_bar_->setPercentage(healthPercent);
+		health_bar_->setPercentage(healthPercent * 100.0f);
 	}
 }
 

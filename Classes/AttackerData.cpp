@@ -5,7 +5,7 @@
 
 //伤害均是每次伤害，不是每秒伤害
 //! 其他细节请看社区
-//! 还没有规定好格子和距离的关系
+//还没有规定好格子和距离的关系，解决
 //野蛮人Barbarian
 AttackerData AttackerData::CreateBarbarianData(int level)
 {
@@ -18,11 +18,11 @@ AttackerData AttackerData::CreateBarbarianData(int level)
 	data.attack_target_type = AttackTargetType::GROUND;
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
-	data.preferred_target = TargetPriority::ANY;
-
+	data.target_priority = TargetPriority::ANY;
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
 	data.attack_distance = 0.4;		// 0.4格
+	data.search_range = data.attack_distance + 10;
 	data.move_speed = 2.0;			// 2格/s
 	static const std::vector<std::pair<int, int>> level_stats = {
 		{9, 45},
@@ -60,11 +60,11 @@ AttackerData AttackerData::CreateArcherData(int level)
 	data.attack_target_type = AttackTargetType::BOTH;
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
-	data.preferred_target = TargetPriority::ANY;
-
+	data.target_priority = TargetPriority::ANY;
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
 	data.attack_distance = 3.5;		// 3.5格
+	data.search_range = data.attack_distance+10;
 	data.move_speed = 3.0;			// 3格/s
 	static const std::vector<std::pair<int, int>> klevel_stats = {
 		{8, 22},
@@ -103,8 +103,8 @@ AttackerData AttackerData::CreateGiantData(int level)
 	data.attack_target_type = AttackTargetType::GROUND;
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
-	data.preferred_target = TargetPriority::DEFENSES;
-
+	data.target_priority = TargetPriority::DEFENSES;
+	data.search_range = 999.0;		//找防御设施
 	data.housing_space = 5;
 	data.attack_interval = 2.0;     // 2s
 	data.attack_distance = 1.0;		// 1格
@@ -134,6 +134,49 @@ AttackerData AttackerData::CreateGiantData(int level)
 	return data;
 }
 
+//气球兵Balloon
+AttackerData AttackerData::CreateBalloonData(int level)
+{
+	AttackerData data;
+
+	data.id = "balloon";
+	data.name = "气球兵";
+	data.level = level;
+	data.combat_type = CombatType::MELEE;
+	data.attack_target_type = AttackTargetType::GROUND;
+	data.unit_target_type = UnitTargetType::AIR;
+	data.attack_type = AttackType::AREA_DAMAGE;
+	data.target_priority = TargetPriority::DEFENSES;
+	data.search_range = 999.0;		//找防御设施
+	data.housing_space = 5;
+	data.attack_interval = 3.0;     // 3s
+	data.attack_distance = 0.05;		// 
+	data.damage_radius = 1.2;		//1.2格
+	data.move_speed = 1.3;			// 1.3格/s
+	static const std::vector<std::pair<int, int>> klevel_stats = {
+		{75, 150},
+		{96, 180},
+		{144, 216},
+		{216, 280},
+		{324, 390},
+		{486, 545},
+		{594, 690},
+		{708, 840},
+		{768, 940},
+		{828, 1040},
+		{870, 1140},
+		{912, 1240}		//12
+	};
+	int idx = level - 1;
+	if (idx >= 0 && idx < klevel_stats.size())
+	{
+		data.damage = klevel_stats[idx].first;
+		data.health = klevel_stats[idx].second;
+	}
+
+	return data;
+}
+
 //哥布林Goblin
 AttackerData AttackerData::CreateGoblinData(int level)
 {
@@ -146,7 +189,8 @@ AttackerData AttackerData::CreateGoblinData(int level)
 	data.attack_target_type = AttackTargetType::GROUND;
 	data.unit_target_type = UnitTargetType::GROUND;
 	data.attack_type = AttackType::SINGLE_TARGET;
-	data.preferred_target = TargetPriority::RESOURCES;
+	data.target_priority = TargetPriority::RESOURCES;
+	data.search_range = 30.0;		//资源型的找大一点
 	data.housing_space = 1;
 	data.attack_interval = 1.0;     // 1s
 	data.attack_distance = 0.4;		// 0.4格
@@ -163,9 +207,10 @@ AttackerData AttackerData::CreateGoblinData(int level)
 		{72, 146},	// 等级9
 	};
 	int idx = level - 1;
-	//! 哥布林对资源建筑类的每次伤害翻倍，这里需要一个接口判断攻击目标，然后翻倍
-	//! 翻倍的攻击力可以写在攻击battle里
-	//! ui展示的时候写在ui那里
+	//哥布林对资源建筑类的每次伤害翻倍，这里需要一个接口判断攻击目标，然后翻倍
+	//翻倍的攻击力可以写在攻击battle里
+	//ui展示的时候写在ui那里
+	//解决:写在attackernormalbehavior里，一个特判，只有炸弹人与所有的都不一致
 	if (idx >= 0 && idx < klevel_stats.size())
 	{
 		data.damage = klevel_stats[idx].first;
@@ -188,10 +233,11 @@ AttackerData AttackerData::CreateBomberData(int level)
 	data.combat_type = CombatType::MELEE;
 	data.attack_target_type = AttackTargetType::GROUND;
 	data.unit_target_type = UnitTargetType::GROUND;
-	data.attack_type = AttackType::SPLASH;
-	data.preferred_target = TargetPriority::WALLS;
-
+	data.attack_type = AttackType::AREA_DAMAGE;
+	data.target_priority = TargetPriority::WALLS;
+	data.search_range = 18.0;		//寻找最近墙
 	data.housing_space = 2;
+	data.damage_radius = 0.8;		//这是主动半径爆炸0.8，死亡伤害半径是0.8我们就直接用数据加上0.7了，不单独写一个变量了
 	data.attack_interval = 0.0;     //! 爆炸一次会杀死自己不需要间隔
 	data.attack_distance = 0.5;		// 0.5格
 	data.move_speed = 3.0;			// 3格/s

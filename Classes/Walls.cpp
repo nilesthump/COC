@@ -33,6 +33,7 @@ bool Walls::init(const std::string& textureName, int hp, int lv, float x0, float
     x = x0;
     y = y0;
     level = lv;
+    size = 1;
     this->setPosition(Vec2(x0, y0));
     // 初始化精灵（关键：类内管理图像）
     if (!initSprite(textureName))

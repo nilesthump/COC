@@ -9,7 +9,7 @@ class ArmyCamp : public Building
 protected:
     int maxSize = 20,currentSize = 0;
     int army[6];//代表六个兵种
-    int size[6] = { 1,1,5,1,2,5 }, establishCost[2] = { 200,200 };
+    int space[6] = { 1,1,5,1,2,5 }, establishCost[2] = { 200,200 };
     int upgradeCost[2] = { 100,100 };
     int upgradeTime = 10;
     bool initSprite(const std::string& textureName)override;
@@ -54,11 +54,11 @@ public:
         return army[i];
     }
     int getArmySize(int i)const override {
-        return size[i];
+        return space[i];
     }
     void updateNum(int i) override {
         army[i]+=1;
-        currentSize +=size[i];
+        currentSize +=space[i];
     }
     int getGoldCost() const override {
         return establishCost[0];

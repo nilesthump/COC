@@ -106,13 +106,13 @@ bool SecondScene::init()
     // 默认建筑初始化在 onWebSocketBuildingsMessage 中处理，通过服务器返回的建筑列表判断
 
     //53-100 总按钮部分
-    auto backItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
+    auto backItem = MenuItemImage::create("5.png", "5.2.png",
         CC_CALLBACK_1(SecondScene::menuFirstCallback, this));
     if (backItem == nullptr ||
         backItem->getContentSize().width <= 0 ||
         backItem->getContentSize().height <= 0)
     {
-        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+        problemLoading("'5.png' and '5.2.png'");
     }
     else
     {
@@ -120,20 +120,20 @@ bool SecondScene::init()
         double y = origin.y + visibleSize.height - backItem->getContentSize().height / 2;
         backItem->setPosition(Vec2(x, y));
 
-        auto backLabel = Label::createWithSystemFont("BACK", "fonts/Marker Felt.ttf", 24);
+        auto backLabel = Label::createWithSystemFont("BACK", "fonts/Marker Felt.ttf", 30);
         backLabel->setColor(Color3B::WHITE);
         backLabel->setPosition(Vec2(backItem->getContentSize().width / 2, backItem->getContentSize().height / 2));
         backItem->addChild(backLabel);
     }
 
-    auto buildItem = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
+    auto buildItem = MenuItemImage::create("5.png", "5.2.png",
         CC_CALLBACK_1(SecondScene::menuBuildCallback, this));
     if (buildItem == nullptr ||
         buildItem->getContentSize().width <= 0 ||
         buildItem->getContentSize().height <= 0)
 
     {
-        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+        problemLoading("'5.png' and '5.2.png'");
     }
     else
     {
@@ -141,64 +141,89 @@ bool SecondScene::init()
         double y = origin.y + visibleSize.height - buildItem->getContentSize().height*1.5;
         buildItem->setPosition(Vec2(x, y));
 
-        auto buildLabel = Label::createWithSystemFont("BUILD", "fonts/Marker Felt.ttf", 24);
+        auto buildLabel = Label::createWithSystemFont("BUILD", "fonts/Marker Felt.ttf", 30);
         buildLabel->setColor(Color3B::WHITE);
         buildLabel->setPosition(Vec2(buildItem->getContentSize().width / 2, buildItem->getContentSize().height / 2));
         buildItem->addChild(buildLabel);
     }
 
-    auto attackItem1 = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
-        CC_CALLBACK_1(SecondScene::menuBuildCallback, this));
-    if (attackItem1 == nullptr ||
-        attackItem1->getContentSize().width <= 0 ||
-        attackItem1->getContentSize().height <= 0)
+    auto attackItem= MenuItemImage::create("5.png", "5.2.png",
+        CC_CALLBACK_1(SecondScene::menuAttackCallback, this));
+    if (attackItem == nullptr ||
+        attackItem->getContentSize().width <= 0 ||
+        attackItem->getContentSize().height <= 0)
 
     {
-        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
-    }
-    else 
-    {
-        double x = origin.x + visibleSize.width- attackItem1->getContentSize().width/2;
-        double y = origin.y + attackItem1->getContentSize().height / 2;
-        attackItem1->setPosition(Vec2(x, y));
-
-        auto attackLabel = Label::createWithSystemFont("Boss1", "fonts/Marker Felt.ttf", 24);
-        attackLabel->setColor(Color3B::WHITE);
-        attackLabel->setPosition(Vec2(attackItem1->getContentSize().width / 2, attackItem1->getContentSize().height / 2));
-        attackItem1->addChild(attackLabel);
-    }
-
-    auto attackItem2 = MenuItemImage::create("btn_normal.png", "btn_pressed.png",
-        CC_CALLBACK_1(SecondScene::menuBuildCallback, this));
-    if (attackItem2 == nullptr ||
-        attackItem2->getContentSize().width <= 0 ||
-        attackItem2->getContentSize().height <= 0)
-
-    {
-        problemLoading("'btn_normal.png' and 'btn_pressed.png'");
+        problemLoading("'5.png' and '5.2.png'");
     }
     else
     {
-        double x = origin.x + visibleSize.width - attackItem2->getContentSize().width *1.5;
-        double y = origin.y + attackItem2->getContentSize().height / 2;
-        attackItem2->setPosition(Vec2(x, y));
+        double x = origin.x + visibleSize.width - attackItem->getContentSize().width / 2;
+        double y = origin.y + attackItem->getContentSize().height / 2;
+        attackItem->setPosition(Vec2(x, y));
 
-        auto attackLabel = Label::createWithSystemFont("Boss2", "fonts/Marker Felt.ttf", 24);
+        auto attackLabel = Label::createWithSystemFont("ATTACK", "fonts/Marker Felt.ttf", 30);
         attackLabel->setColor(Color3B::WHITE);
-        attackLabel->setPosition(Vec2(attackItem2->getContentSize().width / 2, attackItem2->getContentSize().height / 2));
-        attackItem2->addChild(attackLabel);
+        attackLabel->setPosition(Vec2(attackItem->getContentSize().width / 2, attackItem->getContentSize().height / 2));
+        attackItem->addChild(attackLabel);
     }
 
-    auto menu = Menu::create(backItem, buildItem, attackItem1,attackItem2, nullptr);
+    auto menu = Menu::create(backItem, buildItem, attackItem, nullptr);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
-    
-    //101-257 建筑菜单
+    //进攻菜单
+    attackPanel = Node::create();
+    double attackPanelX = -attackItem->getContentSize().width / 2;
+    double attackPanelY = attackItem->getContentSize().height / 2;
+    attackPanel->setPosition(Vec2(attackPanelX, attackPanelY));
+    attackPanel->setVisible(false);
+    attackItem->addChild(attackPanel, 1);
+
+    auto attackBg= Sprite::create("1.png");
+    if (attackBg == nullptr) {
+        problemLoading("'1.png'");
+    }
+    else {
+        double panelBgX = attackItem->getContentSize().width- attackBg->getContentSize().width;
+        double panelBgY = attackItem->getContentSize().height *2;
+        attackBg->setPosition(Vec2(panelBgX, panelBgY));
+        attackPanel->addChild(attackBg);
+    }
+
+    boss1Btn= MenuItemImage::create(
+        "5.png","5.2.png",
+        CC_CALLBACK_1(SecondScene::menuBoss1Callback, this));
+    if (boss1Btn) {
+        auto boss1Label = Label::createWithSystemFont("Boss-1", "fonts/Marker Felt.ttf", 30);
+        boss1Label->setColor(Color3B::WHITE);
+        boss1Label->setPosition(Vec2(boss1Btn->getContentSize().width / 2, boss1Btn->getContentSize().height / 2));
+        boss1Btn->addChild(boss1Label);
+
+        boss1Btn->setPosition(Vec2(attackBg->getContentSize().width / 2, attackBg->getContentSize().height - boss1Btn->getContentSize().height  / 2-20));
+    }
+
+    boss2Btn = MenuItemImage::create(
+        "5.png", "5.2.png",
+        CC_CALLBACK_1(SecondScene::menuBoss2Callback, this));
+    if (boss2Btn) {
+        auto boss2Label = Label::createWithSystemFont("Boss-2", "fonts/Marker Felt.ttf", 30);
+        boss2Label->setColor(Color3B::WHITE);
+        boss2Label->setPosition(Vec2(boss2Btn->getContentSize().width / 2, boss2Btn->getContentSize().height / 2));
+        boss2Btn->addChild(boss2Label);
+
+        boss2Btn->setPosition(Vec2(attackBg->getContentSize().width / 2, attackBg->getContentSize().height - boss2Btn->getContentSize().height *1.5 - 40));
+    }
+
+    auto attackMenu = Menu::create(boss1Btn, boss2Btn, nullptr);
+    attackMenu->setPosition(Vec2::ZERO);
+    attackBg->addChild(attackMenu);
+
+    //建筑菜单
     buildPanel = Node::create();
 
     double buildPanelX = buildItem->getContentSize().width;
-    double buildPanelY = 0;
+    double buildPanelY = buildItem->getContentSize().height;
     buildPanel->setPosition(Vec2(buildPanelX, buildPanelY));
     buildPanel->setVisible(false);
     buildItem->addChild(buildPanel, 1);
@@ -235,12 +260,7 @@ bool SecondScene::init()
                 if (goldMinePreview) {
                     // 预览态设置：半透明（区分实际对象）
                     goldMinePreview->setOpacity(150);
-                    // goldMinePreview->setScale(0.5f); // 如需缩放可加
 
-                    // 计算预览初始位置（和原来的逻辑一致）
-                    //Vec2 worldPos = goldMineBtn->getParent()->convertToWorldSpace(goldMineBtn->getPosition());
-                    //Vec2 localPos = background_sprite_->convertToNodeSpace(worldPos);
-                    //goldMinePreview->setMinePosition(Vec2(goldMinePreview->getX(), goldMinePreview->getY()));
                     Vec2 my = Vec2(goldMinePreview->getX(), goldMinePreview->getY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
@@ -256,7 +276,7 @@ bool SecondScene::init()
         }
     );
     if (goldMineBtn) {
-        goldMineBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 / 2 - 20));
+        goldMineBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 / 2 ));
     }
     goldMineBtn->setScale(0.6f);
 
@@ -297,7 +317,7 @@ bool SecondScene::init()
         }
     );
     if (elixirCollectorBtn) {
-        elixirCollectorBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 1.5 - 20));
+        elixirCollectorBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 1.5 ));
     }
     elixirCollectorBtn->setScale(0.6f);
 
@@ -337,7 +357,7 @@ bool SecondScene::init()
         }
     );
     if (goldStorageBtn) {
-        goldStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 2.5 - 20));
+        goldStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 2.5 +8));
     }
     goldStorageBtn->setScale(0.6f);
 
@@ -377,7 +397,7 @@ bool SecondScene::init()
         }
     );
     if (elixirStorageBtn) {
-        elixirStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 3.5 - 20));
+        elixirStorageBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 3.5 +12));
     }
     elixirStorageBtn->setScale(0.6f);
 
@@ -417,7 +437,7 @@ bool SecondScene::init()
         }
     );
     if (armyCampBtn) {
-        armyCampBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 4.5 - 20));
+        armyCampBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 4.5+15 ));
     }
     armyCampBtn->setScale(0.6f);
 
@@ -457,7 +477,7 @@ bool SecondScene::init()
         }
     );
     if (wallsBtn) {
-        wallsBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 5.5 - 20));
+        wallsBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 5.5 +20));
     }
     wallsBtn->setScale(0.6f);
 
@@ -497,7 +517,7 @@ bool SecondScene::init()
         }
     );
     if (builderHutBtn) {
-        builderHutBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 6.5 - 20));
+        builderHutBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 6.5 +25));
     }
     builderHutBtn->setScale(0.6f);
 
@@ -537,12 +557,6 @@ bool SecondScene::init()
     // 绘制菱形网格
     grids_ = grid_manager_->drawDiamondGrid(background_sprite_, 50.0f);
 
-    // 创建坐标显示标签
-    //coordinate_label_ = Label::createWithTTF("坐标: ", "fonts/STZhongSong_Bold.ttf", 20);
-    //coordinate_label_->setColor(Color3B::YELLOW);
-    //coordinate_label_->setPosition(Vec2(origin.x + visibleSize.width - 200, origin.y + 30));
-    //this->addChild(coordinate_label_, 2);
-  
     // 创建圣水图标和标签
     elixirIcon = Sprite::create("btn_normal.png"); // 实际项目中应该替换为正确的圣水图标资源名
     if (elixirIcon == nullptr)
@@ -559,21 +573,21 @@ bool SecondScene::init()
         // 创建"圣水"文字标签
         elixirNameLabel = Label::createWithTTF("圣水", "fonts/STZhongSong_Bold.ttf", 20);
         elixirNameLabel->setColor(Color3B::BLUE);
-        elixirNameLabel->setPosition(Vec2(elixirIcon->getPositionX() - elixirNameLabel->getContentSize().width / 2, elixirIcon->getPositionY()));
+        elixirNameLabel->setPosition(Vec2(elixirIcon->getPositionX() - elixirNameLabel->getContentSize().width / 2-50, elixirIcon->getPositionY()));
         this->addChild(elixirNameLabel, 2);
 
         // 创建圣水数量标签
         elixirLabel = Label::createWithTTF("750", "fonts/Marker Felt.ttf", 24);
         elixirLabel->setColor(Color3B::BLUE);
-        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() + 20, elixirIcon->getPositionY()));
+        elixirLabel->setPosition(Vec2(elixirIcon->getPositionX() , elixirIcon->getPositionY()));
         this->addChild(elixirLabel, 2);
     }
 
     // 创建金币图标和标签
-    goldIcon = Sprite::create("btn_pressed.png"); // 实际项目中应该替换为正确的金币图标资源名
+    goldIcon = Sprite::create("btn_normal.png"); // 实际项目中应该替换为正确的金币图标资源名
     if (goldIcon == nullptr)
     {
-        problemLoading("'btn_pressed.png' (作为金币图标的替代)");
+        problemLoading("'btn_normal.png' (作为金币图标的替代)");
     }
     else
     {
@@ -586,21 +600,21 @@ bool SecondScene::init()
         // 创建"金币"文字标签
         goldNameLabel = Label::createWithTTF("金币", "fonts/STZhongSong_Bold.ttf", 20);
         goldNameLabel->setColor(Color3B::YELLOW);
-        goldNameLabel->setPosition(Vec2(goldIcon->getPositionX() - goldNameLabel->getContentSize().width / 2, goldIcon->getPositionY()));
+        goldNameLabel->setPosition(Vec2(goldIcon->getPositionX() - goldNameLabel->getContentSize().width / 2-50, goldIcon->getPositionY()));
         this->addChild(goldNameLabel, 2);
 
         // 创建金币数量标签
         goldLabel = Label::createWithTTF("750", "fonts/Marker Felt.ttf", 24);
         goldLabel->setColor(Color3B::YELLOW);
-        goldLabel->setPosition(Vec2(goldIcon->getPositionX() + 20, goldIcon->getPositionY()));
+        goldLabel->setPosition(Vec2(goldIcon->getPositionX(), goldIcon->getPositionY()));
         this->addChild(goldLabel, 2);
     }
 
     // 347-361 创建宝石图标和标签
-    gemIcon= Sprite::create("btn_disabled.png");
+    gemIcon= Sprite::create("btn_normal.png");
     if (gemIcon == nullptr)
     {
-        problemLoading("'btn_disabled.png' (作为金币图标的替代)");
+        problemLoading("'btn_normal.png' (作为金币图标的替代)");
     }
     else
     {
@@ -613,13 +627,13 @@ bool SecondScene::init()
         // 创建"宝石"文字标签
         gemNameLabel = Label::createWithTTF("宝石", "fonts/STZhongSong_Bold.ttf", 20);
         gemNameLabel->setColor(Color3B::GREEN);
-        gemNameLabel->setPosition(Vec2(gemIcon->getPositionX() - gemNameLabel->getContentSize().width / 2, gemIcon->getPositionY()));
+        gemNameLabel->setPosition(Vec2(gemIcon->getPositionX() - gemNameLabel->getContentSize().width / 2-50, gemIcon->getPositionY()));
         this->addChild(gemNameLabel, 2);
 
         // 创建金币数量标签
         gemLabel = Label::createWithTTF("15", "fonts/Marker Felt.ttf", 24);
         gemLabel->setColor(Color3B::GREEN);
-        gemLabel->setPosition(Vec2(gemIcon->getPositionX() + 20, gemIcon->getPositionY()));
+        gemLabel->setPosition(Vec2(gemIcon->getPositionX() , gemIcon->getPositionY()));
         this->addChild(gemLabel, 2);
     }
 
@@ -654,7 +668,17 @@ void SecondScene::update(float delta)
     // 累计时间并每秒增加圣水数量
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
-
+    Building* notFullGoldStorage = nullptr, * notFullElixirStorage = nullptr;
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+            notFullGoldStorage = building;
+        }
+    }
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+            notFullElixirStorage = building;
+        }
+    }
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
@@ -675,6 +699,7 @@ void SecondScene::update(float delta)
             }
             //下均为非升级中
             else if (dynamic_cast<GoldMine*>(building)) {
+<<<<<<< HEAD
                 Building* t = building;
                 int tempGold = building->getSpeed();
                 int maxIterations = 100;
@@ -727,6 +752,71 @@ void SecondScene::update(float delta)
                             break;
                         }
                         t2 = nextStorage;
+=======
+                //两个临时变量存储
+                int tempGold = building->getSpeed();
+                while (tempGold>0) {
+                    //金矿非常未满
+                    if (building->getMaxStock() - building->getCurrentStock() >= tempGold) {
+                        building->updateCurrentStock(tempGold);
+                        tempGold = 0;//接下来肯定会退出循环
+                        break;
+                    }
+                    //金矿将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存钱罐
+                    else if (building->getMaxStock() - building->getCurrentStock() < tempGold && building->getMaxStock() - building->getCurrentStock() > 0) {
+                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());//尽量存
+                        tempGold -= (building->getMaxStock() - building->getCurrentStock());//剩余未存
+                        continue;//金矿已满，下次while循环会直接跳到下面对于存钱罐的判断
+                    }
+                    //有
+                    if (notFullGoldStorage != nullptr) {
+                        if (notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock() >= tempGold) {
+                            notFullGoldStorage->addCurrent(tempGold);
+                            tempGold = 0;
+                            break;
+                        }
+                        else {
+                            notFullGoldStorage->addCurrent(notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock());
+                            tempGold -= notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock();//剩余未存
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+                    }               
+                }
+            }
+            else if (dynamic_cast<ElixirCollector*>(building)) {
+                int tempElixir = building->getSpeed();
+                while (tempElixir > 0) {
+                    //非常未满
+                    if (building->getMaxStock() - building->getCurrentStock() >= tempElixir) {
+                        building->updateCurrentStock(tempElixir);
+                        tempElixir = 0;//接下来肯定会退出循环
+                        break;
+                    }
+                    //将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存罐
+                    else if (building->getMaxStock() - building->getCurrentStock() < tempElixir && building->getMaxStock() - building->getCurrentStock() > 0) {
+                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());
+                        tempElixir -= (building->getMaxStock() - building->getCurrentStock());
+                        continue;
+                    }
+                    //有
+                    else if (notFullElixirStorage != nullptr) {
+                        if (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock() >= tempElixir) {
+                            notFullElixirStorage->addCurrent(tempElixir);
+                            tempElixir = 0;
+                            break;
+                        }
+                        else {
+                            notFullElixirStorage->addCurrent(notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());
+                            tempElixir -= (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());//剩余未存
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+>>>>>>> 663d826ac427855dd4ac5e32c99aac542ee983a2
                     }
                     else {
                         Building* nextStorage = getElixirStorage();
@@ -769,6 +859,38 @@ void SecondScene::menuBuildCallback(Ref* pSender)
     buildPanel->setVisible(!buildPanel->isVisible());
 }
 
+void SecondScene::menuAttackCallback(Ref* pSender)
+{
+    attackPanel->setVisible(!attackPanel->isVisible());
+}
+
+void SecondScene::menuBoss1Callback(Ref* pSender)
+{
+    auto config = CombatSessionManager::getInstance();
+    config->reset(); 
+
+    std::map<UnitType, int>army;
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<ArmyCamp*>(building)) {
+            army[UnitType::BARBARIAN] += building->getArmy(0);
+            army[UnitType::ARCHER] += building->getArmy(1);
+            army[UnitType::GIANT] += building->getArmy(2);
+            army[UnitType::GOBLIN] += building->getArmy(3);
+            army[UnitType::BOMBER] += building->getArmy(4);
+            army[UnitType::BALLOON] += building->getArmy(5);
+        }
+    }
+    config->setAttackerInventory(army);
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
+
+}
+
+void SecondScene::menuBoss2Callback(Ref* pSender)
+{
+    Director::getInstance()->replaceScene(BattleTestLayer::createScene());
+}
+
+
 bool SecondScene::onTouchBegan(Touch* touch, Event* event)
 {
     // 1. 获取当前时间（使用clock()计算程序运行总时间，单位为秒）
@@ -796,8 +918,8 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
             // 复用菱形碰撞检测代码（判断触摸点是否在当前建筑的菱形范围内）
             Sprite* mineSprite = building->getSprite();
             Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
-            const float horizontalDiag = 56.0f * 3;
-            const float verticalDiag = 42.0f * 3;
+            const float horizontalDiag = 56.0f * building->getSize();
+            const float verticalDiag = 42.0f * building->getSize();
             float a = horizontalDiag / 2;
             float b = verticalDiag / 2;
             float dx = touchPos.x - buildingScreenPos.x;
@@ -856,8 +978,8 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
             Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
 
             // 菱形参数配置
-            const float horizontalDiag = 56.0f * 3; // 水平对角线总长度
-            const float verticalDiag = 42.0f * 3;   // 竖直对角线总长度
+            const float horizontalDiag = 56.0f * building->getSize(); // 水平对角线总长度
+            const float verticalDiag = 42.0f * building->getSize();   // 竖直对角线总长度
             const float a = horizontalDiag / 2;     // 水平半轴（x方向）
             const float b = verticalDiag / 2;       // 竖直半轴（y方向）
 
@@ -998,7 +1120,6 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
                 if (movingBuilding) {
                     movingBuilding->getSprite()->setColor(Color3B::RED);
                 }
-                return; // 不更新位置
             }
             //不碰撞&&在界内
             else {
@@ -1056,16 +1177,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
         float snappedX = ceil(localPos.x / gridCellSizeX) * gridCellSizeX;
         float snappedY = ceil(localPos.y / gridCellSizeY) * gridCellSizeY;
         Vec2 snappedPos = Vec2(snappedX, snappedY);
-#if 0
-        // 1. 移除预览对象
-        if (draggingItem == elixirCollectorBtn) {
-            ElixirCollector* dragElixirPreview = static_cast<ElixirCollector*>(draggingItem->getUserData());
-            if (dragElixirPreview) {
-                dragElixirPreview->removeFromParentAndCleanup(true);
-                draggingItem->setUserData(nullptr);
-            }
-        }
-#endif
+
         // 检查放置区域有效性
         Vec2 diamondPos = convertScreenToDiamond(screenPos);
         // 在有效区域
@@ -1170,6 +1282,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedGoldMine, 15);
                         }
                         placedBuildings.push_back(placedGoldMine);
+                        placedGoldMine->setScale(0.8f);
                         placedGoldMine->playSuccessBlink();
                         sendSaveBuildingRequest("GoldMine", snappedPos.x, snappedPos.y, 1,
                             placedGoldMine->getHp(), placedGoldMine->getHp(),
@@ -1201,6 +1314,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedElixirCollector, 15);
                         }
                         placedBuildings.push_back(placedElixirCollector);
+                        placedElixirCollector->setScale(0.8f);
                         placedElixirCollector->playSuccessBlink();
                         sendSaveBuildingRequest("ElixirCollector", snappedPos.x, snappedPos.y, 1,
                             placedElixirCollector->getHp(), placedElixirCollector->getHp(),
@@ -1232,6 +1346,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedGoldStorage, 15);
                         }
                         placedBuildings.push_back(placedGoldStorage);
+                        placedGoldStorage->setScale(0.8f);
                         placedGoldStorage->playSuccessBlink();
                         sendSaveBuildingRequest("GoldStorage", snappedPos.x, snappedPos.y, 1,
                             placedGoldStorage->getHp(), placedGoldStorage->getHp(),
@@ -1263,6 +1378,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedElixirStorage, 15);
                         }
                         placedBuildings.push_back(placedElixirStorage);
+                        placedElixirStorage->setScale(1.1f);
                         placedElixirStorage->playSuccessBlink();
                         sendSaveBuildingRequest("ElixirStorage", snappedPos.x, snappedPos.y, 1,
                             placedElixirStorage->getHp(), placedElixirStorage->getHp(),
@@ -1294,6 +1410,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedArmyCamp, 15);
                         }
                         placedBuildings.push_back(placedArmyCamp);
+                        placedArmyCamp->setScale(1.1f);
                         placedArmyCamp->playSuccessBlink();
                         sendSaveBuildingRequest("ArmyCamp", snappedPos.x, snappedPos.y, 1,
                             placedArmyCamp->getHp(), placedArmyCamp->getHp(),
@@ -1356,6 +1473,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedBuilderhut, 15);
                         }
                         placedBuildings.push_back(placedBuilderhut);
+                        placedBuilderhut->setScale(0.8f);
                         placedBuilderhut->playSuccessBlink();
                         sendSaveBuildingRequest("BuilderHut", snappedPos.x, snappedPos.y, 1,
                             placedBuilderhut->getHp(), placedBuilderhut->getHp(),
@@ -1714,8 +1832,8 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Building* building) {
     // 大菱形参数：
     // 水平对角线长 56.0* = 336 → 半长 168
     // 竖直对角线长 42.0*6 = 252 → 半长 126
-    const float bigHalfHoriz = 56.0f * (yourSize + mySize) / 8; // 水平半对角线（56*6的一半）
-    const float bigHalfVert = 42.0f * (yourSize + mySize) / 8;   // 竖直半对角线（42*6的一半）
+    const float bigHalfHoriz = 56.0f * (yourSize + mySize) / 8;
+    const float bigHalfVert = 42.0f * (yourSize + mySize) / 8;
 
     // 菱形碰撞判断（带浮点容错）
     auto isPointInSingleDiamond = [](const Vec2& p, const Vec2& center, float hh, float hv) -> bool {
@@ -2635,22 +2753,74 @@ void SecondScene::initDefaultBuildingsAndSave() {
         maxLevel = townHall->getLv();
     }
 
+    auto goldMine = GoldMine::create("GoldMineLv1.png");
+    if (goldMine) {
+        goldMine->updatePosition(Vec2(1918, 1625));
+        if (background_sprite_) {
+            background_sprite_->addChild(goldMine, 15);
+        }
+        placedBuildings.push_back(goldMine);
+        goldMine->setScale(0.9f);
+    }
+
+    auto elixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
+    if (elixirCollector) {
+        elixirCollector->updatePosition(Vec2(1918, 1121));
+        if (background_sprite_) {
+            background_sprite_->addChild(elixirCollector, 15);
+        }
+        placedBuildings.push_back(elixirCollector);
+        elixirCollector->setScale(0.9f);
+    }
+
+    auto goldStorage = GoldStorage::create("GoldStorageLv1.png");
+    if (goldStorage) {
+        goldStorage->updatePosition(Vec2(1918, 869));
+        if (background_sprite_) {
+            background_sprite_->addChild(goldStorage, 15);
+        }
+        placedBuildings.push_back(goldStorage);
+        goldStorage->setScale(0.9f);
+    }
+
+    auto elixirStorage = GoldStorage::create("ElixirStorageLv1.png");
+    if (elixirStorage) {
+        elixirStorage->updatePosition(Vec2(1918, 1877));
+        if (background_sprite_) {
+            background_sprite_->addChild(elixirStorage, 15);
+        }
+        placedBuildings.push_back(elixirStorage);
+        elixirStorage->setScale(1.1f);
+    }
+
+    auto armyCamp = ArmyCamp::create("ArmyCampLv1.png");
+    if (armyCamp) {
+        armyCamp->updatePosition(Vec2(2142, 1625));
+        if (background_sprite_) {
+            background_sprite_->addChild(armyCamp, 15);
+        }
+        placedBuildings.push_back(armyCamp);
+        armyCamp->setScale(1.1f);
+    }
+
     auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
     if (builderHut1) {
-        builderHut1->updatePosition(Vec2(1600, 1373));
+        builderHut1->updatePosition(Vec2(1638, 1373));
         if (background_sprite_) {
             background_sprite_->addChild(builderHut1, 15);
         }
         placedBuildings.push_back(builderHut1);
+        builderHut1->setScale(0.9f);
     }
 
     auto builderHut2 = BuilderHut::create("BuilderHutLv1.png");
     if (builderHut2) {
-        builderHut2->updatePosition(Vec2(2200, 1373));
+        builderHut2->updatePosition(Vec2(2198, 1373));
         if (background_sprite_) {
             background_sprite_->addChild(builderHut2, 15);
         }
         placedBuildings.push_back(builderHut2);
+        builderHut2->setScale(0.9f);
     }
 }
 
