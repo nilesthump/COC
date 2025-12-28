@@ -668,90 +668,92 @@ void SecondScene::update(float delta)
     // 累计时间并每秒增加圣水数量
     static float elapsedTime = 0.0f;
     elapsedTime += delta;
-
+    Building* notFullGoldStorage = nullptr, * notFullElixirStorage = nullptr;
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+            notFullGoldStorage = building;
+        }
+    }
+    for (auto building : placedBuildings) {
+        if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+            notFullElixirStorage = building;
+        }
+    }
     // 当经过1秒时
     if (elapsedTime >= 1.0f)
     {
-        // 复制一份副本进行遍历，避免遍历时修改容器
-        std::vector<Building*> buildingsCopy = placedBuildings;
-        for (auto building : buildingsCopy) {
+        // 判断建筑类型并分别累加速度
+        for (auto building : placedBuildings) {
             if (!building) continue;
-
-            // 跳过无效的 building 指针
-            uintptr_t ptrValue = reinterpret_cast<uintptr_t>(building);
-            if (ptrValue == 0xDDDDDDDD || ptrValue == 0xCCCCCCCC || ptrValue < 0x1000) {
-                CCLOG("SecondScene::update: found suspicious building pointer 0x%lX", ptrValue);
-                continue;
-            }
-
             if (building->getIsUpgrade()) {
                 building->cutTime();
             }
             //下均为非升级中
             else if (dynamic_cast<GoldMine*>(building)) {
-                Building* t = building;
+                //两个临时变量存储
                 int tempGold = building->getSpeed();
-                int maxIterations = 100;
-                int iterations = 0;
-                while (t != nullptr && tempGold > 0 && iterations < maxIterations) {
-                    iterations++;
-                    int spaceAvailable = t->getMaxStock() - t->getCurrentStock();
-                    if (spaceAvailable >= tempGold) {
-                        t->updateCurrentStock(tempGold);
-                        tempGold = 0;
+                while (tempGold > 0) {
+                    //金矿非常未满
+                    if (building->getMaxStock() - building->getCurrentStock() >= tempGold) {
+                        building->updateCurrentStock(tempGold);
+                        tempGold = 0;//接下来肯定会退出循环
+                        break;
                     }
-                    else if (spaceAvailable > 0) {
-                        tempGold -= spaceAvailable;
-                        t->updateCurrentStock(spaceAvailable);
-                        Building* nextStorage = getGoldStorage();
-                        if (nextStorage == t || nextStorage == nullptr) {
+                    //金矿将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存钱罐
+                    else if (building->getMaxStock() - building->getCurrentStock() < tempGold && building->getMaxStock() - building->getCurrentStock() > 0) {
+                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());//尽量存
+                        tempGold -= (building->getMaxStock() - building->getCurrentStock());//剩余未存
+                        continue;//金矿已满，下次while循环会直接跳到下面对于存钱罐的判断
+                    }
+                    //有
+                    if (notFullGoldStorage != nullptr) {
+                        if (notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock() >= tempGold) {
+                            notFullGoldStorage->addCurrent(tempGold);
+                            tempGold = 0;
                             break;
                         }
-                        t = nextStorage;
+                        else {
+                            notFullGoldStorage->addCurrent(notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock());
+                            tempGold -= notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock();//剩余未存
+                            break;
+                        }
                     }
                     else {
-                        Building* nextStorage = getGoldStorage();
-                        if (nextStorage == t || nextStorage == nullptr) {
-                            break;
-                        }
-                        t = nextStorage;
+                        break;
                     }
-                }
-                if (iterations >= maxIterations) {
-                    CCLOG("SecondScene::update: GoldMine loop hit max iterations");
                 }
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                Building* t2 = building;
-                int tempElixir = t2->getSpeed();
-                int maxIterations2 = 100;
-                int iterations2 = 0;
-                while (t2 != nullptr && tempElixir > 0 && iterations2 < maxIterations2) {
-                    iterations2++;
-                    int spaceAvailable = t2->getMaxStock() - t2->getCurrentStock();
-                    if (spaceAvailable >= tempElixir) {
-                        t2->updateCurrentStock(tempElixir);
-                        tempElixir = 0;
+                int tempElixir = building->getSpeed();
+                while (tempElixir > 0) {
+                    //非常未满
+                    if (building->getMaxStock() - building->getCurrentStock() >= tempElixir) {
+                        building->updateCurrentStock(tempElixir);
+                        tempElixir = 0;//接下来肯定会退出循环
+                        break;
                     }
-                    else if (spaceAvailable > 0) {
-                        tempElixir -= spaceAvailable;
-                        t2->updateCurrentStock(spaceAvailable);
-                        Building* nextStorage = getElixirStorage();
-                        if (nextStorage == t2 || nextStorage == nullptr) {
+                    //将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存罐
+                    else if (building->getMaxStock() - building->getCurrentStock() < tempElixir && building->getMaxStock() - building->getCurrentStock() > 0) {
+                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());
+                        tempElixir -= (building->getMaxStock() - building->getCurrentStock());
+                        continue;
+                    }
+                    //有
+                    else if (notFullElixirStorage != nullptr) {
+                        if (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock() >= tempElixir) {
+                            notFullElixirStorage->addCurrent(tempElixir);
+                            tempElixir = 0;
                             break;
                         }
-                        t2 = nextStorage;
+                        else {
+                            notFullElixirStorage->addCurrent(notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());
+                            tempElixir -= (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());//剩余未存
+                            break;
+                        }
                     }
                     else {
-                        Building* nextStorage = getElixirStorage();
-                        if (nextStorage == t2 || nextStorage == nullptr) {
-                            break;
-                        }
-                        t2 = nextStorage;
+                        break;
                     }
-                }
-                if (iterations2 >= maxIterations2) {
-                    CCLOG("SecondScene::update: ElixirCollector loop hit max iterations");
                 }
             }
             else {
@@ -772,7 +774,6 @@ void SecondScene::update(float delta)
         elapsedTime = 0.0f;
     }
 }
-
 void SecondScene::menuFirstCallback(Ref* pSender)
 {
     Director::getInstance()->replaceScene(HelloWorld::createScene());
