@@ -14,5 +14,7 @@
 * 项目功能
     * 
     * 
-    * 
+    * 联网功能
+       * [server](https://github.com/nilesthump/COC/tree/main/server)服务器连接客户端，进行联网交互操作
+       * [SQLite](https://github.com/nilesthump/COC/tree/main/SqLiteTools)数据库记录服务器资源数据，客户端加载时从服务器数据库调用数据  数据库为开源C库SQLite
 ---
