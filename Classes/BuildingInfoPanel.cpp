@@ -206,6 +206,15 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     else if (dynamic_cast<TownHall*>(building)) {
         type = "TownHall";
     }
+    else if (dynamic_cast<ArcherTower*>(building)) {
+        type = "ArcherTower";
+    }
+    else if (dynamic_cast<Cannon*>(building)) {
+        type = "Cannon";
+    }
+    else if (dynamic_cast<Mortar*>(building)) {
+        type = "Mortar";
+    }
     else {
         type = "BuilderHut";
     }
@@ -341,6 +350,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_balloon);
     }
     else if (dynamic_cast<Walls*>(building)) {}
+    else if (dynamic_cast<ArcherTower*>(building)) {}
+    else if (dynamic_cast<Cannon*>(building)) {}
+    else if (dynamic_cast<Mortar*>(building)) {}
     else if (dynamic_cast<TownHall*>(building)) {
         _resourceLabel = Label::createWithTTF(
             StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()),
@@ -466,8 +478,17 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     else if (dynamic_cast<Walls*>(building)) {
         type = "Walls";
     }
+    else if (dynamic_cast<ArcherTower*>(building)) {
+        type = "ArcherTower";
+    }
+    else if (dynamic_cast<Cannon*>(building)) {
+        type = "Cannon";
+    }
+    else if (dynamic_cast<Mortar*>(building)) {
+        type = "Mortar";
+    }
     else if (dynamic_cast<TownHall*>(building)) {
-        type = "Townhall";
+        type = "TownHall";
         _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()));
     }
     else if (dynamic_cast<BuilderHut*>(building)) {

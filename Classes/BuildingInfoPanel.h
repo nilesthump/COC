@@ -35,9 +35,9 @@ public:
     void showSoldierInfo(int lv);
     void speedUpgradeClicked(cocos2d::Ref* sender);
 private:
-    cocos2d::Node* armyExtraPanel; // 改为Node类型，方便添加子元素
+    cocos2d::Node* armyExtraPanel; // 方便添加子元素
    
-    Building* _targetBuilding; // 当前选中的建筑
+    Building* _targetBuilding; //当前选中的建筑
     cocos2d::Sprite* temp;
 
     cocos2d::MenuItemImage* barbarianBtn;

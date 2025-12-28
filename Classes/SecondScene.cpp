@@ -228,9 +228,9 @@ bool SecondScene::init()
     buildPanel->setVisible(false);
     buildItem->addChild(buildPanel, 1);
 
-    auto panelBg = Sprite::create("3.png");
+    auto panelBg = Sprite::create("3.1.png");
     if (panelBg == nullptr) {
-        problemLoading("'3.png'");
+        problemLoading("'3.1.png'");
     }
     else {
         double panelBgX = panelBg->getContentSize().width / 2;
@@ -521,7 +521,127 @@ bool SecondScene::init()
     }
     builderHutBtn->setScale(0.6f);
 
-    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn,armyCampBtn, wallsBtn,builderHutBtn, nullptr);
+    // 8.创建箭塔按钮
+    archerTowerBtn = MenuItemImage::create(
+        "ArcherTowerLv1.png",
+        "ArcherTowerLv1.png",
+        [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            ArcherTower* tempMine = ArcherTower::create("ArcherTowerLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
+            if (!isDragging) {
+                log("archerTower ");
+                isDragging = true;
+                draggingItem = archerTowerBtn;
+                dragStartPosition = archerTowerBtn->getPosition();
+
+                auto archerTowerPreview = ArcherTower::create("ArcherTowerLv1.png"); 
+                if (archerTowerPreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    archerTowerPreview->setOpacity(150);
+                    Vec2 my = Vec2(archerTowerPreview->getX(), archerTowerPreview->getY());
+                    if (background_sprite_) {
+                        Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                        archerTowerPreview->setMinePosition(you);
+
+                        // 添加到背景精灵，并保存到按钮的UserData
+                        background_sprite_->addChild(archerTowerPreview, 10);
+                        archerTowerBtn->setUserData(archerTowerPreview);
+                    }
+                }
+            }
+        }
+    );
+    if (archerTowerBtn) {
+        archerTowerBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 7.5 + 15));
+    }
+    archerTowerBtn->setScale(0.6f);
+
+    // 9.创建加农炮按钮
+    cannonBtn = MenuItemImage::create(
+        "CannonLv1.png",
+        "CannonLv1.png",
+        [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            Cannon* tempMine = Cannon::create("CannonLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
+            if (!isDragging) {
+                log("Cannon ");
+                isDragging = true;
+                draggingItem = cannonBtn;
+                dragStartPosition = cannonBtn->getPosition();
+
+                auto cannonPreview = Cannon::create("CannonLv1.png"); 
+                if (cannonPreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    cannonPreview->setOpacity(150);
+                    Vec2 my = Vec2(cannonPreview->getX(), cannonPreview->getY());
+                    if (background_sprite_) {
+                        Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                        cannonPreview->setMinePosition(you);
+
+                        // 添加到背景精灵，并保存到按钮的UserData
+                        background_sprite_->addChild(cannonPreview, 10);
+                        cannonBtn->setUserData(cannonPreview);
+                    }
+                }
+            }
+        }
+    );
+    if (cannonBtn) {
+        cannonBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 8.5 + 10));
+    }
+    cannonBtn->setScale(0.9f);
+
+    // 10.创建迫击炮按钮
+    mortarBtn = MenuItemImage::create(
+        "MortarLv1.png",
+        "MortarLv1.png",
+        [=](Ref* pSender) {
+            // 先检查是否有足够资源
+            Mortar* tempMine = Mortar::create("MortarLv1.png"); // 临时实例获取消耗
+            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+                return; // 直接返回，不允许放置
+            }
+
+            if (!isDragging) {
+                log("mortar ");
+                isDragging = true;
+                draggingItem = mortarBtn;
+                dragStartPosition = mortarBtn->getPosition();
+
+                auto mortarPreview = Mortar::create("MortarLv1.png"); 
+                if (mortarPreview) {
+                    // 预览态设置：半透明（区分实际对象）
+                    mortarPreview->setOpacity(150);
+                    Vec2 my = Vec2(mortarPreview->getX(), mortarPreview->getY());
+                    if (background_sprite_) {
+                        Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
+                        mortarPreview->setMinePosition(you);
+
+                        // 添加到背景精灵，并保存到按钮的UserData
+                        background_sprite_->addChild(mortarPreview, 10);
+                        mortarBtn->setUserData(mortarPreview);
+                    }
+                }
+            }
+        }
+    );
+    if (mortarBtn) {
+        mortarBtn->setPosition(Vec2(panelBg->getContentSize().width / 2, panelBg->getContentSize().height - goldMineBtn->getContentSize().height * 0.6 * 9.5 + 10));
+    }
+    mortarBtn->setScale(0.8f);
+
+    auto panelMenu = Menu::create(goldMineBtn, elixirCollectorBtn, goldStorageBtn, elixirStorageBtn,armyCampBtn, wallsBtn,builderHutBtn, archerTowerBtn,cannonBtn,mortarBtn,nullptr);
     panelMenu->setPosition(Vec2::ZERO);
     panelBg->addChild(panelMenu);
 
@@ -1037,6 +1157,27 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
                 dragBuilderHutPreview->setPosition(Vec2(snappedX, snappedY));
             }
         }
+        //箭塔预览
+        else if (draggingItem == archerTowerBtn) {
+            ArcherTower* dragArcherTowerPreview = static_cast<ArcherTower*>(userData);
+            if (dragArcherTowerPreview) {
+                dragArcherTowerPreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
+        //加农炮预览
+        else if (draggingItem == cannonBtn) {
+            Cannon* dragCannonPreview = static_cast<Cannon*>(userData);
+            if (dragCannonPreview) {
+                dragCannonPreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
+        //迫击炮预览
+        else if (draggingItem == mortarBtn) {
+            Mortar* dragMortarPreview = static_cast<Mortar*>(userData);
+            if (dragMortarPreview) {
+                dragMortarPreview->setPosition(Vec2(snappedX, snappedY));
+            }
+        }
     }
     else if (isMovingBuilding) {
         if (!background_sprite_ || !grid_manager_) {
@@ -1212,6 +1353,46 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         failwalls->playFailBlinkAndRemove();
                     }
                 }
+                else if (draggingItem == builderHutBtn) {
+                    auto failBuilderHut = BuilderHut::create("BuilderHutLv1.png");
+                    if (failBuilderHut) {
+                        failBuilderHut->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failBuilderHut, 15);
+                        }
+                        failBuilderHut->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == archerTowerBtn) {
+                    auto failarcherTower = ArcherTower::create("ArcherTowerLv1.png");
+                    if (failarcherTower) {
+                        failarcherTower->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failarcherTower, 15);
+                        }
+                        failarcherTower->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == cannonBtn) {
+                    auto failCannon = Cannon::create("CannonLv1.png");
+                    if (failCannon) {
+                        failCannon->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failCannon, 15);
+                        }
+                        failCannon->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == mortarBtn) {
+                    auto failMortar = Mortar::create("MortarLv1.png");
+                    if (failMortar) {
+                        failMortar->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failMortar, 15);
+                        }
+                        failMortar->playFailBlinkAndRemove();
+                    }
+                }
                 return; // 阻止放置
             }
             // 如果没有碰撞，继续执行放置逻辑           
@@ -1236,7 +1417,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedGoldMine, 15);
                         }
                         placedBuildings.push_back(placedGoldMine);
-                        placedGoldMine->setScale(0.8f);
+                        placedGoldMine->setScale(0.7f);
                         placedGoldMine->playSuccessBlink();
                         sendSaveBuildingRequest("GoldMine", snappedPos.x, snappedPos.y, 1,
                             placedGoldMine->getHp(), placedGoldMine->getHp(),
@@ -1300,7 +1481,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(placedGoldStorage, 15);
                         }
                         placedBuildings.push_back(placedGoldStorage);
-                        placedGoldStorage->setScale(0.8f);
+                        placedGoldStorage->setScale(0.7f);
                         placedGoldStorage->playSuccessBlink();
                         sendSaveBuildingRequest("GoldStorage", snappedPos.x, snappedPos.y, 1,
                             placedGoldStorage->getHp(), placedGoldStorage->getHp(),
@@ -1439,6 +1620,102 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     hutNum++;
                 }
             }
+            else if (draggingItem == archerTowerBtn) {
+                // 创建箭塔
+                int goldCost = static_cast<ArcherTower*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<ArcherTower*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    ArcherTower* dragArcherTowerPreview = static_cast<ArcherTower*>(draggingItem->getUserData());
+                    if (dragArcherTowerPreview) {
+                        dragArcherTowerPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedArcherTower = ArcherTower::create("ArcherTowerLv1.png");
+                    if (placedArcherTower) {
+                        // 更新
+                        placedArcherTower->updatePosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(placedArcherTower, 15);
+                        }
+                        placedBuildings.push_back(placedArcherTower);
+                        placedArcherTower->setScale(0.8f);
+                        placedArcherTower->playSuccessBlink();
+                        sendSaveBuildingRequest("ArcherTower", snappedPos.x, snappedPos.y, 1,
+                            placedArcherTower->getHp(), placedArcherTower->getHp(),
+                            0, 0, 0);
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
+                }
+            }
+            else if (draggingItem == cannonBtn) {
+                // 创建加农炮
+                int goldCost = static_cast<Cannon*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<Cannon*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    Cannon* dragCannonPreview = static_cast<Cannon*>(draggingItem->getUserData());
+                    if (dragCannonPreview) {
+                        dragCannonPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedCannon = Cannon::create("CannonLv1.png");
+                    if (placedCannon) {
+                        // 更新
+                        placedCannon->updatePosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(placedCannon, 15);
+                        }
+                        placedBuildings.push_back(placedCannon);
+                        placedCannon->setScale(1.1f);
+                        placedCannon->playSuccessBlink();
+                        sendSaveBuildingRequest("Cannon", snappedPos.x, snappedPos.y, 1,
+                            placedCannon->getHp(), placedCannon->getHp(),
+                            0, 0, 0);
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
+                }
+            }
+            else if (draggingItem == mortarBtn) {
+                // 创建迫击炮
+                int goldCost = static_cast<Mortar*>(draggingItem->getUserData())->getGoldCost();
+                int elixirCost = static_cast<Mortar*>(draggingItem->getUserData())->getElixirCost();
+                //再次判断资源是否足够
+                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                    //除旧
+                    Mortar* dragMortarPreview = static_cast<Mortar*>(draggingItem->getUserData());
+                    if (dragMortarPreview) {
+                        dragMortarPreview->removeFromParentAndCleanup(true);
+                        draggingItem->setUserData(nullptr);
+                    }
+                    //迎新
+                    auto placedMortar = Mortar::create("MortarLv1.png");
+                    if (placedMortar) {
+                        // 更新
+                        placedMortar->updatePosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(placedMortar, 15);
+                        }
+                        placedBuildings.push_back(placedMortar);
+                        placedMortar->setScale(1.0f);
+                        placedMortar->playSuccessBlink();
+                        sendSaveBuildingRequest("Mortar", snappedPos.x, snappedPos.y, 1,
+                            placedMortar->getHp(), placedMortar->getHp(),
+                            0, 0, 0);
+                    }
+                    //扣除资源
+                    g_goldCount -= goldCost;
+                    g_elixirCount -= elixirCost;
+                }
+            }
             // 无效区域：创建对应建筑并执行失败反馈
             else {
                 if (draggingItem == goldMineBtn) {
@@ -1509,6 +1786,36 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             background_sprite_->addChild(failBuilderHut, 15);
                         }
                         failBuilderHut->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == archerTowerBtn) {
+                    auto failArcherTower = ArcherTower::create("ArcherTowerLv1.png");
+                    if (failArcherTower) {
+                        failArcherTower->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failArcherTower, 15);
+                        }
+                        failArcherTower->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == cannonBtn) {
+                    auto failCannon = Cannon::create("CannonLv1.png");
+                    if (failCannon) {
+                        failCannon->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failCannon, 15);
+                        }
+                        failCannon->playFailBlinkAndRemove();
+                    }
+                }
+                else if (draggingItem == mortarBtn) {
+                    auto failMortar = Mortar::create("MortarLv1.png");
+                    if (failMortar) {
+                        failMortar->setPosition(snappedPos);
+                        if (background_sprite_) {
+                            background_sprite_->addChild(failMortar, 15);
+                        }
+                        failMortar->playFailBlinkAndRemove();
                     }
                 }
             }
@@ -1634,7 +1941,27 @@ void SecondScene::onTouchCancelled(Touch* touch, Event* event)
                 draggingItem->setUserData(nullptr);
             }
         }
-
+        else if (draggingItem == archerTowerBtn) {
+            ArcherTower* dragArcherTowerPreview = static_cast<ArcherTower*>(draggingItem->getUserData());
+            if (dragArcherTowerPreview) {
+                dragArcherTowerPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == cannonBtn) {
+            Cannon* dragCannonPreview = static_cast<Cannon*>(draggingItem->getUserData());
+            if (dragCannonPreview) {
+                dragCannonPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
+        else if (draggingItem == mortarBtn) {
+            Mortar* dragMortarPreview = static_cast<Mortar*>(draggingItem->getUserData());
+            if (dragMortarPreview) {
+                dragMortarPreview->removeFromParentAndCleanup(true);
+                draggingItem->setUserData(nullptr);
+            }
+        }
         isDragging = false;
         draggingItem = nullptr;
     }
@@ -2605,6 +2932,30 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         }
         return building;
     }
+    else if (buildingType == "Mortar") {
+        Walls* building = Walls::create(StringUtils::format("MortarLv%d.png", level), hp,
+            level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
+    }
+    else if (buildingType == "ArcherTower") {
+        Walls* building = Walls::create(StringUtils::format("ArcherTowerLv%d.png", level), hp,
+            level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
+    }
+    else if (buildingType == "Cannon") {
+        Walls* building = Walls::create(StringUtils::format("CannonLv%d.png", level), hp,
+            level, x, y);
+        if (building) {
+            building->setHp(maxHp);
+        }
+        return building;
+    }
     return nullptr;
 }
 
@@ -2714,7 +3065,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
             background_sprite_->addChild(goldMine, 15);
         }
         placedBuildings.push_back(goldMine);
-        goldMine->setScale(0.9f);
+        goldMine->setScale(0.7f);
     }
 
     auto elixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
@@ -2734,7 +3085,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
             background_sprite_->addChild(goldStorage, 15);
         }
         placedBuildings.push_back(goldStorage);
-        goldStorage->setScale(0.9f);
+        goldStorage->setScale(0.7f);
     }
 
     auto elixirStorage = GoldStorage::create("ElixirStorageLv1.png");
