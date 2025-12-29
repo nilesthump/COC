@@ -43,6 +43,7 @@ struct DefenderData : public BaseUnitData
 	static DefenderData CreateElixirStorageData(int level = 1); //圣水存储器
 	static DefenderData CreateTownHallData(int level = 1);      //大本营
 	static DefenderData CreateBuildersHutData(int level = 1);      //大建筑工人小屋
+	static DefenderData CreateArmyCampData(int level = 1);      //兵营
 };
 
 #endif // _DEFENSE_DATA_H_

@@ -5,8 +5,13 @@
 #include "BattleManager.h"
 #include "ZoomScrollManager.h"
 #include "BattleHUD.h"
+#include "SessionManager.h"
+#include "WebSocketManager.h"
+#include "CombatSessionManager.h"
+#include "BattleSnapshot.h"
 #include <memory>
 #include <vector>
+#include <functional>
 
 class BattleTestLayer : public cocos2d::Layer
 {
@@ -32,7 +37,12 @@ private:
 	bool result_layer_shown_ = false;
 	//保留用于选角色逻辑判断
 	UnitType current_selected_unit_ = UnitType::NONE;
-	
+
+	// 服务器建筑数据（用于账号登录模式）
+	std::vector<BuildingSnapshot> server_buildings_;
+	bool server_buildings_received_ = false;
+	std::function<void()> buildings_callback_;
+	WebSocketManager* wsManager = nullptr;
 
 public:
 	static cocos2d::Scene* createScene();
@@ -46,7 +56,12 @@ public:
 	void setupWorldEnvironment();	//战斗发生的物理空间、环境，随着缩放
 	void setupInputListeners();		//触摸、鼠标监听
 	void setupBattleSession();		//负责本场战斗
-	
+
+	//网络相关
+	void generateLocalBuildings(CombatSessionManager* config);
+	void requestServerBuildings();
+	void parseServerBuildings(const std::string& message);
+	BuildingType parseBuildingType(const std::string& typeStr);
 	//放置逻辑
 	void placeDefender();
 	void placeUnitAt(float gridX, float gridY);

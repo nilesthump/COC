@@ -11,9 +11,14 @@
 #include "BattleResultLayer.h"
 #include "CombatSessionManager.h"
 #include "ccUtils.h"
+#include "WebSocketManager.h"
+#include "SessionManager.h"
 #include <ctime>
+#include "network/WebSocket.h"
+#include "json/document.h"
 
 USING_NS_CC;
+using namespace rapidjson;
 void DebugFullGrid(Node* gameWorld, Sprite* backgroundSprite, int gridStep, bool showLabels);
 
 //错误加载
@@ -43,6 +48,155 @@ bool BattleTestLayer::init()
 
 	this->scheduleUpdate();
 	return true;
+}
+
+void BattleTestLayer::requestServerBuildings()
+{
+	auto wsManager = WebSocketManager::getInstance();
+	WebSocket::State readyState = wsManager->getReadyState();
+
+	if (readyState != WebSocket::State::OPEN) {
+		CCLOG("BattleTestLayer: WebSocket not connected, cannot request buildings");
+		server_buildings_received_ = true;
+		if (buildings_callback_) {
+			buildings_callback_();
+		}
+		return;
+	}
+
+	auto session = SessionManager::getInstance();
+	std::string username = session->getCurrentUsername();
+
+	if (username.empty()) {
+		CCLOG("BattleTestLayer: No username available for request");
+		server_buildings_received_ = true;
+		if (buildings_callback_) {
+			buildings_callback_();
+		}
+		return;
+	}
+
+	Document doc;
+	doc.SetObject();
+	Document::AllocatorType& allocator = doc.GetAllocator();
+
+	doc.AddMember("action", "getBuildings", allocator);
+	doc.AddMember("username", rapidjson::Value(username.c_str(), allocator).Move(), allocator);
+	doc.AddMember("getRandomUser", true, allocator);
+
+	StringBuffer buffer;
+	Writer<StringBuffer> writer(buffer);
+	doc.Accept(writer);
+
+	std::string message = buffer.GetString();
+	if (wsManager->send(message)) {
+		CCLOG("BattleTestLayer: Request sent for random user buildings");
+	}
+	else {
+		CCLOG("BattleTestLayer: Failed to send building request");
+		server_buildings_received_ = true;
+		if (buildings_callback_) {
+			buildings_callback_();
+		}
+	}
+}
+
+void BattleTestLayer::parseServerBuildings(const std::string& message)
+{
+	CCLOG("BattleTestLayer: === PARSE SERVER BUILDINGS STARTED ===");
+	CCLOG("BattleTestLayer: Message length=%zu", message.length());
+	CCLOG("BattleTestLayer: Message content: %.200s...", message.c_str());
+
+	if (server_buildings_received_ && !server_buildings_.empty()) {
+		CCLOG("BattleTestLayer: Already have server buildings, ignoring new message");
+		return;
+	}
+
+	Document doc;
+	ParseResult parseResult = doc.Parse(message.c_str());
+	if (!parseResult) {
+		CCLOG("BattleTestLayer: Failed to parse buildings JSON, error offset=%u", parseResult.Offset());
+		server_buildings_received_ = true;
+		if (buildings_callback_) {
+			buildings_callback_();
+		}
+		return;
+	}
+
+	std::string action;
+	bool result = false;
+
+	if (doc.HasMember("action") && doc["action"].IsString()) {
+		action = doc["action"].GetString();
+	}
+	if (doc.HasMember("result") && doc["result"].IsBool()) {
+		result = doc["result"].GetBool();
+	}
+
+	CCLOG("BattleTestLayer: Buildings parsed action=%s, result=%s", action.c_str(), result ? "true" : "false");
+
+	server_buildings_.clear();
+
+	if (action == "getBuildings" && result && doc.HasMember("buildings") && doc["buildings"].IsArray()) {
+		const rapidjson::Value& buildingsArray = doc["buildings"];
+		int totalBuildings = static_cast<int>(buildingsArray.Size());
+
+		if (totalBuildings > 0) {
+			CCLOG("BattleTestLayer: Received %d buildings from server", totalBuildings);
+
+			for (rapidjson::SizeType i = 0; i < buildingsArray.Size(); i++) {
+				const rapidjson::Value& building = buildingsArray[i];
+
+				if (!building.HasMember("type") || !building["type"].IsString() ||
+					!building.HasMember("x") || !building["x"].IsNumber() ||
+					!building.HasMember("y") || !building["y"].IsNumber() ||
+					!building.HasMember("level") || !building["level"].IsInt()) {
+					CCLOG("BattleTestLayer: Invalid building data at index %d", i);
+					continue;
+				}
+
+				std::string buildingType = building["type"].GetString();
+				int level = building["level"].GetInt();
+				float absoluteX = static_cast<float>(building["x"].GetDouble());
+				float absoluteY = static_cast<float>(building["y"].GetDouble());
+				Vec2 absolutePos = Vec2(absoluteX, absoluteY);
+				Vec2 gridPos = ConvertTest::convertScreenToGrid(absolutePos, background_sprite_, game_world_)-Vec2(0.0f,42.5f);
+
+				BuildingSnapshot snapshot;
+				snapshot.type = parseBuildingType(buildingType);
+				snapshot.level = level;
+				snapshot.logicalPos = gridPos;
+
+				CCLOG("BattleTestLayer: Parsed building - type=%s, gridX=%.2f, gridY=%.2f, level=%d (from absolute: %.2f, %.2f)",
+					buildingType.c_str(), gridPos.x, gridPos.y, level, absoluteX, absoluteY);
+
+				server_buildings_.push_back(snapshot);
+			}
+
+			CCLOG("BattleTestLayer: Successfully parsed %zu buildings", server_buildings_.size());
+		}
+	}
+
+	server_buildings_received_ = true;
+	if (buildings_callback_) {
+		buildings_callback_();
+	}
+}
+
+BuildingType BattleTestLayer::parseBuildingType(const std::string& typeStr)
+{
+	if (typeStr == "TownHall") return BuildingType::TOWN_HALL;
+	if (typeStr == "Cannon") return BuildingType::CANNON;
+	if (typeStr == "ArcherTower") return BuildingType::ARCHER_TOWER;
+	if (typeStr == "Mortar") return BuildingType::MORTAR;
+	if (typeStr == "GoldMine") return BuildingType::GOLD_MINE;
+	if (typeStr == "ElixirCollector") return BuildingType::ELIXIR;
+	if (typeStr == "GoldStorage") return BuildingType::GOLD_STORAGE;
+	if (typeStr == "ElixirStorage") return BuildingType::ELIXIR_STORAGE;
+	if (typeStr == "Walls") return BuildingType::WALL;
+	if (typeStr == "BuilderHut") return BuildingType::BUILDERSHUT;
+	if (typeStr == "ArmyCamp") return BuildingType::ARMYCAMP;
+	return BuildingType::TOWN_HALL;
 }
 
 //整体更新
@@ -177,11 +331,79 @@ void BattleTestLayer::setupBattleSession()
 	auto config = CombatSessionManager::getInstance();
 	auto bm = BattleManager::getInstance();
 
+	auto session = SessionManager::getInstance();
+	wsManager = WebSocketManager::getInstance();
+
+	config->battle_start_params.buildings.clear();
+
+	CCLOG("BattleTestLayer: Checking login status for building data source");
+	CCLOG("BattleTestLayer: isAccountLogin=%s, isGuestLogin=%s",
+		session->isAccountLogin() ? "true" : "false",
+		session->isGuestLogin() ? "true" : "false");
+
+	if (session->isAccountLogin()) {
+		CCLOG("BattleTestLayer: Account login detected - requesting buildings from server");
+
+		server_buildings_received_ = false;
+		server_buildings_.clear();
+
+		buildings_callback_ = [this, config, bm]() {
+			CCLOG("BattleTestLayer: Server buildings callback triggered, received=%s, count=%zu",
+				server_buildings_received_ ? "true" : "false",
+				server_buildings_.size());
+
+			if (server_buildings_received_ && !server_buildings_.empty()) {
+				CCLOG("BattleTestLayer: Using %zu buildings from server", server_buildings_.size());
+				config->battle_start_params.buildings = server_buildings_;
+			}
+			else {
+				CCLOG("BattleTestLayer: Server data unavailable, using local buildings");
+				generateLocalBuildings(config);
+			}
+
+			auto bmInner = BattleManager::getInstance();
+			if (bmInner) {
+				bmInner->PrepareBattle(config->battle_start_params);
+				placeDefender();
+				bmInner->GetIndexSystem()->UpdateDeploymentMap();
+			}
+			};
+
+		requestServerBuildings();
+
+		wsManager->setOnMessageCallback([this](const std::string& message) {
+			if (message.find("\"action\":\"getBuildings\"") != std::string::npos) {
+				CCLOG("BattleTestLayer: Received buildings message from WebSocket");
+				parseServerBuildings(message);
+			}
+			});
+	}
+	else if (session->isGuestLogin()) {
+		CCLOG("BattleTestLayer: Guest login detected - using local buildings");
+		generateLocalBuildings(config);
+
+		bm->PrepareBattle(config->battle_start_params);
+		placeDefender();
+		bm->GetIndexSystem()->UpdateDeploymentMap();
+	}
+	else {
+		CCLOG("BattleTestLayer: No valid login, using local buildings");
+		generateLocalBuildings(config);
+
+		bm->PrepareBattle(config->battle_start_params);
+		placeDefender();
+		bm->GetIndexSystem()->UpdateDeploymentMap();
+	}
+}
+
+void BattleTestLayer::generateLocalBuildings(CombatSessionManager* config)
+{
+	auto bm = BattleManager::getInstance();
 	// --- 1. 核心大本营 (4x4) ---
 	// 中心点 23.5f，占用索引范围：[22, 23, 24, 25]
 	BuildingSnapshot th;
 	th.type = BuildingType::TOWN_HALL;
-	th.level = 1;
+	th.level = 5;
 	th.logicalPos = Vec2(23.5f, 23.5f);
 	config->battle_start_params.buildings.push_back(th);
 
@@ -199,7 +421,7 @@ void BattleTestLayer::setupBattleSession()
 	{
 		BuildingSnapshot def;
 		def.type = defTypes[i];
-		def.level = 1;
+		def.level = 7;
 		def.logicalPos = defPositions[i];
 		config->battle_start_params.buildings.push_back(def);
 	}
@@ -211,13 +433,13 @@ void BattleTestLayer::setupBattleSession()
 	{
 		BuildingSnapshot gm;
 		gm.type = BuildingType::GOLD_MINE;
-		gm.level = 1;
+		gm.level = 3;
 		gm.logicalPos = Vec2(18.0f + i * 3.0f, 16.0f); // 占用 y: [15, 16, 17]
 		config->battle_start_params.buildings.push_back(gm);
 
 		BuildingSnapshot ex;
 		ex.type = BuildingType::ELIXIR;
-		ex.level = 1;
+		ex.level = 2;
 		ex.logicalPos = Vec2(18.0f + i * 3.0f, 31.0f); // 占用 y: [30, 31, 32]
 		config->battle_start_params.buildings.push_back(ex);
 	}
@@ -226,7 +448,7 @@ void BattleTestLayer::setupBattleSession()
 	// 左右护法，避开大本营 (22-25) 和防御塔
 	BuildingSnapshot gs;
 	gs.type = BuildingType::GOLD_STORAGE;
-	gs.level = 1;
+	gs.level = 7;
 	gs.logicalPos = Vec2(16.0f, 23.5f); // 3x3 偶数对齐有点特殊，建议也用整数避开 23.5
 	// 修正：仓库也用整数中心 16.0, 23.0，占用 x:[15,16,17], y:[22,23,24]
 	gs.logicalPos = Vec2(16.0f, 23.0f);
@@ -252,17 +474,18 @@ void BattleTestLayer::setupBattleSession()
 			{
 				BuildingSnapshot wall;
 				wall.type = BuildingType::WALL;
-				wall.level = 1;
+				wall.level = 5;
 				wall.logicalPos = Vec2((float)x, (float)y);
 				config->battle_start_params.buildings.push_back(wall);
 			}
 		}
 	}
-
+#if 0
 	bm->PrepareBattle(config->battle_start_params);
 	placeDefender();
 	//计算禁放区（内部以及外部一圈）
 	bm->GetIndexSystem()->UpdateDeploymentMap();
+#endif
 }
 
 //固定放置（直接放逻辑位置）
@@ -466,8 +689,11 @@ void BattleTestLayer::showBattleResultLayer(BattleResult result)
 //返回HelloWorldScene触发
 void BattleTestLayer::menuMainCallback(Ref* pSender)
 {
+	auto config = CombatSessionManager::getInstance();
+	config->battle_start_params.army.clear();
 	BattleManager* battleManager = BattleManager::getInstance();
 	battleManager->clear(); // 重置战斗管理器状态
+
 	this->unscheduleUpdate(); // 停止更新
 	Director::getInstance()->replaceScene(SecondScene::createScene());
 }
