@@ -11,15 +11,15 @@ public:
     // 初始化方法
    bool init(Building* building, cocos2d::Sprite* background_sprite_);
     // 更新面板信息（如升级后调用）
-    void updateInfo(Building* building, cocos2d::Sprite* background_sprite_);
-    void refreshUpgradeButton(Building* building);
-    void updateUpgradeCountdown();
-    void startUpgradeCountdownScheduler();
-    void stopUpgradeCountdownScheduler();
+    void UpdateInfo(Building* building, cocos2d::Sprite* background_sprite_);
+    void RefreshUpgradeButton(Building* building);
+    void UpdateUpgradeCountdown();
+    void StartUpgradeCountdownScheduler();
+    void StopUpgradeCountdownScheduler();
     // 按钮回调
-    void onUpgradeClicked(cocos2d::Ref* sender);
+    void OnUpgradeClicked(cocos2d::Ref* sender);
     //成功放置
-    void playBlinkAnimation(cocos2d::MenuItemImage* btn) {
+    void PlayBlinkAnimation(cocos2d::MenuItemImage* btn) {
         if (!btn) return;
 
         // 停止按钮上已有的动画（避免多次点击动画叠加）
@@ -31,9 +31,9 @@ public:
         auto blinkSeq = cocos2d::Sequence::create(fadeOut, fadeIn, nullptr);
         btn->runAction(blinkSeq);
     }
-    void onCollectClicked(cocos2d::Ref* sender);
-    void showSoldierInfo(int lv);
-    void speedUpgradeClicked(cocos2d::Ref* sender);
+    void OnCollectClicked(cocos2d::Ref* sender);
+    void ShowSoldierInfo(int lv);
+    void SpeedUpgradeClicked(cocos2d::Ref* sender);
 private:
     cocos2d::Node* armyExtraPanel; // 方便添加子元素
    

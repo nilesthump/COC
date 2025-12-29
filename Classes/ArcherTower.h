@@ -7,21 +7,21 @@ extern int global_gold_count, global_elixir_count, max_level;
 class ArcherTower : public Building
 {
 protected:
-    int establishCost[2] = { 50,50 };
-    int upgradeCost[2] = { 25,25 };
-    int upgradeTime = 10;
+    int establish_cost[2] = { 50,50 };
+    int upgrade_cost[2] = { 25,25 };
+    int upgrade_time = 10;
     bool InitSprite(const std::string& textureName)override;
 public:
     bool ArcherTower::init(const std::string& textureName, int original_hp, int lv, float x0, float y0)override;
 
     int GetUpgradeGoldCost()const override {
-        return upgradeCost[0];
+        return upgrade_cost[0];
     }
     int GetUpgradeElixirCost() const override {
-        return upgradeCost[1];
+        return upgrade_cost[1];
     }
     bool CanUpgrade()override {
-        if (global_gold_count >= upgradeCost[0] && global_elixir_count >= upgradeCost[1] && level < max_level) {
+        if (global_gold_count >= upgrade_cost[0] && global_elixir_count >= upgrade_cost[1] && level < max_level) {
             return true;
         }
         else {
@@ -32,7 +32,7 @@ public:
         //公有属性
         level += 1;
         hp += 1000;
-        upgradeTime = level * 3;//每次升级完成后，需要的升级时间对应延长
+        upgrade_time = level * 3;//每次升级完成后，需要的升级时间对应延长
         is_upgrade = false;
         //换图
         texture_name = StringUtils::format("ArcherTowerLv%d.png", level);
@@ -40,22 +40,22 @@ public:
         PlaySuccessBlink();
     }
     int GetGoldCost() const override {
-        return establishCost[0];
+        return establish_cost[0];
     }
     int GetElixirCost() const override {
-        return establishCost[1];
+        return establish_cost[1];
     }
     void FinishUpgrade()override {
         update();
     }
     void CutTime()override {
-        upgradeTime--;
-        if (upgradeTime <= 0) {
+        upgrade_time--;
+        if (upgrade_time <= 0) {
             update();
         }
     }
     int GetRemainTime() override {
-        return upgradeTime;
+        return upgrade_time;
     }
     std::string GetBuildingType() const override {
         return "ArcherTower";

@@ -3231,7 +3231,7 @@ void SecondScene::onUpgradeComplete(UpgradeCompleteData* data) {
                 building->GetBuildingType().c_str(), data->newLevel);
 
             if (_curOpenInfoPanel && _curOpenBuilding == building) {
-                _curOpenInfoPanel->refreshUpgradeButton(building);
+                _curOpenInfoPanel->RefreshUpgradeButton(building);
             }
 
             std::string oldImage = StringUtils::format("%sLv1.png", building->GetBuildingType().c_str());

@@ -7,22 +7,22 @@ extern int global_gold_count, global_elixir_count,max_level;
 class BuilderHut : public Building
 {
 protected:
-    int establishCost[2] = { 10,10 };
-    int upgradeCost[2] = { 5,5 };
-    int upgradeTime = 1;
+    int establish_cost[2] = { 10,10 };
+    int upgrade_cost[2] = { 5,5 };
+    int upgrade_time = 1;
     bool InitSprite(const std::string& textureName)override;
 public:
     
     bool BuilderHut::init(const std::string& textureName, int original_hp, int lv, float x0, float y0)override;
 
     int GetUpgradeGoldCost()const override {
-        return upgradeCost[0];
+        return upgrade_cost[0];
     }
     int GetUpgradeElixirCost() const override {
-        return upgradeCost[1];
+        return upgrade_cost[1];
     }
     bool CanUpgrade()override {
-        if (global_gold_count >= upgradeCost[0] && global_elixir_count >= upgradeCost[1] && level < max_level&& level < 7) {
+        if (global_gold_count >= upgrade_cost[0] && global_elixir_count >= upgrade_cost[1] && level < max_level&& level < 7) {
             return true;
         }
         else {
@@ -33,7 +33,7 @@ public:
         //公有属性
         level += 1;
         hp += 1000;     
-        upgradeTime = 1;//每次升级完成后，需要的升级时间对应延长
+        upgrade_time = 1;//每次升级完成后，需要的升级时间对应延长
         is_upgrade = false;
         //换图
         texture_name = StringUtils::format("BuilderHutLv%d.png", level);
@@ -41,22 +41,22 @@ public:
         PlaySuccessBlink();
     }
     int GetGoldCost() const override {
-        return establishCost[0];
+        return establish_cost[0];
     }
     int GetElixirCost() const override {
-        return establishCost[1];
+        return establish_cost[1];
     }
     void FinishUpgrade()override {
         update();
     }
     void CutTime()override {
-        upgradeTime--;
-        if (upgradeTime <= 0) {
+        upgrade_time--;
+        if (upgrade_time <= 0) {
             update();
         }
     }
     int GetRemainTime() override {
-        return upgradeTime;
+        return upgrade_time;
     }
     std::string GetBuildingType() const override {
         return "BuilderHut";

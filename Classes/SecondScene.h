@@ -83,7 +83,7 @@ public:
 			}
 		}
 	}
-	friend void BuildingInfoPanel::onUpgradeClicked(Ref* sender);
+	friend void BuildingInfoPanel::OnUpgradeClicked(Ref* sender);
 	//new≈–∂œ
 	CREATE_FUNC(SecondScene);
 
