@@ -566,9 +566,9 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
         }
     }
     //canUpgrade函数判断了资源是否足够，等级是否超上限，而count则是同时可以升级的建筑数量
-    if (count < hutNum && _targetBuilding->canUpgrade()) {
-        g_goldCount -= _targetBuilding->getUpgradeGoldCost();
-        g_elixirCount-= _targetBuilding->getUpgradeElixirCost();
+    if (count < hut_num && _targetBuilding->canUpgrade()) {
+        global_gold_count -= _targetBuilding->getUpgradeGoldCost();
+        global_elixir_count-= _targetBuilding->getUpgradeElixirCost();
 
         _targetBuilding->playSuccessBlink();// 播放开始升级动画
         _targetBuilding->startUpgrade();
@@ -587,8 +587,8 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
 
 //一键完成加速
 void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
-    if (g_gemCount > 0&& _targetBuilding->getIsUpgrade()) {
-        g_gemCount--;
+    if (global_gem_count > 0&& _targetBuilding->getIsUpgrade()) {
+        global_gem_count--;
         _targetBuilding->finishUpgrade();
     }
 }
@@ -619,18 +619,18 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     // 判断建筑类型并执行对应收集逻辑
     if (dynamic_cast<GoldMine*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
-        CCLOG("BuildingInfoPanel: GoldMine current stock: %d, g_goldCount: %d, max: %d",
-            collected, g_goldCount, maxGoldVolum);
-        if (collected > 0 && collected + g_goldCount <= maxGoldVolum) {
-            g_goldCount += collected;
+        CCLOG("BuildingInfoPanel: GoldMine current stock: %d, global_gold_count: %d, max: %d",
+            collected, global_gold_count, max_gold_volum);
+        if (collected > 0 && collected + global_gold_count <= max_gold_volum) {
+            global_gold_count += collected;
             resourceUpdated = true;
             collected = 0;
-            CCLOG("BuildingInfoPanel: Gold collected, new g_goldCount: %d", g_goldCount);
+            CCLOG("BuildingInfoPanel: Gold collected, new global_gold_count: %d", global_gold_count);
         }
-        else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
-            int spaceAvailable = maxGoldVolum - g_goldCount;
+        else if (collected > 0 && collected + global_gold_count > max_gold_volum) {
+            int spaceAvailable = max_gold_volum - global_gold_count;
             if (spaceAvailable > 0) {
-                g_goldCount = maxGoldVolum;
+                global_gold_count = max_gold_volum;
                 collected -= spaceAvailable;
                 resourceUpdated = true;
             }
@@ -638,17 +638,17 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     }
     else if (dynamic_cast<ElixirCollector*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
-        CCLOG("BuildingInfoPanel: ElixirCollector current stock: %d, g_elixirCount: %d, max: %d",
-            collected, g_elixirCount, maxElixirVolum);
-        if (collected > 0 && collected + g_elixirCount <= maxElixirVolum) {
-            g_elixirCount += collected;
+        CCLOG("BuildingInfoPanel: ElixirCollector current stock: %d, global_elixir_count: %d, max: %d",
+            collected, global_elixir_count, max_elixir_volum);
+        if (collected > 0 && collected + global_elixir_count <= max_elixir_volum) {
+            global_elixir_count += collected;
             resourceUpdated = true;
             collected = 0;
         }
-        else if (collected > 0 && collected + g_elixirCount > maxElixirVolum) {
-            int spaceAvailable = maxElixirVolum - g_elixirCount;
+        else if (collected > 0 && collected + global_elixir_count > max_elixir_volum) {
+            int spaceAvailable = max_elixir_volum - global_elixir_count;
             if (spaceAvailable > 0) {
-                g_elixirCount = maxElixirVolum;
+                global_elixir_count = max_elixir_volum;
                 collected -= spaceAvailable;
                 resourceUpdated = true;
             }
@@ -656,15 +656,15 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     }
     else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
-        if (collected > 0 && collected + g_goldCount <= maxGoldVolum) {
-            g_goldCount += collected;
+        if (collected > 0 && collected + global_gold_count <= max_gold_volum) {
+            global_gold_count += collected;
             resourceUpdated = true;
             collected = 0;
         }
-        else if (collected > 0 && collected + g_goldCount > maxGoldVolum) {
-            int spaceAvailable = maxGoldVolum - g_goldCount;
+        else if (collected > 0 && collected + global_gold_count > max_gold_volum) {
+            int spaceAvailable = max_gold_volum - global_gold_count;
             if (spaceAvailable > 0) {
-                g_goldCount = maxGoldVolum;
+                global_gold_count = max_gold_volum;
                 collected -= spaceAvailable;
                 resourceUpdated = true;
             }
@@ -672,15 +672,15 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     }
     else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
         collected = _targetBuilding->getCurrentStock();
-        if (collected > 0 && collected + g_elixirCount <= maxElixirVolum) {
-            g_elixirCount += collected;
+        if (collected > 0 && collected + global_elixir_count <= max_elixir_volum) {
+            global_elixir_count += collected;
             resourceUpdated = true;
             collected = 0;
         }
-        else if (collected > 0 && collected + g_elixirCount > maxElixirVolum) {
-            int spaceAvailable = maxElixirVolum - g_elixirCount;
+        else if (collected > 0 && collected + global_elixir_count > max_elixir_volum) {
+            int spaceAvailable = max_elixir_volum - global_elixir_count;
             if (spaceAvailable > 0) {
-                g_elixirCount = maxElixirVolum;
+                global_elixir_count = max_elixir_volum;
                 collected -= spaceAvailable;
                 resourceUpdated = true;
             }

@@ -99,10 +99,10 @@ public:
 	// 公开方法：更新资源 UI 显示
 	void updateResourceLabels() {
 		if (goldLabel) {
-			goldLabel->setString(StringUtils::format("%d", g_goldCount));
+			goldLabel->setString(StringUtils::format("%d", global_gold_count));
 		}
 		if (elixirLabel) {
-			elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+			elixirLabel->setString(StringUtils::format("%d", global_elixir_count));
 		}
 	}
 	void sendSaveBuildingRequest(const std::string& buildingType, float x, float y, int level,
@@ -201,8 +201,8 @@ private:
 	void applyProductionDataToBuildings();
 };
 
-extern int maxLevel, maxGoldVolum, maxElixirVolum;
-extern int g_elixirCount, g_goldCount, g_gemCount, hutNum;
+extern int max_level, max_gold_volum, max_elixir_volum;
+extern int global_elixir_count, global_gold_count, global_gem_count, hut_num;
 
 #endif
 

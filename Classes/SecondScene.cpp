@@ -10,9 +10,9 @@
 #include <functional>
 
 // 初始化全局变量
-int maxLevel, maxGoldVolum = 1000, maxElixirVolum = 1000;
-int g_elixirCount = 750, g_goldCount = 750;
-int g_gemCount = 15, hutNum = 2;
+int max_level, max_gold_volum = 1000, max_elixir_volum = 1000;
+int global_elixir_count = 750, global_gold_count = 750;
+int global_gem_count = 15, hut_num = 2;
 
 std::vector<Building*> SecondScene::placedBuildings;
 
@@ -44,17 +44,17 @@ bool SecondScene::init()
     if (session->isAccountLogin() && session->hasResourceData()) {
         int gold, elixir, gems;
         session->getResourceData(gold, elixir, gems);
-        g_goldCount = gold;
-        g_elixirCount = elixir;
-        g_gemCount = gems;
+        global_gold_count = gold;
+        global_elixir_count = elixir;
+        global_gem_count = gems;
         CCLOG("Loaded resources from server: gold=%d, elixir=%d, gems=%d",
-            g_goldCount, g_elixirCount, g_gemCount);
+            global_gold_count, global_elixir_count, global_gem_count);
     }
     else {
         // 初始化产金相关变量
-        g_goldCount = 750; // 确保金币计数初始化为0
-        g_elixirCount = 750;
-        g_gemCount = 15;
+        global_gold_count = 750; // 确保金币计数初始化为0
+        global_elixir_count = 750;
+        global_gem_count = 15;
     }
 
     _sceneIsDestroyed = false;
@@ -246,7 +246,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             GoldMine* tempMine = GoldMine::create("GoldMineLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost||g_elixirCount< elixirCost) {
+            if (global_gold_count < goldCost||global_elixir_count< elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -288,7 +288,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             ElixirCollector* tempMine = ElixirCollector::create("ElixirCollectorLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -329,7 +329,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             GoldStorage* tempMine = GoldStorage::create("GoldStorageLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -369,7 +369,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             ElixirStorage* tempMine = ElixirStorage::create("ElixirStorageLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -409,7 +409,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             ArmyCamp* tempMine = ArmyCamp::create("ArmyCampLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -449,7 +449,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             Walls* tempMine = Walls::create("WallsLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -489,7 +489,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源，且数量不超过5
             BuilderHut* tempMine = BuilderHut::create("BuilderHutLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost || hutNum >= 5) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost || hut_num >= 5) {
                 return; // 直接返回，不允许放置
             }
 
@@ -529,7 +529,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             ArcherTower* tempMine = ArcherTower::create("ArcherTowerLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -569,7 +569,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             Cannon* tempMine = Cannon::create("CannonLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -609,7 +609,7 @@ bool SecondScene::init()
             // 先检查是否有足够资源
             Mortar* tempMine = Mortar::create("MortarLv1.png"); // 临时实例获取消耗
             int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
-            if (g_goldCount < goldCost || g_elixirCount < elixirCost) {
+            if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
 
@@ -882,13 +882,13 @@ void SecondScene::update(float delta)
         }
         // 每一秒都更新标签显示
         if (elixirLabel) {
-            elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
+            elixirLabel->setString(StringUtils::format("%d", global_elixir_count));
         }
         if (goldLabel) {
-            goldLabel->setString(StringUtils::format("%d", g_goldCount));
+            goldLabel->setString(StringUtils::format("%d", global_gold_count));
         }
         if (gemLabel) {
-            gemLabel->setString(StringUtils::format("%d", g_gemCount));
+            gemLabel->setString(StringUtils::format("%d", global_gem_count));
         }
         // 重置计时器
         elapsedTime = 0.0f;
@@ -1401,7 +1401,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<GoldMine*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<GoldMine*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     GoldMine* dragMinePreview = static_cast<GoldMine*>(draggingItem->getUserData());
                     if (dragMinePreview) {
@@ -1424,8 +1424,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             placedGoldMine->getSpeed(), placedGoldMine->getMaxStock(), 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == elixirCollectorBtn) {
@@ -1433,7 +1433,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     ElixirCollector* dragElixirCollectorPreview = static_cast<ElixirCollector*>(draggingItem->getUserData());
                     if (dragElixirCollectorPreview) {
@@ -1456,8 +1456,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             placedElixirCollector->getSpeed(), placedElixirCollector->getMaxStock(), 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == goldStorageBtn) {
@@ -1465,7 +1465,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<GoldStorage*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<GoldStorage*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     GoldStorage* dragGoldStoragePreview = static_cast<GoldStorage*>(draggingItem->getUserData());
                     if (dragGoldStoragePreview) {
@@ -1488,8 +1488,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, placedGoldStorage->getMaxStock(), 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == elixirStorageBtn) {
@@ -1497,7 +1497,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     ElixirStorage* draElixirStoragePreview = static_cast<ElixirStorage*>(draggingItem->getUserData());
                     if (draElixirStoragePreview) {
@@ -1520,8 +1520,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, placedElixirStorage->getMaxStock(), 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == armyCampBtn) {
@@ -1529,7 +1529,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     ArmyCamp* dragArmyCampPreview = static_cast<ArmyCamp*>(draggingItem->getUserData());
                     if (dragArmyCampPreview) {
@@ -1552,8 +1552,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, placedArmyCamp->getMaxStock(), 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == wallsBtn) {
@@ -1561,7 +1561,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<Walls*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<Walls*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     Walls* dragWallsPreview = static_cast<Walls*>(draggingItem->getUserData());
                     if (dragWallsPreview) {
@@ -1583,8 +1583,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, 0, 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == builderHutBtn) {
@@ -1592,7 +1592,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<BuilderHut*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<BuilderHut*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost && hutNum < 5) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost && hut_num < 5) {
                     //除旧
                     BuilderHut* dragBuilderHutPreview = static_cast<BuilderHut*>(draggingItem->getUserData());
                     if (dragBuilderHutPreview) {
@@ -1615,9 +1615,9 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, 0, 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
-                    hutNum++;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
+                    hut_num++;
                 }
             }
             else if (draggingItem == archerTowerBtn) {
@@ -1625,7 +1625,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<ArcherTower*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<ArcherTower*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     ArcherTower* dragArcherTowerPreview = static_cast<ArcherTower*>(draggingItem->getUserData());
                     if (dragArcherTowerPreview) {
@@ -1648,8 +1648,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, 0, 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == cannonBtn) {
@@ -1657,7 +1657,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<Cannon*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<Cannon*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     Cannon* dragCannonPreview = static_cast<Cannon*>(draggingItem->getUserData());
                     if (dragCannonPreview) {
@@ -1680,8 +1680,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, 0, 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             else if (draggingItem == mortarBtn) {
@@ -1689,7 +1689,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                 int goldCost = static_cast<Mortar*>(draggingItem->getUserData())->getGoldCost();
                 int elixirCost = static_cast<Mortar*>(draggingItem->getUserData())->getElixirCost();
                 //再次判断资源是否足够
-                if (g_goldCount >= goldCost && g_elixirCount >= elixirCost) {
+                if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
                     Mortar* dragMortarPreview = static_cast<Mortar*>(draggingItem->getUserData());
                     if (dragMortarPreview) {
@@ -1712,8 +1712,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                             0, 0, 0);
                     }
                     //扣除资源
-                    g_goldCount -= goldCost;
-                    g_elixirCount -= elixirCost;
+                    global_gold_count -= goldCost;
+                    global_elixir_count -= elixirCost;
                 }
             }
             // 无效区域：创建对应建筑并执行失败反馈
@@ -2229,35 +2229,35 @@ void SecondScene::onWebSocketMessage(const std::string& message) {
 
                 CCLOG("SecondScene: Parsed gold=%d, elixir=%d, gems=%d from response", gold, elixir, gems);
 
-                g_goldCount = gold;
-                g_elixirCount = elixir;
-                g_gemCount = gems;
+                global_gold_count = gold;
+                global_elixir_count = elixir;
+                global_gem_count = gems;
 
                 CCLOG("SecondScene: Updated global variables - gold=%d, elixir=%d, gems=%d",
-                    g_goldCount, g_elixirCount, g_gemCount);
+                    global_gold_count, global_elixir_count, global_gem_count);
 
                 auto session = SessionManager::getInstance();
                 session->setResourceData(gold, elixir, gems);
 
                 CCLOG("SecondScene: Resource data loaded from server - gold=%d, elixir=%d, gems=%d",
-                    g_goldCount, g_elixirCount, g_gemCount);
+                    global_gold_count, global_elixir_count, global_gem_count);
 
                 // 立即更新 UI 标签显示
                 CCLOG("SecondScene: goldLabel=%p, elixirLabel=%p, gemLabel=%p", goldLabel, elixirLabel, gemLabel);
                 if (goldLabel) {
-                    goldLabel->setString(StringUtils::format("%d", g_goldCount));
-                    CCLOG("SecondScene: Updated goldLabel to %d", g_goldCount);
+                    goldLabel->setString(StringUtils::format("%d", global_gold_count));
+                    CCLOG("SecondScene: Updated goldLabel to %d", global_gold_count);
                 }
                 else {
                     CCLOG("SecondScene: goldLabel is NULL!");
                 }
                 if (elixirLabel) {
-                    elixirLabel->setString(StringUtils::format("%d", g_elixirCount));
-                    CCLOG("SecondScene: Updated elixirLabel to %d", g_elixirCount);
+                    elixirLabel->setString(StringUtils::format("%d", global_elixir_count));
+                    CCLOG("SecondScene: Updated elixirLabel to %d", global_elixir_count);
                 }
                 if (gemLabel) {
-                    gemLabel->setString(StringUtils::format("%d", g_gemCount));
-                    CCLOG("SecondScene: Updated gemLabel to %d", g_gemCount);
+                    gemLabel->setString(StringUtils::format("%d", global_gem_count));
+                    CCLOG("SecondScene: Updated gemLabel to %d", global_gem_count);
                 }
             }
             else {
@@ -2266,7 +2266,7 @@ void SecondScene::onWebSocketMessage(const std::string& message) {
                     hasElixir ? "present" : "missing",
                     hasGems ? "present" : "missing");
                 CCLOG("SecondScene: Current values kept - gold=%d, elixir=%d, gems=%d",
-                    g_goldCount, g_elixirCount, g_gemCount);
+                    global_gold_count, global_elixir_count, global_gem_count);
             }
         }
         else {
@@ -2346,9 +2346,9 @@ void SecondScene::sendUpdateResourceRequest(float dt) {
 
     doc.AddMember("action", "updateResource", allocator);
     doc.AddMember("username", rapidjson::Value(username.c_str(), allocator), allocator);
-    doc.AddMember("gold", g_goldCount, allocator);
-    doc.AddMember("elixir", g_elixirCount, allocator);
-    doc.AddMember("gems", g_gemCount, allocator);
+    doc.AddMember("gold", global_gold_count, allocator);
+    doc.AddMember("elixir", global_elixir_count, allocator);
+    doc.AddMember("gems", global_gem_count, allocator);
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -2357,7 +2357,7 @@ void SecondScene::sendUpdateResourceRequest(float dt) {
     std::string message = buffer.GetString();
     if (wsManager->send(message)) {
         CCLOG("SecondScene: Resource update sent for user: %s - gold=%d, elixir=%d, gems=%d",
-            username.c_str(), g_goldCount, g_elixirCount, g_gemCount);
+            username.c_str(), global_gold_count, global_elixir_count, global_gem_count);
     }
     else {
         CCLOG("SecondScene: Failed to send resource update");
@@ -3053,9 +3053,9 @@ void SecondScene::initDefaultBuildingsAndSave() {
         }
         placedBuildings.push_back(townHall);
         townHall->setScale(0.9f);
-        maxGoldVolum = townHall->getMaxGoldNum();
-        maxElixirVolum = townHall->getMaxElixirNum();
-        maxLevel = townHall->getLv();
+        max_gold_volum = townHall->getMaxGoldNum();
+        max_elixir_volum = townHall->getMaxElixirNum();
+        max_level = townHall->getLv();
     }
 
     auto goldMine = GoldMine::create("GoldMineLv1.png");

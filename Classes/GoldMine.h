@@ -2,7 +2,7 @@
 #define __GOLD_MINE_H__
 
 #include "Building.h"
-extern int g_goldCount, g_elixirCount,maxLevel;
+extern int global_gold_count, global_elixir_count,max_level;
 
 class GoldMine : public Building
 {
@@ -24,7 +24,7 @@ public:
         return upgradeCost[1];
     }
     bool canUpgrade()override {
-        if (g_goldCount >= upgradeCost[0] && g_elixirCount >= upgradeCost[1]&&level < maxLevel) {
+        if (global_gold_count >= upgradeCost[0] && global_elixir_count >= upgradeCost[1]&&level < max_level) {
             return true;
         }
         else {

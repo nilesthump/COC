@@ -2,8 +2,8 @@
 #define __TOWN_HALL_H__
 
 #include "Building.h"
-extern int maxGoldVolum, maxElixirVolum, maxLevel;
-extern int g_goldCount, g_elixirCount;
+extern int max_gold_volum, max_elixir_volum, max_level;
+extern int global_gold_count, global_elixir_count;
 
 class TownHall : public Building
 {
@@ -21,7 +21,7 @@ public:
         return upgradeCost[1];
     }
     bool canUpgrade()override {
-        if (g_goldCount >= upgradeCost[0] && g_elixirCount >= upgradeCost[1] && level < 15) {
+        if (global_gold_count >= upgradeCost[0] && global_elixir_count >= upgradeCost[1] && level < 15) {
             return true;
         }
         else {
@@ -39,9 +39,9 @@ public:
         upgradeTime = level * 15;
         isUpgrade = false;
         //更新全局变量
-        maxGoldVolum = maxGoldNum;
-        maxElixirVolum = maxElixirNum;
-        maxLevel = level;
+        max_gold_volum = maxGoldNum;
+        max_elixir_volum = maxElixirNum;
+        max_level = level;
         //换图
         _textureName = StringUtils::format("TownHallLv%d.png", level);
         updateTexture(_textureName);

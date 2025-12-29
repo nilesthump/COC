@@ -2,7 +2,7 @@
 #define __ELIXIR_STORAGE_H__
 
 #include "Building.h"
-extern int g_goldCount, g_elixirCount,maxLevel,maxElixirVolum;
+extern int global_gold_count, global_elixir_count,max_level,max_elixir_volum;
 
 class ElixirStorage : public Building
 {
@@ -25,13 +25,13 @@ public:
         return currentSize;
     }
     void clearCurrentStock()override {
-        if (g_elixirCount + currentSize <= maxElixirVolum) {
+        if (global_elixir_count + currentSize <= max_elixir_volum) {
             currentSize = 0;
-            g_elixirCount += currentSize;
+            global_elixir_count += currentSize;
         }
         else {
-            currentSize -= (maxElixirVolum - g_elixirCount);
-            g_elixirCount = maxElixirVolum;
+            currentSize -= (max_elixir_volum - global_elixir_count);
+            global_elixir_count = max_elixir_volum;
         }
     }
     void addCurrent(int n) {
@@ -45,7 +45,7 @@ public:
         return upgradeCost[1];
     }
     bool canUpgrade()override {
-        if (g_goldCount >= upgradeCost[0] && g_elixirCount >= upgradeCost[1] && level < maxLevel) {
+        if (global_gold_count >= upgradeCost[0] && global_elixir_count >= upgradeCost[1] && level < max_level) {
             return true;
         }
         else {
