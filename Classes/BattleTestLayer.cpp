@@ -160,7 +160,7 @@ void BattleTestLayer::parseServerBuildings(const std::string& message)
 				float absoluteX = static_cast<float>(building["x"].GetDouble());
 				float absoluteY = static_cast<float>(building["y"].GetDouble());
 				Vec2 absolutePos = Vec2(absoluteX, absoluteY);
-				Vec2 gridPos = ConvertTest::convertScreenToGrid(absolutePos, background_sprite_, game_world_);
+				Vec2 gridPos = ConvertTest::convertScreenToGrid(absolutePos, background_sprite_, game_world_)-Vec2(0.0f,42.5f);
 
 				BuildingSnapshot snapshot;
 				snapshot.type = parseBuildingType(buildingType);
