@@ -57,9 +57,9 @@ public:
 	UnitState& operator=(UnitState&&) = default;
 
 	//初始化接口
-	//模板化的Init函数，可以接受任何派生自BaseUnitData的类型
+	//模板化的init函数，可以接受任何派生自BaseUnitData的类型
 	template<typename T>
-	void Init(const T& data)
+	void init(const T& data)
 	{
 		// 1. 深度拷贝静态配置
 		base_data_ptr_ = std::make_unique<T>(data);

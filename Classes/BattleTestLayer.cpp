@@ -206,7 +206,7 @@ void BattleTestLayer::update(float delta)
 	if (!bm) return;
 
 	//逻辑更新
-	bm->Update(delta);
+	bm->update(delta);
 
 	//UI更新，只管调用HUD的接口，HUD内部会去读取Manager的数据
 	if (hud_)

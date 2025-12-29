@@ -71,14 +71,14 @@ public:
 	//·µ»ØÎ´Âú
 	Building* getGoldStorage() {
 		for (auto building : placedBuildings) {
-			if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+			if (dynamic_cast<GoldStorage*>(building) && building->GetCurrentStock() < building->GetMaxStock()) {
 				return building;
 			}
 		}
 	}
 	Building* getElixirStorage() {
 		for (auto building : placedBuildings) {
-			if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+			if (dynamic_cast<ElixirStorage*>(building) && building->GetCurrentStock() < building->GetMaxStock()) {
 				return building;
 			}
 		}

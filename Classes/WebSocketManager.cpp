@@ -192,8 +192,8 @@ void WebSocketManager::processMessageQueue() {
         handleUpgradeCompleteMessage(message);
     }
 
-    if (message.find("\"action\":\"startUpgrade\"") != std::string::npos) {
-        CCLOG("WebSocketManager: Detected startUpgrade response");
+    if (message.find("\"action\":\"StartUpgrade\"") != std::string::npos) {
+        CCLOG("WebSocketManager: Detected StartUpgrade response");
 
         size_t durationPos = message.find("\"duration\":");
         if (durationPos != std::string::npos) {
@@ -431,7 +431,7 @@ void WebSocketManager::parseProductionData(const std::string& jsonData) {
         }
 
         std::string request = StringUtils::format(
-            "{\"action\":\"startUpgrade\",\"username\":\"%s\",\"buildingType\":\"%s\",\"x\":%.1f,\"y\":%.1f,\"targetLevel\":%d,\"duration\":%d}",
+            "{\"action\":\"StartUpgrade\",\"username\":\"%s\",\"buildingType\":\"%s\",\"x\":%.1f,\"y\":%.1f,\"targetLevel\":%d,\"duration\":%d}",
             username.c_str(), buildingType.c_str(), x, y, targetLevel, duration);
 
         _webSocket->send(request);

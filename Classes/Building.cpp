@@ -8,9 +8,9 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-void Building::playFailBlinkAndRemove()
+void Building::PlayFailBlinkAndRemove()
 {
-    _sprite->setColor(Color3B::RED); // 设为红色
+    building_sprite->setColor(Color3B::RED); // 设为红色
     this->runAction(Sequence::create(
         Blink::create(0.5f, 2),    // 闪烁2次
         RemoveSelf::create(true),  
@@ -18,9 +18,9 @@ void Building::playFailBlinkAndRemove()
     ));
 }
 
-void Building::playFailBlink()
+void Building::PlayFailBlink()
 {
-    _sprite->setColor(Color3B::RED); // 设为红色
+    building_sprite->setColor(Color3B::RED); // 设为红色
     this->runAction(Sequence::create(
         Blink::create(0.5f, 2),    // 闪烁2次      
         nullptr

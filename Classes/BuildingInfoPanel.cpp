@@ -56,9 +56,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             [this](cocos2d::Ref* sender) {
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
-                    if (armyCamp->getCurrentStock()+ armyCamp->getArmySize(0) <= armyCamp->getMaxStock()) {
+                    if (armyCamp->GetCurrentStock()+ armyCamp->GetArmySize(0) <= armyCamp->GetMaxStock()) {
                         this->playBlinkAnimation(barbarianBtn);
-                        armyCamp->updateNum(0); // 野蛮人数量+1
+                        armyCamp->UpdateNum(0); // 野蛮人数量+1
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
                 }
@@ -72,9 +72,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             [this](cocos2d::Ref* sender) {
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
-                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(1) <= armyCamp->getMaxStock()) {
+                    if (armyCamp->GetCurrentStock() + armyCamp->GetArmySize(1) <= armyCamp->GetMaxStock()) {
                         this->playBlinkAnimation(archerBtn);
-                        armyCamp->updateNum(1); 
+                        armyCamp->UpdateNum(1); 
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
                 }
@@ -89,9 +89,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             [this](cocos2d::Ref* sender) {
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
-                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(2) <= armyCamp->getMaxStock()) {
+                    if (armyCamp->GetCurrentStock() + armyCamp->GetArmySize(2) <= armyCamp->GetMaxStock()) {
                         this->playBlinkAnimation(giantBtn);
-                        armyCamp->updateNum(2); 
+                        armyCamp->UpdateNum(2); 
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
                 }
@@ -106,9 +106,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             [this](cocos2d::Ref* sender) {
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
-                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(3) <= armyCamp->getMaxStock()) {
+                    if (armyCamp->GetCurrentStock() + armyCamp->GetArmySize(3) <= armyCamp->GetMaxStock()) {
                         this->playBlinkAnimation(goblinBtn);
-                        armyCamp->updateNum(3);
+                        armyCamp->UpdateNum(3);
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
                 }
@@ -123,9 +123,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             [this](cocos2d::Ref* sender) {
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
-                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(4) <= armyCamp->getMaxStock()) {
+                    if (armyCamp->GetCurrentStock() + armyCamp->GetArmySize(4) <= armyCamp->GetMaxStock()) {
                         this->playBlinkAnimation(bomberBtn);
-                        armyCamp->updateNum(4); 
+                        armyCamp->UpdateNum(4); 
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
                 }
@@ -140,9 +140,9 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             [this](cocos2d::Ref* sender) {
                 if (auto armyCamp = dynamic_cast<ArmyCamp*>(_targetBuilding)) {
                     // 检查是否还有容量
-                    if (armyCamp->getCurrentStock() + armyCamp->getArmySize(5) <= armyCamp->getMaxStock()) {
+                    if (armyCamp->GetCurrentStock() + armyCamp->GetArmySize(5) <= armyCamp->GetMaxStock()) {
                         this->playBlinkAnimation(balloonBtn);
-                        armyCamp->updateNum(5);
+                        armyCamp->UpdateNum(5);
                         this->updateInfo(_targetBuilding, temp); // 更新显示
                     }
                 }
@@ -156,7 +156,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
             "0.png",
             "0.png",
             [this](Ref* sender) {
-                showSoldierInfo(_targetBuilding->getLv());
+                showSoldierInfo(_targetBuilding->GetLevel());
             }
         );
         soldierInfoBtn->setScale(0.5f);
@@ -219,7 +219,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         type = "BuilderHut";
     }
     _titleLabel = Label::createWithTTF(
-        StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()),
+        StringUtils::format("%s Lv.%d", type.c_str(), building->GetLevel()),
         "fonts/Marker Felt.ttf", 24
     );
     _titleLabel->setPosition(bgWidth / 2, bgHeight - 30);
@@ -228,7 +228,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
 
     // 3. 血量信息
     _hpLabel = Label::createWithTTF(
-        StringUtils::format("HP: %d", building->getHp()),
+        StringUtils::format("HP: %d", building->GetHp()),
         "fonts/Marker Felt.ttf", 24
     );
     _hpLabel->setPosition(bgWidth / 2, bgHeight - 70);
@@ -241,7 +241,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     //兵营显示各个士兵的信息，城墙、建筑小屋不需要显示
     if (dynamic_cast<GoldMine*>(building)) {
         _speedLabel = Label::createWithTTF(
-            StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
+            StringUtils::format("generateSpeed: %d/s", building->GetSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
@@ -249,7 +249,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_speedLabel);
 
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("Gold: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()),
+            StringUtils::format("Gold: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );  
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 210); // 调整位置在坐标下方
@@ -259,7 +259,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         _speedLabel = Label::createWithTTF(
-            StringUtils::format("generateSpeed: %d/s", building->getSpeed()),
+            StringUtils::format("generateSpeed: %d/s", building->GetSpeed()),
             "fonts/Marker Felt.ttf", 24
         );
         _speedLabel->setPosition(bgWidth / 2, bgHeight - 150);
@@ -267,7 +267,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_speedLabel);
 
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("Elixir: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()),
+            StringUtils::format("Elixir: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 210); // 调整位置在坐标下方
@@ -276,7 +276,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("Gold: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()),
+            StringUtils::format("Gold: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
@@ -285,7 +285,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("Elixir: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()),
+            StringUtils::format("Elixir: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
@@ -294,7 +294,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     }
     else if (dynamic_cast<ArmyCamp*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("armyNum/maxNum: %d/%d", building->getCurrentStock(), building->getMaxStock()),
+            StringUtils::format("armyNum/maxNum: %d/%d", building->GetCurrentStock(), building->GetMaxStock()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
@@ -302,7 +302,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_resourceLabel);
 
         _barbarian = Label::createWithTTF(
-            StringUtils::format("barbarianNum: %d", building->getArmy(0)),
+            StringUtils::format("barbarianNum: %d", building->GetArmy(0)),
             "fonts/Marker Felt.ttf", 24
         );
         _barbarian->setPosition(bgWidth / 2, bgHeight - 190); // 调整位置在坐标下方
@@ -310,7 +310,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_barbarian);
 
         _archer = Label::createWithTTF(
-            StringUtils::format("archerNum: %d", building->getArmy(1)),
+            StringUtils::format("archerNum: %d", building->GetArmy(1)),
             "fonts/Marker Felt.ttf", 24
         );
         _archer->setPosition(bgWidth / 2, bgHeight - 230); // 调整位置在坐标下方
@@ -318,7 +318,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_archer);
 
         _giant = Label::createWithTTF(
-            StringUtils::format("giantNum: %d", building->getArmy(2)),
+            StringUtils::format("giantNum: %d", building->GetArmy(2)),
             "fonts/Marker Felt.ttf", 24
         );
         _giant->setPosition(bgWidth / 2, bgHeight - 270); // 调整位置在坐标下方
@@ -326,7 +326,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_giant);
 
         _goblin = Label::createWithTTF(
-            StringUtils::format("goblinNum: %d", building->getArmy(3)),
+            StringUtils::format("goblinNum: %d", building->GetArmy(3)),
             "fonts/Marker Felt.ttf", 24
         );
         _goblin->setPosition(bgWidth / 2, bgHeight - 310); // 调整位置在坐标下方
@@ -334,7 +334,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_goblin);
 
         _bomber = Label::createWithTTF(
-            StringUtils::format("bomberNum: %d", building->getArmy(4)),
+            StringUtils::format("bomberNum: %d", building->GetArmy(4)),
             "fonts/Marker Felt.ttf", 24
         );
         _bomber->setPosition(bgWidth / 2, bgHeight - 350); // 调整位置在坐标下方
@@ -342,7 +342,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         panelBg->addChild(_bomber);
 
         _balloon = Label::createWithTTF(
-            StringUtils::format("balloonNum: %d", building->getArmy(5)),
+            StringUtils::format("balloonNum: %d", building->GetArmy(5)),
             "fonts/Marker Felt.ttf", 24
         );
         _balloon->setPosition(bgWidth / 2, bgHeight - 390); // 调整位置在坐标下方
@@ -355,7 +355,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     else if (dynamic_cast<Mortar*>(building)) {}
     else if (dynamic_cast<TownHall*>(building)) {
         _resourceLabel = Label::createWithTTF(
-            StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()),
+            StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->GetMaxGoldNum(), building->GetMaxElixirNum()),
             "fonts/Marker Felt.ttf", 24
         );
         _resourceLabel->setPosition(bgWidth / 2, bgHeight - 150); // 调整位置在坐标下方
@@ -371,8 +371,8 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         CC_CALLBACK_1(BuildingInfoPanel::onUpgradeClicked, this)
      );
     //设置文字提示
-    if (!_targetBuilding->getIsUpgrade()) {
-        if (_targetBuilding->getLv() < 15) {
+    if (!_targetBuilding->GetIsUpgrade()) {
+        if (_targetBuilding->GetLevel() < 15) {
             auto upGradeLabel = Label::createWithSystemFont("UpGrade", "fonts/Marker Felt.ttf", 24);
             upGradeLabel->setColor(Color3B::MAGENTA);
             upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
@@ -386,7 +386,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
         }
     }
     else {
-        auto upGradeLabel = Label::createWithSystemFont(StringUtils::format("please wait %d s!", _targetBuilding->getRemainTime()),"fonts/Marker Felt.ttf", 24);
+        auto upGradeLabel = Label::createWithSystemFont(StringUtils::format("please wait %d s!", _targetBuilding->GetRemainTime()),"fonts/Marker Felt.ttf", 24);
         upGradeLabel->setColor(Color3B::RED);
         upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
         _upgradeBtn->addChild(upGradeLabel);
@@ -396,7 +396,7 @@ bool BuildingInfoPanel::init(Building* building, cocos2d::Sprite* background_spr
     _upgradeBtn->setPosition(bgWidth / 2, 70);
     
     //6. 加速按钮
-    if (_targetBuilding->getIsUpgrade()) {
+    if (_targetBuilding->GetIsUpgrade()) {
         _speedUpBtn = MenuItemImage::create(
             "5.png",  // 正常状态图
             "5.png", // 按下状态图
@@ -449,31 +449,31 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     std::string type;
     if (dynamic_cast<GoldMine*>(building)) {
         type = "GoldMine";
-        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->getSpeed()));
-        _resourceLabel->setString(StringUtils::format("Gold: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()));
+        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->GetSpeed()));
+        _resourceLabel->setString(StringUtils::format("Gold: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()));
     }
     else if (dynamic_cast<ElixirCollector*>(building)) {
         type = "ElixirCollector";
-        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->getSpeed()));
-        _resourceLabel->setString(StringUtils::format("Elixir: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()));
+        _speedLabel->setString(StringUtils::format("generateSpeed: %d/s", building->GetSpeed()));
+        _resourceLabel->setString(StringUtils::format("Elixir: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()));
     }
     else if (dynamic_cast<GoldStorage*>(building)) {
         type = "GoldStorage";
-        _resourceLabel->setString(StringUtils::format("Gold: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()));
+        _resourceLabel->setString(StringUtils::format("Gold: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()));
     }
     else if (dynamic_cast<ElixirStorage*>(building)) {
         type = "ElixirStorage";
-        _resourceLabel->setString(StringUtils::format("Elixir: %d\nVolum: %d", building->getCurrentStock(), building->getMaxStock()));
+        _resourceLabel->setString(StringUtils::format("Elixir: %d\nVolum: %d", building->GetCurrentStock(), building->GetMaxStock()));
     }
     else if (dynamic_cast<ArmyCamp*>(building)) {
         type = "ArmyCamp";
-        _resourceLabel->setString(StringUtils::format("armyNum/maxNum: %d/%d", building->getCurrentStock(), building->getMaxStock()));
-        _barbarian->setString(StringUtils::format("barbarianNum: %d", building->getArmy(0)));
-        _archer->setString(StringUtils::format("archerNum: %d", building->getArmy(1)));
-        _giant->setString(StringUtils::format("giantNum: %d", building->getArmy(2)));
-        _goblin->setString(StringUtils::format("goblinNum: %d", building->getArmy(3)));
-        _bomber->setString(StringUtils::format("bomberNum: %d", building->getArmy(4)));
-        _balloon->setString(StringUtils::format("balloonNum: %d", building->getArmy(5)));
+        _resourceLabel->setString(StringUtils::format("armyNum/maxNum: %d/%d", building->GetCurrentStock(), building->GetMaxStock()));
+        _barbarian->setString(StringUtils::format("barbarianNum: %d", building->GetArmy(0)));
+        _archer->setString(StringUtils::format("archerNum: %d", building->GetArmy(1)));
+        _giant->setString(StringUtils::format("giantNum: %d", building->GetArmy(2)));
+        _goblin->setString(StringUtils::format("goblinNum: %d", building->GetArmy(3)));
+        _bomber->setString(StringUtils::format("bomberNum: %d", building->GetArmy(4)));
+        _balloon->setString(StringUtils::format("balloonNum: %d", building->GetArmy(5)));
     }
     else if (dynamic_cast<Walls*>(building)) {
         type = "Walls";
@@ -489,14 +489,14 @@ void BuildingInfoPanel::updateInfo(Building* building, cocos2d::Sprite* backgrou
     }
     else if (dynamic_cast<TownHall*>(building)) {
         type = "TownHall";
-        _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->getMaxGoldNum(), building->getMaxElixirNum()));
+        _resourceLabel->setString(StringUtils::format("maxGoldNum: %d\nmaxElixirNum: %d", building->GetMaxGoldNum(), building->GetMaxElixirNum()));
     }
     else if (dynamic_cast<BuilderHut*>(building)) {
         type = "BuilderHut";
     }
     //公共标签
-    _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->getLv()));
-    _hpLabel->setString(StringUtils::format("HP: %d", building->getHp()));
+    _titleLabel->setString(StringUtils::format("%s Lv.%d", type.c_str(), building->GetLevel()));
+    _hpLabel->setString(StringUtils::format("HP: %d", building->GetHp()));
   
     refreshUpgradeButton(building);
 
@@ -510,8 +510,8 @@ void BuildingInfoPanel::refreshUpgradeButton(Building* building) {
 
     _upgradeBtn->removeAllChildren();
 
-    if (!building->getIsUpgrade()) {
-        if (building->getLv() < 15) {
+    if (!building->GetIsUpgrade()) {
+        if (building->GetLevel() < 15) {
             auto upGradeLabel = Label::createWithSystemFont("UpGrade", "fonts/Marker Felt.ttf", 24);
             upGradeLabel->setColor(Color3B::MAGENTA);
             upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
@@ -525,7 +525,7 @@ void BuildingInfoPanel::refreshUpgradeButton(Building* building) {
         }
     }
     else {
-        int remainingTime = building->getRemainTime();
+        int remainingTime = building->GetRemainTime();
         auto upGradeLabel = Label::createWithSystemFont(StringUtils::format("please wait %d s!", remainingTime), "fonts/Marker Felt.ttf", 24);
         upGradeLabel->setColor(Color3B::RED);
         upGradeLabel->setPosition(Vec2(_upgradeBtn->getContentSize().width / 2, _upgradeBtn->getContentSize().height / 2));
@@ -536,7 +536,7 @@ void BuildingInfoPanel::refreshUpgradeButton(Building* building) {
 void BuildingInfoPanel::updateUpgradeCountdown() {
     if (!_targetBuilding) return;
 
-    if (_targetBuilding->getIsUpgrade()) {
+    if (_targetBuilding->GetIsUpgrade()) {
         refreshUpgradeButton(_targetBuilding);
     }
 }
@@ -561,25 +561,25 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
 
     int count = 0;
     for (auto building :SecondScene::placedBuildings) {
-        if (building->getIsUpgrade()) {
+        if (building->GetIsUpgrade()) {
             count++;
         }
     }
-    //canUpgrade函数判断了资源是否足够，等级是否超上限，而count则是同时可以升级的建筑数量
-    if (count < hut_num && _targetBuilding->canUpgrade()) {
-        global_gold_count -= _targetBuilding->getUpgradeGoldCost();
-        global_elixir_count-= _targetBuilding->getUpgradeElixirCost();
+    //CanUpgrade函数判断了资源是否足够，等级是否超上限，而count则是同时可以升级的建筑数量
+    if (count < hut_num && _targetBuilding->CanUpgrade()) {
+        global_gold_count -= _targetBuilding->GetUpgradeGoldCost();
+        global_elixir_count-= _targetBuilding->GetUpgradeElixirCost();
 
-        _targetBuilding->playSuccessBlink();// 播放开始升级动画
-        _targetBuilding->startUpgrade();
+        _targetBuilding->PlaySuccessBlink();// 播放开始升级动画
+        _targetBuilding->StartUpgrade();
 
         // 发送升级开始事件到服务器
         WebSocketManager::getInstance()->sendUpgradeStart(
-            _targetBuilding->getBuildingType(),
-            _targetBuilding->getX(),
-            _targetBuilding->getY(),
-            _targetBuilding->getLv() + 1,
-            _targetBuilding->getUpgradeDuration()
+            _targetBuilding->GetBuildingType(),
+            _targetBuilding->GetX(),
+            _targetBuilding->GetY(),
+            _targetBuilding->GetLevel() + 1,
+            _targetBuilding->GetUpgradeDuration()
         );
     }
     updateInfo(_targetBuilding, temp);
@@ -587,9 +587,9 @@ void BuildingInfoPanel::onUpgradeClicked(Ref* sender) {
 
 //一键完成加速
 void BuildingInfoPanel::speedUpgradeClicked(cocos2d::Ref* sender) {
-    if (global_gem_count > 0&& _targetBuilding->getIsUpgrade()) {
+    if (global_gem_count > 0&& _targetBuilding->GetIsUpgrade()) {
         global_gem_count--;
-        _targetBuilding->finishUpgrade();
+        _targetBuilding->FinishUpgrade();
     }
 }
 
@@ -618,7 +618,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     bool resourceUpdated = false;
     // 判断建筑类型并执行对应收集逻辑
     if (dynamic_cast<GoldMine*>(_targetBuilding)) {
-        collected = _targetBuilding->getCurrentStock();
+        collected = _targetBuilding->GetCurrentStock();
         CCLOG("BuildingInfoPanel: GoldMine current stock: %d, global_gold_count: %d, max: %d",
             collected, global_gold_count, max_gold_volum);
         if (collected > 0 && collected + global_gold_count <= max_gold_volum) {
@@ -637,7 +637,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
         }
     }
     else if (dynamic_cast<ElixirCollector*>(_targetBuilding)) {
-        collected = _targetBuilding->getCurrentStock();
+        collected = _targetBuilding->GetCurrentStock();
         CCLOG("BuildingInfoPanel: ElixirCollector current stock: %d, global_elixir_count: %d, max: %d",
             collected, global_elixir_count, max_elixir_volum);
         if (collected > 0 && collected + global_elixir_count <= max_elixir_volum) {
@@ -655,7 +655,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
         }
     }
     else if (dynamic_cast<GoldStorage*>(_targetBuilding)) {
-        collected = _targetBuilding->getCurrentStock();
+        collected = _targetBuilding->GetCurrentStock();
         if (collected > 0 && collected + global_gold_count <= max_gold_volum) {
             global_gold_count += collected;
             resourceUpdated = true;
@@ -671,7 +671,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
         }
     }
     else if (dynamic_cast<ElixirStorage*>(_targetBuilding)) {
-        collected = _targetBuilding->getCurrentStock();
+        collected = _targetBuilding->GetCurrentStock();
         if (collected > 0 && collected + global_elixir_count <= max_elixir_volum) {
             global_elixir_count += collected;
             resourceUpdated = true;
@@ -689,7 +689,7 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
 
     CCLOG("BuildingInfoPanel: Before updating building stock, collected: %d", collected);
     // 发送收集生产请求到服务器（清空建筑存量之前发送，确保数据一致性）
-    int originalStock = _targetBuilding->getCurrentStock();
+    int originalStock = _targetBuilding->GetCurrentStock();
     if (originalStock > 0) {
         auto director = cocos2d::Director::getInstance();
         auto scene = director->getRunningScene();
@@ -715,9 +715,9 @@ void BuildingInfoPanel::onCollectClicked(Ref* sender) {
     }
 
     // 更新面板显示的资源数量
-    _targetBuilding->clearCurrentStock();
+    _targetBuilding->ClearCurrentStock();
     if (collected > 0) {
-        _targetBuilding->updateCurrentStock(collected);
+        _targetBuilding->UpdateCurrentStock(collected);
     }
     CCLOG("BuildingInfoPanel: Before updateInfo");
     updateInfo(_targetBuilding, temp); // 刷新信息显示

@@ -245,7 +245,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             GoldMine* tempMine = GoldMine::create("GoldMineLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost||global_elixir_count< elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -261,10 +261,10 @@ bool SecondScene::init()
                     // 预览态设置：半透明（区分实际对象）
                     goldMinePreview->setOpacity(150);
 
-                    Vec2 my = Vec2(goldMinePreview->getX(), goldMinePreview->getY());
+                    Vec2 my = Vec2(goldMinePreview->GetX(), goldMinePreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        goldMinePreview->setMinePosition(you);
+                        goldMinePreview->SetMinePosition(you);
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(goldMinePreview, 10);
                         goldMineBtn->setUserData(goldMinePreview);
@@ -287,7 +287,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             ElixirCollector* tempMine = ElixirCollector::create("ElixirCollectorLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -303,10 +303,10 @@ bool SecondScene::init()
                     // 预览态设置：半透明（区分实际对象）
                     elixirCollectorPreview->setOpacity(150);
                     
-                    Vec2 my = Vec2(elixirCollectorPreview->getX(), elixirCollectorPreview->getY());
+                    Vec2 my = Vec2(elixirCollectorPreview->GetX(), elixirCollectorPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        elixirCollectorPreview->setMinePosition(you);
+                        elixirCollectorPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(elixirCollectorPreview, 10);
@@ -328,7 +328,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             GoldStorage* tempMine = GoldStorage::create("GoldStorageLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -343,10 +343,10 @@ bool SecondScene::init()
                 if (goldStoragePreview) {
                     // 预览态设置：半透明（区分实际对象）
                     goldStoragePreview->setOpacity(150);                   
-                    Vec2 my = Vec2(goldStoragePreview->getX(), goldStoragePreview->getY());
+                    Vec2 my = Vec2(goldStoragePreview->GetX(), goldStoragePreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        goldStoragePreview->setMinePosition(you);
+                        goldStoragePreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(goldStoragePreview, 10);
@@ -368,7 +368,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             ElixirStorage* tempMine = ElixirStorage::create("ElixirStorageLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -383,10 +383,10 @@ bool SecondScene::init()
                 if (elixirStoragePreview) {
                     // 预览态设置：半透明（区分实际对象）
                     elixirStoragePreview->setOpacity(150);
-                    Vec2 my = Vec2(elixirStoragePreview->getX(), elixirStoragePreview->getY());
+                    Vec2 my = Vec2(elixirStoragePreview->GetX(), elixirStoragePreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        elixirStoragePreview->setMinePosition(you);
+                        elixirStoragePreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(elixirStoragePreview, 10);
@@ -408,7 +408,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             ArmyCamp* tempMine = ArmyCamp::create("ArmyCampLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -423,10 +423,10 @@ bool SecondScene::init()
                 if (armyCampPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     armyCampPreview->setOpacity(150);
-                    Vec2 my = Vec2(armyCampPreview->getX(), armyCampPreview->getY());
+                    Vec2 my = Vec2(armyCampPreview->GetX(), armyCampPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        armyCampPreview->setMinePosition(you);
+                        armyCampPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(armyCampPreview, 10);
@@ -448,7 +448,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             Walls* tempMine = Walls::create("WallsLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -463,10 +463,10 @@ bool SecondScene::init()
                 if (wallsPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     wallsPreview->setOpacity(150);
-                    Vec2 my = Vec2(wallsPreview->getX(), wallsPreview->getY());
+                    Vec2 my = Vec2(wallsPreview->GetX(), wallsPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        wallsPreview->setMinePosition(you);
+                        wallsPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(wallsPreview, 10);
@@ -488,7 +488,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源，且数量不超过5
             BuilderHut* tempMine = BuilderHut::create("BuilderHutLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost || hut_num >= 5) {
                 return; // 直接返回，不允许放置
             }
@@ -503,10 +503,10 @@ bool SecondScene::init()
                 if (builderHutPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     builderHutPreview->setOpacity(150);
-                    Vec2 my = Vec2(builderHutPreview->getX(), builderHutPreview->getY());
+                    Vec2 my = Vec2(builderHutPreview->GetX(), builderHutPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        builderHutPreview->setMinePosition(you);
+                        builderHutPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(builderHutPreview, 10);
@@ -528,7 +528,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             ArcherTower* tempMine = ArcherTower::create("ArcherTowerLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -543,10 +543,10 @@ bool SecondScene::init()
                 if (archerTowerPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     archerTowerPreview->setOpacity(150);
-                    Vec2 my = Vec2(archerTowerPreview->getX(), archerTowerPreview->getY());
+                    Vec2 my = Vec2(archerTowerPreview->GetX(), archerTowerPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        archerTowerPreview->setMinePosition(you);
+                        archerTowerPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(archerTowerPreview, 10);
@@ -568,7 +568,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             Cannon* tempMine = Cannon::create("CannonLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -583,10 +583,10 @@ bool SecondScene::init()
                 if (cannonPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     cannonPreview->setOpacity(150);
-                    Vec2 my = Vec2(cannonPreview->getX(), cannonPreview->getY());
+                    Vec2 my = Vec2(cannonPreview->GetX(), cannonPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        cannonPreview->setMinePosition(you);
+                        cannonPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(cannonPreview, 10);
@@ -608,7 +608,7 @@ bool SecondScene::init()
         [=](Ref* pSender) {
             // 先检查是否有足够资源
             Mortar* tempMine = Mortar::create("MortarLv1.png"); // 临时实例获取消耗
-            int goldCost = tempMine->getGoldCost(), elixirCost = tempMine->getElixirCost();
+            int goldCost = tempMine->GetGoldCost(), elixirCost = tempMine->GetElixirCost();
             if (global_gold_count < goldCost || global_elixir_count < elixirCost) {
                 return; // 直接返回，不允许放置
             }
@@ -623,10 +623,10 @@ bool SecondScene::init()
                 if (mortarPreview) {
                     // 预览态设置：半透明（区分实际对象）
                     mortarPreview->setOpacity(150);
-                    Vec2 my = Vec2(mortarPreview->getX(), mortarPreview->getY());
+                    Vec2 my = Vec2(mortarPreview->GetX(), mortarPreview->GetY());
                     if (background_sprite_) {
                         Vec2 you = ConvertTest::convertLocalToGrid(my, background_sprite_);
-                        mortarPreview->setMinePosition(you);
+                        mortarPreview->SetMinePosition(you);
 
                         // 添加到背景精灵，并保存到按钮的UserData
                         background_sprite_->addChild(mortarPreview, 10);
@@ -790,12 +790,12 @@ void SecondScene::update(float delta)
     elapsedTime += delta;
     Building* notFullGoldStorage = nullptr, * notFullElixirStorage = nullptr;
     for (auto building : placedBuildings) {
-        if (dynamic_cast<GoldStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+        if (dynamic_cast<GoldStorage*>(building) && building->GetCurrentStock() < building->GetMaxStock()) {
             notFullGoldStorage = building;
         }
     }
     for (auto building : placedBuildings) {
-        if (dynamic_cast<ElixirStorage*>(building) && building->getCurrentStock() < building->getMaxStock()) {
+        if (dynamic_cast<ElixirStorage*>(building) && building->GetCurrentStock() < building->GetMaxStock()) {
             notFullElixirStorage = building;
         }
     }
@@ -805,36 +805,36 @@ void SecondScene::update(float delta)
         // 判断建筑类型并分别累加速度
         for (auto building : placedBuildings) {
             if (!building) continue;
-            if (building->getIsUpgrade()) {
-                building->cutTime();
+            if (building->GetIsUpgrade()) {
+                building->CutTime();
             }
             //下均为非升级中
             else if (dynamic_cast<GoldMine*>(building)) {
                 //两个临时变量存储
-                int tempGold = building->getSpeed();
+                int tempGold = building->GetSpeed();
                 while (tempGold > 0) {
                     //金矿非常未满
-                    if (building->getMaxStock() - building->getCurrentStock() >= tempGold) {
-                        building->updateCurrentStock(tempGold);
+                    if (building->GetMaxStock() - building->GetCurrentStock() >= tempGold) {
+                        building->UpdateCurrentStock(tempGold);
                         tempGold = 0;//接下来肯定会退出循环
                         break;
                     }
-                    //金矿将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存钱罐
-                    else if (building->getMaxStock() - building->getCurrentStock() < tempGold && building->getMaxStock() - building->getCurrentStock() > 0) {
-                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());//尽量存
-                        tempGold -= (building->getMaxStock() - building->getCurrentStock());//剩余未存
+                    //金矿将要存满,存入building->GetMaxStock() - building->GetCurrentStock()，其余尽量进存钱罐
+                    else if (building->GetMaxStock() - building->GetCurrentStock() < tempGold && building->GetMaxStock() - building->GetCurrentStock() > 0) {
+                        building->UpdateCurrentStock(building->GetMaxStock() - building->GetCurrentStock());//尽量存
+                        tempGold -= (building->GetMaxStock() - building->GetCurrentStock());//剩余未存
                         continue;//金矿已满，下次while循环会直接跳到下面对于存钱罐的判断
                     }
                     //有
                     if (notFullGoldStorage != nullptr) {
-                        if (notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock() >= tempGold) {
-                            notFullGoldStorage->addCurrent(tempGold);
+                        if (notFullGoldStorage->GetMaxStock() - notFullGoldStorage->GetCurrentStock() >= tempGold) {
+                            notFullGoldStorage->AddCurrent(tempGold);
                             tempGold = 0;
                             break;
                         }
                         else {
-                            notFullGoldStorage->addCurrent(notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock());
-                            tempGold -= notFullGoldStorage->getMaxStock() - notFullGoldStorage->getCurrentStock();//剩余未存
+                            notFullGoldStorage->AddCurrent(notFullGoldStorage->GetMaxStock() - notFullGoldStorage->GetCurrentStock());
+                            tempGold -= notFullGoldStorage->GetMaxStock() - notFullGoldStorage->GetCurrentStock();//剩余未存
                             break;
                         }
                     }
@@ -844,30 +844,30 @@ void SecondScene::update(float delta)
                 }
             }
             else if (dynamic_cast<ElixirCollector*>(building)) {
-                int tempElixir = building->getSpeed();
+                int tempElixir = building->GetSpeed();
                 while (tempElixir > 0) {
                     //非常未满
-                    if (building->getMaxStock() - building->getCurrentStock() >= tempElixir) {
-                        building->updateCurrentStock(tempElixir);
+                    if (building->GetMaxStock() - building->GetCurrentStock() >= tempElixir) {
+                        building->UpdateCurrentStock(tempElixir);
                         tempElixir = 0;//接下来肯定会退出循环
                         break;
                     }
-                    //将要存满,存入building->getMaxStock() - building->getCurrentStock()，其余尽量进存罐
-                    else if (building->getMaxStock() - building->getCurrentStock() < tempElixir && building->getMaxStock() - building->getCurrentStock() > 0) {
-                        building->updateCurrentStock(building->getMaxStock() - building->getCurrentStock());
-                        tempElixir -= (building->getMaxStock() - building->getCurrentStock());
+                    //将要存满,存入building->GetMaxStock() - building->GetCurrentStock()，其余尽量进存罐
+                    else if (building->GetMaxStock() - building->GetCurrentStock() < tempElixir && building->GetMaxStock() - building->GetCurrentStock() > 0) {
+                        building->UpdateCurrentStock(building->GetMaxStock() - building->GetCurrentStock());
+                        tempElixir -= (building->GetMaxStock() - building->GetCurrentStock());
                         continue;
                     }
                     //有
                     else if (notFullElixirStorage != nullptr) {
-                        if (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock() >= tempElixir) {
-                            notFullElixirStorage->addCurrent(tempElixir);
+                        if (notFullElixirStorage->GetMaxStock() - notFullElixirStorage->GetCurrentStock() >= tempElixir) {
+                            notFullElixirStorage->AddCurrent(tempElixir);
                             tempElixir = 0;
                             break;
                         }
                         else {
-                            notFullElixirStorage->addCurrent(notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());
-                            tempElixir -= (notFullElixirStorage->getMaxStock() - notFullElixirStorage->getCurrentStock());//剩余未存
+                            notFullElixirStorage->AddCurrent(notFullElixirStorage->GetMaxStock() - notFullElixirStorage->GetCurrentStock());
+                            tempElixir -= (notFullElixirStorage->GetMaxStock() - notFullElixirStorage->GetCurrentStock());//剩余未存
                             break;
                         }
                     }
@@ -925,7 +925,7 @@ void SecondScene::menuBoss1Callback(Ref* pSender)
         {
             for (int i = 0; i < 6; i++)
             {
-                int count = camp->getArmy(i);
+                int count = camp->GetArmy(i);
                 if (count > 0)
                 {
                     UnitType t = static_cast<UnitType>(static_cast<int>(UnitType::BARBARIAN) + i);
@@ -933,15 +933,15 @@ void SecondScene::menuBoss1Callback(Ref* pSender)
                     if (combinedArmy.find(t) == combinedArmy.end())
                     {
                         combinedArmy[t].type = t;
-                        combinedArmy[t].level = camp->getLv(); 
+                        combinedArmy[t].level = camp->GetLevel(); 
                         combinedArmy[t].amount = 0;
                     }
                     combinedArmy[t].amount += count;
 
                     //如果不同军营等级不同，这里可以取最高等级
-                    if (camp->getLv() > combinedArmy[t].level)
+                    if (camp->GetLevel() > combinedArmy[t].level)
                     {
-                        combinedArmy[t].level = camp->getLv();
+                        combinedArmy[t].level = camp->GetLevel();
                     }
                 }
             }
@@ -990,10 +990,10 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
         for (auto& building : placedBuildings) {
             if (!building || !background_sprite_) continue;
             // 复用菱形碰撞检测代码（判断触摸点是否在当前建筑的菱形范围内）
-            Sprite* mineSprite = building->getSprite();
+            Sprite* mineSprite = building->GetSprite();
             Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
-            const float horizontalDiag = 56.0f * building->getSize();
-            const float verticalDiag = 42.0f * building->getSize();
+            const float horizontalDiag = 56.0f * building->GetSize();
+            const float verticalDiag = 42.0f * building->GetSize();
             float a = horizontalDiag / 2;
             float b = verticalDiag / 2;
             float dx = touchPos.x - buildingScreenPos.x;
@@ -1045,15 +1045,15 @@ bool SecondScene::onTouchBegan(Touch* touch, Event* event)
         // 检查是否点击了已放置的
         for (auto& building : placedBuildings) {
             if (!building || !background_sprite_) continue;
-            Sprite* mineSprite = building->getSprite();
+            Sprite* mineSprite = building->GetSprite();
             if (!mineSprite) continue;
 
             // 建筑的世界坐标（菱形中心）
             Vec2 buildingScreenPos = background_sprite_->convertToWorldSpace(building->getPosition());
 
             // 菱形参数配置
-            const float horizontalDiag = 56.0f * building->getSize(); // 水平对角线总长度
-            const float verticalDiag = 42.0f * building->getSize();   // 竖直对角线总长度
+            const float horizontalDiag = 56.0f * building->GetSize(); // 水平对角线总长度
+            const float verticalDiag = 42.0f * building->GetSize();   // 竖直对角线总长度
             const float a = horizontalDiag / 2;     // 水平半轴（x方向）
             const float b = verticalDiag / 2;       // 竖直半轴（y方向）
 
@@ -1213,14 +1213,14 @@ void SecondScene::onTouchMoved(Touch* touch, Event* event)
             if (isColliding) {
                 // 可以将建筑设为红色提示碰撞
                 if (movingBuilding) {
-                    movingBuilding->getSprite()->setColor(Color3B::RED);
+                    movingBuilding->GetSprite()->setColor(Color3B::RED);
                 }
             }
             //不碰撞&&在界内
             else {
                 // 恢复颜色
                 if (movingBuilding) {
-                    movingBuilding->getSprite()->setColor(Color3B::WHITE);
+                    movingBuilding->GetSprite()->setColor(Color3B::WHITE);
                 }
             }
             // 如果没有碰撞，继续移动
@@ -1300,7 +1300,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failGoldMine, 15);
                         }
-                        failGoldMine->playFailBlinkAndRemove();
+                        failGoldMine->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == elixirCollectorBtn) {
@@ -1310,7 +1310,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failElixir, 15);
                         }
-                        failElixir->playFailBlinkAndRemove();
+                        failElixir->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == goldStorageBtn) {
@@ -1320,7 +1320,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failGoldStorage, 15);
                         }
-                        failGoldStorage->playFailBlinkAndRemove();
+                        failGoldStorage->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == elixirStorageBtn) {
@@ -1330,7 +1330,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failElixirStorage, 15);
                         }
-                        failElixirStorage->playFailBlinkAndRemove();
+                        failElixirStorage->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == armyCampBtn) {
@@ -1340,7 +1340,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failArmyCamp, 15);
                         }
-                        failArmyCamp->playFailBlinkAndRemove();
+                        failArmyCamp->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == wallsBtn) {
@@ -1350,7 +1350,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failwalls, 15);
                         }
-                        failwalls->playFailBlinkAndRemove();
+                        failwalls->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == builderHutBtn) {
@@ -1360,7 +1360,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failBuilderHut, 15);
                         }
-                        failBuilderHut->playFailBlinkAndRemove();
+                        failBuilderHut->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == archerTowerBtn) {
@@ -1370,7 +1370,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failarcherTower, 15);
                         }
-                        failarcherTower->playFailBlinkAndRemove();
+                        failarcherTower->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == cannonBtn) {
@@ -1380,7 +1380,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failCannon, 15);
                         }
-                        failCannon->playFailBlinkAndRemove();
+                        failCannon->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == mortarBtn) {
@@ -1390,7 +1390,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failMortar, 15);
                         }
-                        failMortar->playFailBlinkAndRemove();
+                        failMortar->PlayFailBlinkAndRemove();
                     }
                 }
                 return; // 阻止放置
@@ -1398,8 +1398,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             // 如果没有碰撞，继续执行放置逻辑           
             if (draggingItem == goldMineBtn) {
                 // 创建金矿
-                int goldCost = static_cast<GoldMine*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<GoldMine*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<GoldMine*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<GoldMine*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1412,16 +1412,16 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedGoldMine = GoldMine::create("GoldMineLv1.png");
                     if (placedGoldMine) {
                         // 更新
-                        placedGoldMine->updatePosition(snappedPos);
+                        placedGoldMine->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedGoldMine, 15);
                         }
                         placedBuildings.push_back(placedGoldMine);
                         placedGoldMine->setScale(0.7f);
-                        placedGoldMine->playSuccessBlink();
+                        placedGoldMine->PlaySuccessBlink();
                         sendSaveBuildingRequest("GoldMine", snappedPos.x, snappedPos.y, 1,
-                            placedGoldMine->getHp(), placedGoldMine->getHp(),
-                            placedGoldMine->getSpeed(), placedGoldMine->getMaxStock(), 0);
+                            placedGoldMine->GetHp(), placedGoldMine->GetHp(),
+                            placedGoldMine->GetSpeed(), placedGoldMine->GetMaxStock(), 0);
                     }
                     //扣除资源
                     global_gold_count -= goldCost;
@@ -1430,8 +1430,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == elixirCollectorBtn) {
                 // 创建圣水收集器
-                int goldCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<ElixirCollector*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1444,16 +1444,16 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedElixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
                     if (placedElixirCollector) {
                         // 更新
-                        placedElixirCollector->updatePosition(snappedPos);
+                        placedElixirCollector->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedElixirCollector, 15);
                         }
                         placedBuildings.push_back(placedElixirCollector);
                         placedElixirCollector->setScale(0.8f);
-                        placedElixirCollector->playSuccessBlink();
+                        placedElixirCollector->PlaySuccessBlink();
                         sendSaveBuildingRequest("ElixirCollector", snappedPos.x, snappedPos.y, 1,
-                            placedElixirCollector->getHp(), placedElixirCollector->getHp(),
-                            placedElixirCollector->getSpeed(), placedElixirCollector->getMaxStock(), 0);
+                            placedElixirCollector->GetHp(), placedElixirCollector->GetHp(),
+                            placedElixirCollector->GetSpeed(), placedElixirCollector->GetMaxStock(), 0);
                     }
                     //扣除资源
                     global_gold_count -= goldCost;
@@ -1462,8 +1462,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == goldStorageBtn) {
                 // 创建存钱罐
-                int goldCost = static_cast<GoldStorage*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<GoldStorage*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<GoldStorage*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<GoldStorage*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1476,16 +1476,16 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedGoldStorage = GoldStorage::create("GoldStorageLv1.png");
                     if (placedGoldStorage) {
                         // 更新
-                        placedGoldStorage->updatePosition(snappedPos);
+                        placedGoldStorage->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedGoldStorage, 15);
                         }
                         placedBuildings.push_back(placedGoldStorage);
                         placedGoldStorage->setScale(0.7f);
-                        placedGoldStorage->playSuccessBlink();
+                        placedGoldStorage->PlaySuccessBlink();
                         sendSaveBuildingRequest("GoldStorage", snappedPos.x, snappedPos.y, 1,
-                            placedGoldStorage->getHp(), placedGoldStorage->getHp(),
-                            0, placedGoldStorage->getMaxStock(), 0);
+                            placedGoldStorage->GetHp(), placedGoldStorage->GetHp(),
+                            0, placedGoldStorage->GetMaxStock(), 0);
                     }
                     //扣除资源
                     global_gold_count -= goldCost;
@@ -1494,8 +1494,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == elixirStorageBtn) {
                 // 创建圣水瓶
-                int goldCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<ElixirStorage*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1508,16 +1508,16 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedElixirStorage = ElixirStorage::create("ElixirStorageLv1.png");
                     if (placedElixirStorage) {
                         // 更新
-                        placedElixirStorage->updatePosition(snappedPos);
+                        placedElixirStorage->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedElixirStorage, 15);
                         }
                         placedBuildings.push_back(placedElixirStorage);
                         placedElixirStorage->setScale(1.1f);
-                        placedElixirStorage->playSuccessBlink();
+                        placedElixirStorage->PlaySuccessBlink();
                         sendSaveBuildingRequest("ElixirStorage", snappedPos.x, snappedPos.y, 1,
-                            placedElixirStorage->getHp(), placedElixirStorage->getHp(),
-                            0, placedElixirStorage->getMaxStock(), 0);
+                            placedElixirStorage->GetHp(), placedElixirStorage->GetHp(),
+                            0, placedElixirStorage->GetMaxStock(), 0);
                     }
                     //扣除资源
                     global_gold_count -= goldCost;
@@ -1526,8 +1526,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == armyCampBtn) {
                 // 创建兵营
-                int goldCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<ArmyCamp*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1540,16 +1540,16 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedArmyCamp = ArmyCamp::create("ArmyCampLv1.png");
                     if (placedArmyCamp) {
                         // 更新
-                        placedArmyCamp->updatePosition(snappedPos);
+                        placedArmyCamp->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedArmyCamp, 15);
                         }
                         placedBuildings.push_back(placedArmyCamp);
                         placedArmyCamp->setScale(1.1f);
-                        placedArmyCamp->playSuccessBlink();
+                        placedArmyCamp->PlaySuccessBlink();
                         sendSaveBuildingRequest("ArmyCamp", snappedPos.x, snappedPos.y, 1,
-                            placedArmyCamp->getHp(), placedArmyCamp->getHp(),
-                            0, placedArmyCamp->getMaxStock(), 0);
+                            placedArmyCamp->GetHp(), placedArmyCamp->GetHp(),
+                            0, placedArmyCamp->GetMaxStock(), 0);
                     }
                     //扣除资源
                     global_gold_count -= goldCost;
@@ -1558,8 +1558,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == wallsBtn) {
                 // 创建城墙
-                int goldCost = static_cast<Walls*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<Walls*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<Walls*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<Walls*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1572,14 +1572,14 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedWalls = Walls::create("WallsLv1.png");
                     if (placedWalls) {
                         // 更新
-                        placedWalls->updatePosition(snappedPos);
+                        placedWalls->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedWalls, 15);
                         }
                         placedBuildings.push_back(placedWalls);
-                        placedWalls->playSuccessBlink();
+                        placedWalls->PlaySuccessBlink();
                         sendSaveBuildingRequest("Walls", snappedPos.x, snappedPos.y, 1,
-                            placedWalls->getHp(), placedWalls->getHp(),
+                            placedWalls->GetHp(), placedWalls->GetHp(),
                             0, 0, 0);
                     }
                     //扣除资源
@@ -1589,8 +1589,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == builderHutBtn) {
                 // 创建小屋
-                int goldCost = static_cast<BuilderHut*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<BuilderHut*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<BuilderHut*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<BuilderHut*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost && hut_num < 5) {
                     //除旧
@@ -1603,15 +1603,15 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedBuilderhut = BuilderHut::create("BuilderHutLv1.png");
                     if (placedBuilderhut) {
                         // 更新
-                        placedBuilderhut->updatePosition(snappedPos);
+                        placedBuilderhut->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedBuilderhut, 15);
                         }
                         placedBuildings.push_back(placedBuilderhut);
                         placedBuilderhut->setScale(0.8f);
-                        placedBuilderhut->playSuccessBlink();
+                        placedBuilderhut->PlaySuccessBlink();
                         sendSaveBuildingRequest("BuilderHut", snappedPos.x, snappedPos.y, 1,
-                            placedBuilderhut->getHp(), placedBuilderhut->getHp(),
+                            placedBuilderhut->GetHp(), placedBuilderhut->GetHp(),
                             0, 0, 0);
                     }
                     //扣除资源
@@ -1622,8 +1622,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == archerTowerBtn) {
                 // 创建箭塔
-                int goldCost = static_cast<ArcherTower*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<ArcherTower*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<ArcherTower*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<ArcherTower*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1636,15 +1636,15 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedArcherTower = ArcherTower::create("ArcherTowerLv1.png");
                     if (placedArcherTower) {
                         // 更新
-                        placedArcherTower->updatePosition(snappedPos);
+                        placedArcherTower->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedArcherTower, 15);
                         }
                         placedBuildings.push_back(placedArcherTower);
                         placedArcherTower->setScale(0.8f);
-                        placedArcherTower->playSuccessBlink();
+                        placedArcherTower->PlaySuccessBlink();
                         sendSaveBuildingRequest("ArcherTower", snappedPos.x, snappedPos.y, 1,
-                            placedArcherTower->getHp(), placedArcherTower->getHp(),
+                            placedArcherTower->GetHp(), placedArcherTower->GetHp(),
                             0, 0, 0);
                     }
                     //扣除资源
@@ -1654,8 +1654,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == cannonBtn) {
                 // 创建加农炮
-                int goldCost = static_cast<Cannon*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<Cannon*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<Cannon*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<Cannon*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1668,15 +1668,15 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedCannon = Cannon::create("CannonLv1.png");
                     if (placedCannon) {
                         // 更新
-                        placedCannon->updatePosition(snappedPos);
+                        placedCannon->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedCannon, 15);
                         }
                         placedBuildings.push_back(placedCannon);
                         placedCannon->setScale(1.1f);
-                        placedCannon->playSuccessBlink();
+                        placedCannon->PlaySuccessBlink();
                         sendSaveBuildingRequest("Cannon", snappedPos.x, snappedPos.y, 1,
-                            placedCannon->getHp(), placedCannon->getHp(),
+                            placedCannon->GetHp(), placedCannon->GetHp(),
                             0, 0, 0);
                     }
                     //扣除资源
@@ -1686,8 +1686,8 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
             }
             else if (draggingItem == mortarBtn) {
                 // 创建迫击炮
-                int goldCost = static_cast<Mortar*>(draggingItem->getUserData())->getGoldCost();
-                int elixirCost = static_cast<Mortar*>(draggingItem->getUserData())->getElixirCost();
+                int goldCost = static_cast<Mortar*>(draggingItem->getUserData())->GetGoldCost();
+                int elixirCost = static_cast<Mortar*>(draggingItem->getUserData())->GetElixirCost();
                 //再次判断资源是否足够
                 if (global_gold_count >= goldCost && global_elixir_count >= elixirCost) {
                     //除旧
@@ -1700,15 +1700,15 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                     auto placedMortar = Mortar::create("MortarLv1.png");
                     if (placedMortar) {
                         // 更新
-                        placedMortar->updatePosition(snappedPos);
+                        placedMortar->UpdatePosition(snappedPos);
                         if (background_sprite_) {
                             background_sprite_->addChild(placedMortar, 15);
                         }
                         placedBuildings.push_back(placedMortar);
                         placedMortar->setScale(1.0f);
-                        placedMortar->playSuccessBlink();
+                        placedMortar->PlaySuccessBlink();
                         sendSaveBuildingRequest("Mortar", snappedPos.x, snappedPos.y, 1,
-                            placedMortar->getHp(), placedMortar->getHp(),
+                            placedMortar->GetHp(), placedMortar->GetHp(),
                             0, 0, 0);
                     }
                     //扣除资源
@@ -1725,7 +1725,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failGoldMine, 15);
                         }
-                        failGoldMine->playFailBlinkAndRemove();
+                        failGoldMine->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == elixirCollectorBtn) {
@@ -1735,7 +1735,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failElixir, 15);
                         }
-                        failElixir->playFailBlinkAndRemove();
+                        failElixir->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == goldStorageBtn) {
@@ -1745,7 +1745,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failGoldStorage, 15);
                         }
-                        failGoldStorage->playFailBlinkAndRemove();
+                        failGoldStorage->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == elixirStorageBtn) {
@@ -1755,7 +1755,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failElixirStorage, 15);
                         }
-                        failElixirStorage->playFailBlinkAndRemove();
+                        failElixirStorage->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == armyCampBtn) {
@@ -1765,7 +1765,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failArmyCamp, 15);
                         }
-                        failArmyCamp->playFailBlinkAndRemove();
+                        failArmyCamp->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == wallsBtn) {
@@ -1775,7 +1775,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failWalls, 15);
                         }
-                        failWalls->playFailBlinkAndRemove();
+                        failWalls->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == builderHutBtn) {
@@ -1785,7 +1785,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failBuilderHut, 15);
                         }
-                        failBuilderHut->playFailBlinkAndRemove();
+                        failBuilderHut->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == archerTowerBtn) {
@@ -1795,7 +1795,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failArcherTower, 15);
                         }
-                        failArcherTower->playFailBlinkAndRemove();
+                        failArcherTower->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == cannonBtn) {
@@ -1805,7 +1805,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failCannon, 15);
                         }
-                        failCannon->playFailBlinkAndRemove();
+                        failCannon->PlayFailBlinkAndRemove();
                     }
                 }
                 else if (draggingItem == mortarBtn) {
@@ -1815,7 +1815,7 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
                         if (background_sprite_) {
                             background_sprite_->addChild(failMortar, 15);
                         }
-                        failMortar->playFailBlinkAndRemove();
+                        failMortar->PlayFailBlinkAndRemove();
                     }
                 }
             }
@@ -1866,14 +1866,14 @@ void SecondScene::onTouchEnded(Touch* touch, Event* event)
 
         if (inDiamond && movingBuilding) {
             // 使用新的更新方法
-            movingBuilding->updatePosition(Vec2(snappedX, snappedY));
+            movingBuilding->UpdatePosition(Vec2(snappedX, snappedY));
             // 删除原位置记录
             sendDeleteBuildingRequest(_movingBuildingOriginalPos.x, _movingBuildingOriginalPos.y);
             // 保存建筑位置到数据库
-            sendSaveBuildingRequest(movingBuilding->getBuildingType(),
-                snappedX, snappedY, movingBuilding->getLv(),
-                movingBuilding->getHp(), movingBuilding->getHp(),
-                movingBuilding->getSpeed(), movingBuilding->getMaxStock(), 0);
+            sendSaveBuildingRequest(movingBuilding->GetBuildingType(),
+                snappedX, snappedY, movingBuilding->GetLevel(),
+                movingBuilding->GetHp(), movingBuilding->GetHp(),
+                movingBuilding->GetSpeed(), movingBuilding->GetMaxStock(), 0);
             movingBuilding->setOpacity(255);
             if (background_sprite_) {
                 background_sprite_->reorderChild(movingBuilding, 15);
@@ -2084,7 +2084,7 @@ bool SecondScene::isPointInBuilding(const Vec2& point, Building* building) {
         return false;
     }
 
-    int yourSize = building->getSize();
+    int yourSize = building->GetSize();
     int mySize = 0;
     if (draggingItem == goldMineBtn ||
         draggingItem == elixirCollectorBtn ||
@@ -2387,9 +2387,9 @@ void SecondScene::sendCollectProductionRequest(Building* building, int collected
         return;
     }
 
-    std::string buildingType = building->getBuildingType();
-    float x = building->getX();
-    float y = building->getY();
+    std::string buildingType = building->GetBuildingType();
+    float x = building->GetX();
+    float y = building->GetY();
 
     rapidjson::Document doc;
     doc.SetObject();
@@ -2643,7 +2643,7 @@ void SecondScene::createBuildingsSync(const rapidjson::Value& buildingsArray) {
                 Building* newBuilding = createBuildingByType(buildingType, x, y,
                     level, hp, maxHp, productionRate, maxStock, attack);
                 if (newBuilding) {
-                    newBuilding->updatePosition(Vec2(x, y));
+                    newBuilding->UpdatePosition(Vec2(x, y));
 
                     if (background_sprite_) {
                         background_sprite_->addChild(newBuilding, 15);
@@ -2713,7 +2713,7 @@ void SecondScene::createBuildingsAsync(const rapidjson::Value& buildingsArray) {
             Building* newBuilding = createBuildingByType(buildingType, x, y,
                 level, hp, maxHp, productionRate, maxStock, attack);
             if (newBuilding) {
-                newBuilding->updatePosition(Vec2(x, y));
+                newBuilding->UpdatePosition(Vec2(x, y));
 
                 if (background_sprite_) {
                     background_sprite_->addChild(newBuilding, 15);
@@ -2776,7 +2776,7 @@ void SecondScene::createBuildingsAsync(const rapidjson::Value& buildingsArray) {
                 Building* newBuilding = createBuildingByType(buildingType, x, y, level,
                     hp, maxHp, productionRate, maxStock, attack);
                 if (newBuilding) {
-                    newBuilding->updatePosition(Vec2(x, y));
+                    newBuilding->UpdatePosition(Vec2(x, y));
 
                     if (background_sprite_) {
                         background_sprite_->addChild(newBuilding, 15);
@@ -2839,7 +2839,7 @@ void SecondScene::createBuildingsAsync(const rapidjson::Value& buildingsArray) {
                     Building* newBuilding = createBuildingByType(buildingType, x, y, level, 
                         hp, maxHp, productionRate, maxStock, attack);
                     if (newBuilding) {
-                        newBuilding->updatePosition(Vec2(x, y));
+                        newBuilding->UpdatePosition(Vec2(x, y));
 
                         if (background_sprite_) {
                             background_sprite_->addChild(newBuilding, 15);
@@ -2872,7 +2872,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
     if (buildingType == "GoldMine") {
         GoldMine* building = GoldMine::create(StringUtils::format("GoldMineLv%d.png", level), hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2880,7 +2880,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         ElixirCollector* building = ElixirCollector::create(StringUtils::format("ElixirCollectorLv%d.png", 
             level), hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2888,7 +2888,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         GoldStorage* building = GoldStorage::create(StringUtils::format("GoldStorageLv%d.png", level),
             hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2896,7 +2896,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         ElixirStorage* building = ElixirStorage::create(StringUtils::format("ElixirStorageLv%d.png", level),
             hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2904,7 +2904,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         ArmyCamp* building = ArmyCamp::create(StringUtils::format("ArmyCampLv%d.png", level),
             hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2912,7 +2912,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         Walls* building = Walls::create(StringUtils::format("WallsLv%d.png", level), hp, 
             level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2920,7 +2920,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         BuilderHut* building = BuilderHut::create(StringUtils::format("BuilderHutLv%d.png", level), 
             hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2928,7 +2928,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         TownHall* building = TownHall::create(StringUtils::format("TownHallLv%d.png", level), 
             hp, level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2936,7 +2936,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         Walls* building = Walls::create(StringUtils::format("MortarLv%d.png", level), hp,
             level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2944,7 +2944,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         Walls* building = Walls::create(StringUtils::format("ArcherTowerLv%d.png", level), hp,
             level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2952,7 +2952,7 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
         Walls* building = Walls::create(StringUtils::format("CannonLv%d.png", level), hp,
             level, x, y);
         if (building) {
-            building->setHp(maxHp);
+            building->SetHp(maxHp);
         }
         return building;
     }
@@ -2962,9 +2962,9 @@ Building* SecondScene::createBuildingByType(const std::string& buildingType, flo
 bool SecondScene::trySyncProductionDataToBuilding(Building* building) {
     if (!building) return false;
 
-    std::string btype = building->getBuildingType();
-    float bx = building->getX();
-    float by = building->getY();
+    std::string btype = building->GetBuildingType();
+    float bx = building->GetX();
+    float by = building->GetY();
 
     std::vector<ProductionData> productions;
     if (!SessionManager::getInstance()->getProductionData(productions)) {
@@ -2976,7 +2976,7 @@ bool SecondScene::trySyncProductionDataToBuilding(Building* building) {
         if (prod.buildingType == btype &&
             fabs(prod.x - bx) < 1.0f &&
             fabs(prod.y - by) < 1.0f) {
-            building->addCurrent(prod.currentStock);
+            building->AddCurrent(prod.currentStock);
             CCLOG("SecondScene: trySyncProductionDataToBuilding success - type=%s, x=%.2f, y=%.2f, stock=%d",
                 btype.c_str(), bx, by, prod.currentStock);
             return true;
@@ -3018,10 +3018,10 @@ void SecondScene::applyProductionDataToBuildings() {
     for (auto building : placedBuildings) {
         if (!building) continue;
 
-        std::string btype = building->getBuildingType();
+        std::string btype = building->GetBuildingType();
 
-        float bx = building->getX();
-        float by = building->getY();
+        float bx = building->GetX();
+        float by = building->GetY();
 
         CCLOG("SecondScene: Checking building - type=%s, x=%.2f, y=%.2f",
             btype.c_str(), bx, by);
@@ -3030,7 +3030,7 @@ void SecondScene::applyProductionDataToBuildings() {
             if (prod.buildingType == btype &&
                 fabs(prod.x - bx) < 1.0f &&
                 fabs(prod.y - by) < 1.0f) {
-                building->addCurrent(prod.currentStock);
+                building->AddCurrent(prod.currentStock);
                 CCLOG("SecondScene: Applied production data - type=%s, x=%.2f, y=%.2f, stock=%d",
                     btype.c_str(), bx, by, prod.currentStock);
                 appliedCount++;
@@ -3047,20 +3047,20 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto townHall = TownHall::create("TownHallLv1.png");
     if (townHall) {
-        townHall->updatePosition(Vec2(1918, 1373));
+        townHall->UpdatePosition(Vec2(1918, 1373));
         if (background_sprite_) {
             background_sprite_->addChild(townHall, 15);
         }
         placedBuildings.push_back(townHall);
         townHall->setScale(0.9f);
-        max_gold_volum = townHall->getMaxGoldNum();
-        max_elixir_volum = townHall->getMaxElixirNum();
-        max_level = townHall->getLv();
+        max_gold_volum = townHall->GetMaxGoldNum();
+        max_elixir_volum = townHall->GetMaxElixirNum();
+        max_level = townHall->GetLevel();
     }
 
     auto goldMine = GoldMine::create("GoldMineLv1.png");
     if (goldMine) {
-        goldMine->updatePosition(Vec2(1918, 1625));
+        goldMine->UpdatePosition(Vec2(1918, 1625));
         if (background_sprite_) {
             background_sprite_->addChild(goldMine, 15);
         }
@@ -3070,7 +3070,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto elixirCollector = ElixirCollector::create("ElixirCollectorLv1.png");
     if (elixirCollector) {
-        elixirCollector->updatePosition(Vec2(1918, 1121));
+        elixirCollector->UpdatePosition(Vec2(1918, 1121));
         if (background_sprite_) {
             background_sprite_->addChild(elixirCollector, 15);
         }
@@ -3080,7 +3080,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto goldStorage = GoldStorage::create("GoldStorageLv1.png");
     if (goldStorage) {
-        goldStorage->updatePosition(Vec2(1918, 869));
+        goldStorage->UpdatePosition(Vec2(1918, 869));
         if (background_sprite_) {
             background_sprite_->addChild(goldStorage, 15);
         }
@@ -3090,7 +3090,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto elixirStorage = GoldStorage::create("ElixirStorageLv1.png");
     if (elixirStorage) {
-        elixirStorage->updatePosition(Vec2(1918, 1877));
+        elixirStorage->UpdatePosition(Vec2(1918, 1877));
         if (background_sprite_) {
             background_sprite_->addChild(elixirStorage, 15);
         }
@@ -3100,7 +3100,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto armyCamp = ArmyCamp::create("ArmyCampLv1.png");
     if (armyCamp) {
-        armyCamp->updatePosition(Vec2(2142, 1625));
+        armyCamp->UpdatePosition(Vec2(2142, 1625));
         if (background_sprite_) {
             background_sprite_->addChild(armyCamp, 15);
         }
@@ -3110,7 +3110,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto builderHut1 = BuilderHut::create("BuilderHutLv1.png");
     if (builderHut1) {
-        builderHut1->updatePosition(Vec2(1638, 1373));
+        builderHut1->UpdatePosition(Vec2(1638, 1373));
         if (background_sprite_) {
             background_sprite_->addChild(builderHut1, 15);
         }
@@ -3120,7 +3120,7 @@ void SecondScene::initDefaultBuildingsAndSave() {
 
     auto builderHut2 = BuilderHut::create("BuilderHutLv1.png");
     if (builderHut2) {
-        builderHut2->updatePosition(Vec2(2198, 1373));
+        builderHut2->UpdatePosition(Vec2(2198, 1373));
         if (background_sprite_) {
             background_sprite_->addChild(builderHut2, 15);
         }
@@ -3222,23 +3222,23 @@ void SecondScene::onUpgradeComplete(UpgradeCompleteData* data) {
 
     for (auto building : placedBuildings) {
         if (building &&
-            std::abs(building->getX() - data->x) < 0.1f &&
-            std::abs(building->getY() - data->y) < 0.1f) {
+            std::abs(building->GetX() - data->x) < 0.1f &&
+            std::abs(building->GetY() - data->y) < 0.1f) {
 
-            building->setIsUpgrade(false);
+            building->SetIsUpgrade(false);
 
             CCLOG("SecondScene: Updated building %s to level %d",
-                building->getBuildingType().c_str(), data->newLevel);
+                building->GetBuildingType().c_str(), data->newLevel);
 
             if (_curOpenInfoPanel && _curOpenBuilding == building) {
                 _curOpenInfoPanel->refreshUpgradeButton(building);
             }
 
-            std::string oldImage = StringUtils::format("%sLv1.png", building->getBuildingType().c_str());
-            std::string newImage = StringUtils::format("%sLv%d.png", building->getBuildingType().c_str(), data->newLevel);
+            std::string oldImage = StringUtils::format("%sLv1.png", building->GetBuildingType().c_str());
+            std::string newImage = StringUtils::format("%sLv%d.png", building->GetBuildingType().c_str(), data->newLevel);
 
             if (FileUtils::getInstance()->isFileExist(newImage)) {
-                building->updateTexture(newImage);
+                building->UpdateTexture(newImage);
                 CCLOG("SecondScene: Updated building image from %s to %s",
                     oldImage.c_str(), newImage.c_str());
             }

@@ -8,10 +8,10 @@ static void problemLoading(const char* filename)
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float x0, float y0)
+TownHall* TownHall::create(const std::string& textureName, int original_hp, int lv, float x0, float y0)
 {
     TownHall* mine = new (std::nothrow) TownHall();
-    if (mine && mine->init(textureName, hp, lv, x0, y0))
+    if (mine && mine->init(textureName, original_hp, lv, x0, y0))
     {
         mine->autorelease();
         return mine;
@@ -20,7 +20,7 @@ TownHall* TownHall::create(const std::string& textureName, int hp, int lv, float
     return nullptr;
 }
 
-bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, float y0)
+bool TownHall::init(const std::string& textureName, int original_hp, int lv, float x0, float y0)
 {
     if (!Node::init())
     {
@@ -28,38 +28,38 @@ bool TownHall::init(const std::string& textureName, int hp, int lv, float x0, fl
     }
 
     // 初始化核心属性
-    _hp = hp;
-    _textureName = textureName;
+    hp = original_hp;
+    texture_name = textureName;
     x = x0;
     y = y0;
     level = lv;
     size = 4;
     this->setPosition(Vec2(x0, y0));
     // 初始化精灵
-    if (!initSprite(textureName))
+    if (!InitSprite(textureName))
     {
         return false;
     }
 
     // 设置锚点
     this->setAnchorPoint(Vec2(0.5f, 0.5f));
-    _sprite->setAnchorPoint(Vec2(0.5f, 0.5f));
+    building_sprite->setAnchorPoint(Vec2(0.5f, 0.5f));
 
     return true;
 }
 
-bool TownHall::initSprite(const std::string& textureName)
+bool TownHall::InitSprite(const std::string& textureName)
 {
-    _sprite = Sprite::create(textureName);
-    if (!_sprite)
+    building_sprite = Sprite::create(textureName);
+    if (!building_sprite)
     {
         problemLoading("'TownHallLv1.png'");
         return false;
     }
 
-    this->addChild(_sprite);
+    this->addChild(building_sprite);
     // 精灵缩放
-    _sprite->setScale(1.0f);
+    building_sprite->setScale(1.0f);
 
     return true;
 }

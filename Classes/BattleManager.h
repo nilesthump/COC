@@ -90,7 +90,7 @@ public:
     void SetBattleActive(bool s);
 
     //主更新循环
-    void Update(double deltaTime);
+    void update(double deltaTime);
 
     //清理死亡单位
     void RemoveDeadUnits();

@@ -72,7 +72,7 @@ void BattleUnit::SetBuildingComponent(std::unique_ptr<BuildingComponent> comp)
 	building_ = std::move(comp);
 }
 
-void BattleUnit::Update(float deltaTime, std::vector<BattleUnit*>& enemies)
+void BattleUnit::update(float deltaTime, std::vector<BattleUnit*>& enemies)
 {
 	static int logFrame = 0;
 	logFrame++;

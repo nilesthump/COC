@@ -47,7 +47,7 @@ BattleUnit* UnitFactory::CreateBuildingByType(BuildingType type, int level, coco
 BattleUnit* UnitFactory::CreateBaseBuilding(DefenderData data, const std::string& spritePath, Node* parent, Sprite* background, bool canAttack)
 {
 	auto unit = new BattleUnit();
-	unit->Init(data);
+	unit->init(data);
 	unit->SetBackgroundSprite(background);
 
 	//表现层组装
@@ -81,7 +81,7 @@ BattleUnit* UnitFactory::CreateBaseBuilding(DefenderData data, const std::string
 BattleUnit* UnitFactory::CreateBaseAttacker(AttackerData data, const std::string& spritePath, Node* parent, Sprite* background)
 {
 	auto unit = new BattleUnit();
-	unit->Init(data);
+	unit->init(data);
 	unit->SetBackgroundSprite(background);
 	unit->SetBehavior(std::make_unique<AttackerNormalBehavior>());
 	unit->SetNavigation(std::make_unique<AttackerNavigation>());

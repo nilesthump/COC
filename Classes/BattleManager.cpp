@@ -137,7 +137,7 @@ std::vector<BattleUnit*> BattleManager::GetEnemiesFor(BattleUnit* unit) const
 }
 
 //主更新循环
-void BattleManager::Update(double deltaTime)
+void BattleManager::update(double deltaTime)
 {
 	if (!battle_active_)
 		return;
@@ -149,7 +149,7 @@ void BattleManager::Update(double deltaTime)
 		if (unit->IsAlive())
 		{
 			std::vector<BattleUnit*> enemies = GetEnemiesFor(unit.get());
-			unit->Update(deltaTime, enemies);
+			unit->update(deltaTime, enemies);
 		}
 	}
 

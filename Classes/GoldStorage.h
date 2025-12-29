@@ -11,18 +11,18 @@ protected:
     int establishCost[2] = { 100,100 };
     int upgradeCost[2] = { 50,50 };
     int upgradeTime = 10;
-    bool initSprite(const std::string& textureName)override;
+    bool InitSprite(const std::string& textureName)override;
 public:
-    bool GoldStorage::init(const std::string& textureName, int hp, int lv, float x0, float y0)override;
+    bool GoldStorage::init(const std::string& textureName, int original_hp, int lv, float x0, float y0)override;
 
     //功能相关
-    int getMaxStock() const override {
+    int GetMaxStock() const override {
         return addSize;
     }
-    int getCurrentStock() const override {
+    int GetCurrentStock() const override {
         return currentSize;
     }
-    void clearCurrentStock()override {
+    void ClearCurrentStock()override {
         if (global_gold_count + currentSize <= max_gold_volum) {
             currentSize = 0;
             global_gold_count += currentSize;
@@ -32,17 +32,17 @@ public:
             global_gold_count = max_gold_volum;
         }
     }
-    void addCurrent(int n) {
+    void AddCurrent(int n) {
         currentSize += n;
     }
     //升级相关
-    int getUpgradeGoldCost()const override {
+    int GetUpgradeGoldCost()const override {
         return upgradeCost[0];
     }
-    int getUpgradeElixirCost() const override {
+    int GetUpgradeElixirCost() const override {
         return upgradeCost[1];
     }
-    bool canUpgrade()override {
+    bool CanUpgrade()override {
         if (global_gold_count >= upgradeCost[0] && global_elixir_count >= upgradeCost[1] && level < max_level) {
             return true;
         }
@@ -53,42 +53,42 @@ public:
     void update()override {
         //公有属性
         level += 1;
-        _hp += 500;
+        hp += 500;
         //私有属性
         addSize += 1000;
         //加速成本升级
         upgradeTime = level * 10;//每次升级完成后，需要的升级时间对应延长
-        isUpgrade = false;
+        is_upgrade = false;
         //换图
-        _textureName = StringUtils::format("GoldStorageLv%d.png", level);
-        updateTexture(_textureName);
-        playSuccessBlink();
+        texture_name = StringUtils::format("GoldStorageLv%d.png", level);
+        UpdateTexture(texture_name);
+        PlaySuccessBlink();
     }
-    int getGoldCost() const override {
+    int GetGoldCost() const override {
         return establishCost[0];
     }
-    int getElixirCost() const override {
+    int GetElixirCost() const override {
         return establishCost[1];
     }
-    void finishUpgrade()override {
+    void FinishUpgrade()override {
         update();
     }
-    void cutTime()override {
+    void CutTime()override {
         upgradeTime--;
         if (upgradeTime <= 0) {
             update();
         }
     }
-    int getRemainTime() override {
+    int GetRemainTime() override {
         return upgradeTime;
     }
-    int getUpgradeDuration() const override {
+    int GetUpgradeDuration() const override {
         return upgradeTime;
     }
-    std::string getBuildingType() const override {
+    std::string GetBuildingType() const override {
         return "GoldStorage";
     }
-    static GoldStorage* create(const std::string& textureName, int hp = 100, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
+    static GoldStorage* create(const std::string& textureName, int original_hp = 100, int lv = 1, float x0 = 667.0f, float y0 = 2074.0f);
 };
 
 #endif

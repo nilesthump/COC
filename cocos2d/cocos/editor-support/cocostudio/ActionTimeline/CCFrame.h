@@ -119,10 +119,10 @@ public:
 
     virtual void setNode(cocos2d::Node* node) override;
 
-    virtual void onEnter(Frame *nextFrame, int currentFrameIndex) override;
+    virtual void onEnter(Frame* nextFrame, int currentFrameIndex) override;
     virtual Frame* clone() override;
 
-    inline void setTextureName(std::string textureName) { _textureName = textureName;}
+    inline void setTextureName(std::string textureName) { _textureName = textureName; }
     inline std::string getTextureName() const { return _textureName; }
 
 protected:

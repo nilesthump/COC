@@ -11,11 +11,11 @@
  * 生命周期：
  * 1. 创建：UnitFactory根据配置创建
  * 2. 初始化：设置初始位置、血量等状态
- * 3. 战斗：每帧Update，协调各组件工作
+ * 3. 战斗：每帧update，协调各组件工作
  * 4. 销毁：死亡或战斗结束后删除
  * 
  * 12/16
- * Update:BattleUnit = UnitState + UnitBehavior + UnitNavigation + VisualComponet
+ * update:BattleUnit = UnitState + UnitBehavior + UnitNavigation + VisualComponet
  * BattleUnit作为一个战斗单位，血条/音效/图片/死亡效果都跟着角色走
  * 而且visual部分可以根据实际快速更新，注意和战斗逻辑分离即可
  */ 
@@ -74,9 +74,9 @@ public:
 
 	//初始化
 	template<typename T>
-	void Init(const T&data)
+	void init(const T&data)
 	{
-		state_.Init(data);
+		state_.init(data);
 	}
 
 	//设置组件
@@ -86,7 +86,7 @@ public:
 	void SetBuildingComponent(std::unique_ptr<BuildingComponent> comp);
 
 	//更新函数
-	void Update(float deltaTime, std::vector<BattleUnit*>& enemies);
+	void update(float deltaTime, std::vector<BattleUnit*>& enemies);
 
 	//受到伤害
 	void TakeDamage(float damage, BattleUnit* source);

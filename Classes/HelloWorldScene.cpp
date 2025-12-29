@@ -1256,11 +1256,11 @@ void HelloWorld::menuGuestLoginCallback(cocos2d::Ref* pSender)
     // Directly login as guest, same as successful login
     // Show secondSceneItem and battleTestItem
     // Hide guest login and register buttons - ensure both are hidden
-    // Update login status - guest login doesn't set currentLoggedInUser
+    // update login status - guest login doesn't set currentLoggedInUser
     auto session = SessionManager::getInstance();
     session->login("", LoginType::GUEST); // Guest login uses empty username
 
-    // Update welcome label for guest login
+    // update welcome label for guest login
     // Change login button to logout button
     loginItem->setCallback(CC_CALLBACK_1(HelloWorld::menuLogoutCallback, this));
     loginLabel->setString("LOGOUT");
@@ -1700,7 +1700,7 @@ void HelloWorld::performLocalLogout() {
     // Show guest login and register buttons
     setupMenuItemVisibleAndEnabled(0b00011100);
 
-    // Update login status
+    // update login status
     auto session = SessionManager::getInstance();
     bool wasAccountLogin = session->isAccountLogin();
     session->logout();
